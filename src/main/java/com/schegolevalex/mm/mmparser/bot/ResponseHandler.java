@@ -126,7 +126,7 @@ public class ResponseHandler {
                     .build());
             context.putState(chatId, UserState.AWAITING_MAIN_PAGE_ACTION);
         } else if (update.getMessage().hasText()
-                && update.getMessage().getText().matches("(http(s)?://.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)")) {
+                && update.getMessage().getText().matches(".*(http(s)?://.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)")) {
             String url = update.getMessage().getText();
             Link link = linkRepository.saveAndFlush(Link.builder()
                     .url(url)
@@ -163,30 +163,6 @@ public class ResponseHandler {
         } else
             unexpectedMessage(chatId);
     }
-
-//    private void replyToAddLink(Update update) {
-//        Long chatId = AbilityUtils.getChatId(update);
-//        silent.send(Constant.Message.SUGGESTION_TO_INPUT_LINK, chatId);
-//    }
-
-//    public Reply addLinkFlow(DBContext db) {
-//        return ReplyFlow.builder(db)
-//                .action((bot, update) -> bot
-//                        .silent()
-//                        .send(Constant.Message.SUGGESTION_TO_INPUT_LINK, AbilityUtils.getChatId(update)))
-//                .onlyIf(Flag.TEXT)
-//                .next(replyToLinkAction())
-//                .build();
-//    }
-//
-//    private Reply replyToLinkAction() {
-//        BiConsumer<BaseAbilityBot, Update> action = (bot, update) -> silent.send("Ссылка принята", AbilityUtils.getChatId(update));
-//        return Reply.of(action, Flag.TEXT, isLink());
-//    }
-//
-//    private Predicate<Update> isLink() {
-//        return update -> update.getMessage().getText().startsWith("https://");
-//    }
 
     private void unexpectedMessage(long chatId) {
         SendMessage sendMessage = new SendMessage();
