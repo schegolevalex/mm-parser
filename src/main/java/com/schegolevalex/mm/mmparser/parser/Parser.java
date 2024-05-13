@@ -62,7 +62,7 @@ public class Parser {
 
         return offerList.stream().filter(offer -> {
             Integer priceBefore = offer.getPrice();
-            long bonusPercent = (offer.getBonusPercent() + 2) / 100L;
+            double bonusPercent = (offer.getBonusPercent() + 2) / 100.0;
             int promo;
             if (priceBefore > 100000)
                 promo = 20000;
