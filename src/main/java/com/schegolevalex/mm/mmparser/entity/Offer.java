@@ -5,10 +5,12 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
@@ -24,7 +26,8 @@ public class Offer {
     Integer bonus;
 
     @CreatedDate
-    Instant createdAt; //todo
+    @Column(updatable = false)
+    Instant createdAt;
 
     @ManyToOne
     Link link;

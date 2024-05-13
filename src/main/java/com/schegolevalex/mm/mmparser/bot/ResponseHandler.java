@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 //@RequiredArgsConstructor
@@ -45,6 +46,9 @@ public class ResponseHandler {
 
     public void replyToButtons(Update update) {
         Long chatId = AbilityUtils.getChatId(update);
+
+        if (update.getMessage().getText().equalsIgnoreCase("/start"))
+            replyToStart(update);
 
         if (update.getMessage().getText().equalsIgnoreCase("/stop"))
             stopChat(chatId);
@@ -86,12 +90,17 @@ public class ResponseHandler {
             List<Link> links = linkRepository.findAllByChatId(chatId);
 
             StringBuilder text = new StringBuilder();
+            AtomicInteger num = new AtomicInteger(1);
+
             if (links.isEmpty())
                 text.append(Constant.Message.LINKS_IS_EMPTY);
             else
                 links.stream()
                         .sorted((link1, link2) -> link2.getCreatedAt().compareTo(link1.getCreatedAt()))
-                        .forEach(link -> text.append(link.getTitle()).append("\n"));
+                        .forEach(link -> text.append(num.getAndIncrement())
+                                .append(". ")
+                                .append(link.getTitle())
+                                .append("\n"));
 
             silent.execute(SendMessage.builder()
                     .text(String.valueOf(text))
@@ -115,15 +124,19 @@ public class ResponseHandler {
                     .build());
             context.putState(chatId, UserState.AWAITING_MAIN_PAGE_ACTION);
         } else if (update.getMessage().hasText()
-                && update.getMessage().getText().matches("(http(s)?:\\/\\/.)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)")) {
+                && update.getMessage().getText().matches("(http(s)?://.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)")) {
             String url = update.getMessage().getText();
             Link link = linkRepository.saveAndFlush(Link.builder()
                     .url(url)
                     .chatId(chatId)
                     .build());
             parser.parseLink(link);
-            silent.send("0K", chatId);
-            context.putState(chatId, UserState.AWAITING_BEGIN_CONVERSATION);
+            silent.execute(SendMessage.builder()
+                    .chatId(chatId)
+                    .text(Constant.Message.LINK_IS_ACCEPTED)
+                    .replyMarkup(KeyboardFactory.withMainPageActions())
+                    .build());
+            context.putState(chatId, UserState.AWAITING_MAIN_PAGE_ACTION);
         } else
             unexpectedMessage(chatId);
     }
@@ -170,7 +183,7 @@ public class ResponseHandler {
     private void unexpectedMessage(long chatId) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
-        sendMessage.setText("Я ещё не знаю как отвечать на такое...");
+        sendMessage.setText(Constant.Message.WRONG_INPUT);
         silent.execute(sendMessage);
     }
 

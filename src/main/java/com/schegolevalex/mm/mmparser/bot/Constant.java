@@ -12,6 +12,8 @@ public interface Constant {
         String SUGGESTION_TO_LINK_INPUT = "Введите ссылку:";
         String LINKS_IS_EMPTY = "Вы еще не добавили ни одну ссылку";
         String WELCOME = "Привет, начинаем?";
+        String LINK_IS_ACCEPTED = "Ссылка принята";
+        String WRONG_INPUT = "Я ещё не знаю как отвечать на такое...";
     }
 
     interface Button {

@@ -6,13 +6,18 @@ import com.schegolevalex.mm.mmparser.repository.LinkRepository;
 import com.schegolevalex.mm.mmparser.repository.OfferRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.openqa.selenium.By;
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 
 @Service
@@ -21,91 +26,66 @@ public class Parser {
     private final OfferRepository offerRepository;
     private final LinkRepository linkRepository;
     private final ChromeOptions options = new ChromeOptions();
+    private final ProxyService proxyService;
 
+    @SneakyThrows
     public void parseLink(Link productLink) {
+        proxyService.setProxy(options);
         WebDriver driver = new ChromeDriver(options);
-
         driver.manage().window().maximize();
-
-//        driver.get("https://megamarket.ru/");
-//        driver.get("https://megamarket.ru/catalog/iphone-15/#?related_search=iphone+15/");
-//        driver.get("https://megamarket.ru/catalog/details/smartfon-apple-iphone-15-pro-128gb-2-nano-sim-natural-titanium-100060825465_3333/#?details_block=prices&related_search=iphone%2015");
+        driver.get("https://megamarket.ru/");
         driver.get(productLink.getUrl());
-
+        Thread.sleep(2000);
         String productTitle = driver.findElement(By.className("pdp-header__title_only-title")).getText();
+        Thread.sleep(2000);
+
         productLink.setTitle(productTitle);
         linkRepository.saveAndFlush(productLink);
 
-        driver.findElement(By.className("more-offers-button")).click();
-//        List<WebElement> offers = driver.findElements(By.className("product-offer_with-payment-method"));
-        List<WebElement> offers = driver.findElements(By.cssSelector("div[itemtype=\"http://schema.org/Offer\"]"));
-        offers.forEach(webElement -> {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(5000));
+        wait.until(ExpectedConditions.elementToBeClickable(By.className("more-offers-button")));
+        try {
+            driver.findElement(By.className("more-offers-button")).click();
+        } catch (Exception exception) {
+            driver.findElement(By.className("out-of-stock-block-redesign__link")).click();
+        }
+        Thread.sleep(5000);
+
+        List<WebElement> webElements = driver.findElements(By.cssSelector("div[itemtype=\"http://schema.org/Offer\"]"));
+        List<Offer> offerList = webElements.stream().map(webElement -> {
             Offer offer = parseOffer(webElement);
             offer.setLink(productLink);
-            offerRepository.save(offer);
-        });
-//        WebElement search = driver.findElement(By.className("search-field-input"));
-//        search.sendKeys("iphone 15");
-//        search.submit();
+            return offer;
+        }).toList();
 
-//        List<WebElement> products = driver.findElements(By.className("catalog-item-regular-desktop"));
-
-//        List<WebElement> products = driver.findElements(By.cssSelector("[data-product-id] > .catalog-item-regular-desktop__main-info > a"));
-
-//        Optional<WebElement> iphone = products.stream()
-//                .filter(e -> e.findElement(By.className("catalog-item-regular-desktop__main-info"))
-//                        .findElement(By.tagName("a"))
-//                        .getText()
-//                        .contains("Смартфон Apple iPhone 15 Pro 128Gb Natural Titanium"))
-//                .findFirst();
-//
-//        iphone.ifPresent(iph -> iph.findElement(By.className("catalog-item-regular-desktop__main-info"))
-//                .findElement(By.className("catalog-item-regular-desktop__title-link"))
-//                .click());
-//                .sendKeys(Keys.CONTROL +"t"));
-
-//        Optional<WebElement> iphoneNanoSim = products.stream()
-//                .filter(e -> e.findElement(By.className("catalog-item-regular-desktop__main-info"))
-//                        .findElement(By.className("catalog-item-regular-desktop__title-link ddl_product_link"))
-//                        .getText()
-//                        .contains("Смартфон Apple iPhone 15 Pro 128Gb 2 nano-sim Natural Titanium"))
-//                .findFirst();
-
-//        iphoneNanoSim.ifPresent(iph -> iph.findElement(By.className("catalog-item-regular-desktop__main-info"))
-//                .findElement(By.className("catalog-item-regular-desktop__title-link ddl_product_link"))
-//                .click());
-
-//        driver.manage().window().maximize();
-//
-//        driver.manage().timeouts().implicitlyWait(Duration.ofMillis(10));
-//        List<WebElement> elements = driver.findElements(By.className("product-offer-price__amount"));
-//
-//        for (WebElement element : elements) {
-//            System.out.println(element.getText());
-//        }
+        offerRepository.saveAll(offerList);
         driver.close();
     }
 
-    private Offer parseOffer(WebElement offer) {
-        String seller = offer.findElement(By.className("pdp-merchant-rating-block__merchant-name")).getText();
+    private Offer parseOffer(WebElement webElement) {
+        Offer result = new Offer();
 
-        String tempPrice = offer.findElement(By.className("product-offer-price__amount")).getText();
+        String seller = webElement.findElement(By.className("pdp-merchant-rating-block__merchant-name")).getText();
+        result.setSeller(seller);
+
+        try {
+            String tempBonusPercent = webElement.findElement(By.className("bonus-percent")).getText();
+            String bonusPercent = tempBonusPercent
+                    .substring(0, tempBonusPercent.length() - 1)
+                    .replaceAll(" ", "");
+            result.setBonusPercent(Integer.valueOf(bonusPercent));
+
+            String bonus = webElement.findElement(By.className("bonus-amount")).getText().replaceAll(" ", "");
+            result.setBonus(Integer.valueOf(bonus));
+        } catch (Exception ex) {
+
+        }
+
+        String tempPrice = webElement.findElement(By.className("product-offer-price__amount")).getText();
         String tempTempPrice = tempPrice.substring(0, tempPrice.length() - 2);
         String price = tempTempPrice.replaceAll(" ", "");
-
-        String tempBonusPercent = offer.findElement(By.className("bonus-percent")).getText();
-        String tempTempBonusPercent = tempBonusPercent.substring(0, tempBonusPercent.length() - 1);
-        String bonusPercent = tempTempBonusPercent.replaceAll(" ", "");
-
-        String tempBonus = offer.findElement(By.className("bonus-amount")).getText();
-        String bonus = tempBonus.replaceAll(" ", "");
-
-        return Offer.builder()
-                .seller(seller)
-                .price(Integer.valueOf(price))
-                .bonusPercent(Integer.valueOf(bonusPercent))
-                .bonus(Integer.valueOf(bonus))
-                .build();
+        result.setPrice(Integer.valueOf(price));
+        return result;
     }
 
     @PostConstruct
@@ -114,7 +94,9 @@ public class Parser {
         options.addArguments("accept-language=ru-Ru");
         options.addArguments("--disable-blink-features");
         options.addArguments("--disable-blink-features=AutomationControlled");
-//        options.setPageLoadStrategy(PageLoadStrategy.EAGER);
+
+        options.setPageLoadStrategy(PageLoadStrategy.EAGER);
+//        options.addArguments("--user-data-dir=/home/schegolevalex/.config/google-chrome");
 
 //        options.addArguments("--display=:1");
 //        options.addArguments("referer=https://www.google.com/search?q=%D1%81%D0%B1%D0%B5%D1%80%D0%BC%D0%B5%D0%B3%D0%B0%D0%BC%D0%B0%D1%80%D0%BA%D0%B5%D1%82&sca_esv=5f32bda464ccee7b&ei=mvrAZc3EDM2nwPAPi4aikAs&oq=%D1%81%D0%B1%D0%B5%D1%80%D0%BC%D0%B5&gs_lp=Egxnd3Mtd2l6LXNlcnAiDNGB0LHQtdGA0LzQtSoCCAAyCBAAGIAEGLADMggQABiABBiwAzIIEAAYgAQYsAMyCBAAGIAEGLADMggQABiABBiwAzIIEAAYgAQYsAMyCBAAGIAEGLADMggQABiABBiwAzIIEAAYgAQYsAMyBxAAGB4YsANI9QtQAFgAcAF4AJABAJgBAKABAKoBALgBA8gBAOIDBBgBIEGIBgGQBgo&sclient=gws-wiz-serp");
@@ -122,9 +104,6 @@ public class Parser {
 //        options.addArguments("--no-sandbox");
 //        options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
 //        options.setExperimentalOption("useAutomationExtension", false);
-
-//        options.addArguments("--user-data-dir=/home/schegolevalex/.config/google-chrome");
-//        options.addExtensions(new File("src/main/resources/proxy.zip"));
     }
 
     private void setCookies(WebDriver driver) {
@@ -167,5 +146,4 @@ public class Parser {
 //        driver.manage().addCookie(new Cookie("ssaid", "0a8c2ba0-087c-11ef-8a99-53062e1b8cf4"));
 //        driver.manage().addCookie(new Cookie("uxs_uid", "0c27b330-087c-11ef-ac0b-dbfe4f1636f2"));
     }
-
 }
