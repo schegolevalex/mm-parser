@@ -29,7 +29,7 @@ public class Parser {
     private final ProxyService proxyService;
 
     @SneakyThrows
-    public void parseLink(Link productLink) {
+    public List<Offer> parseLink(Link productLink) {
         proxyService.setProxy(options);
         WebDriver driver = new ChromeDriver(options);
         driver.manage().window().maximize();
@@ -57,9 +57,21 @@ public class Parser {
             offer.setLink(productLink);
             return offer;
         }).toList();
-
-        offerRepository.saveAll(offerList);
         driver.close();
+        offerRepository.saveAll(offerList);
+
+        return offerList.stream().filter(offer -> {
+            Integer priceBefore = offer.getPrice();
+            long bonusPercent = (offer.getBonusPercent() + 2) / 100L;
+            int promo;
+            if (priceBefore > 100000)
+                promo = 20000;
+            else promo = 10000;
+
+            boolean totalPrice = (priceBefore - promo - (priceBefore - promo) * bonusPercent) < 78000;
+            boolean scam = priceBefore > 90000;
+            return totalPrice && scam;
+        }).toList();
     }
 
     private Offer parseOffer(WebElement webElement) {

@@ -29,4 +29,9 @@ public class Link {
     @CreatedDate
     @Column(updatable = false)
     Instant createdAt;
+
+    @Override
+    public String toString() {
+        return url;
+    }
 }

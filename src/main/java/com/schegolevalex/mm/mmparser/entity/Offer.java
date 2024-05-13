@@ -22,7 +22,9 @@ public class Offer {
     Long id;
     String seller;
     Integer price;
+    @Column(columnDefinition = "integer default 0")
     Integer bonusPercent;
+    @Column(columnDefinition = "integer default 0")
     Integer bonus;
 
     @CreatedDate
@@ -31,4 +33,14 @@ public class Offer {
 
     @ManyToOne
     Link link;
+
+    @Override
+    public String toString() {
+        return "Предложение:" +
+                "\n- продавец: \"" + seller + "\"" +
+                "\n- цена: " + price +
+                "\n- процент бонусов: " + bonusPercent +
+                "\n- количество бонусов: " + bonus +
+                "\n- ссылка: " + link + ")";
+    }
 }

@@ -1,10 +1,12 @@
 package com.schegolevalex.mm.mmparser.bot;
 
 import com.schegolevalex.mm.mmparser.entity.Link;
+import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.parser.Parser;
 import com.schegolevalex.mm.mmparser.repository.LinkRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.abilitybots.api.sender.SilentSender;
 import org.telegram.abilitybots.api.util.AbilityUtils;
@@ -130,15 +132,21 @@ public class ResponseHandler {
                     .url(url)
                     .chatId(chatId)
                     .build());
-            parser.parseLink(link);
+            List<Offer> offers = parser.parseLink(link);
             silent.execute(SendMessage.builder()
                     .chatId(chatId)
                     .text(Constant.Message.LINK_IS_ACCEPTED)
                     .replyMarkup(KeyboardFactory.withMainPageActions())
                     .build());
+            sendOffers(offers, chatId);
             context.putState(chatId, UserState.AWAITING_MAIN_PAGE_ACTION);
         } else
             unexpectedMessage(chatId);
+    }
+
+    private void sendOffers(List<Offer> offers, Long chatId) {
+        if (!offers.isEmpty())
+            offers.forEach(offer -> silent.send(offer.toString(), chatId));
     }
 
     private void replyToWatchLinks(Update update) {
@@ -197,5 +205,13 @@ public class ResponseHandler {
 
     public boolean userIsActive(Long chatId) {
         return context.userIsActive(chatId);
+    }
+
+    @Scheduled(cron = "0 */5 * * * *", zone = "Europe/Moscow")
+    private void parseAndNotify() {
+        linkRepository.findAll().forEach(productLink -> {
+            List<Offer> offers = parser.parseLink(productLink);
+            sendOffers(offers, productLink.getChatId());
+        });
     }
 }
