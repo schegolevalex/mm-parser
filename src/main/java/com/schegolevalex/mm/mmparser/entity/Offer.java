@@ -20,10 +20,14 @@ public class Offer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+
     String seller;
+
     Integer price;
+
     @Column(columnDefinition = "integer default 0")
     Integer bonusPercent;
+
     @Column(columnDefinition = "integer default 0")
     Integer bonus;
 

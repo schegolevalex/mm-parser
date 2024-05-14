@@ -30,6 +30,9 @@ public class Link {
     @Column(updatable = false)
     Instant createdAt;
 
+    @Column(columnDefinition = "boolean default true")
+    Boolean isActive;
+
     @Override
     public String toString() {
         return url;
