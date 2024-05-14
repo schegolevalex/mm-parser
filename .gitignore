@@ -30,3 +30,13 @@ build/
 
 ### VS Code ###
 .vscode/
+
+/background.js
+/manifest.json
+/mmParserBot
+/mmPaserBot
+/proxy_auth_plugin_0.zip
+/proxy_auth_plugin_1.zip
+/proxy_auth_plugin_2.zip
+/proxy_auth_plugin_3.zip
+/schegolev_test_bot
