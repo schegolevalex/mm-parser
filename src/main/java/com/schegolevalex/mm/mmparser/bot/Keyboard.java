@@ -6,7 +6,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 
 import java.util.List;
 
-public class KeyboardFactory {
+public class Keyboard {
 
     public static ReplyKeyboard withMainPageActions() {
         KeyboardRow row = new KeyboardRow();

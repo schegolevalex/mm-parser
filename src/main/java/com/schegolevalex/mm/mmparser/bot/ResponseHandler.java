@@ -12,13 +12,16 @@ import org.telegram.abilitybots.api.sender.SilentSender;
 import org.telegram.abilitybots.api.util.AbilityUtils;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.schegolevalex.mm.mmparser.bot.Constant.Button;
+import static com.schegolevalex.mm.mmparser.bot.Constant.Message;
+
 @Component
-//@RequiredArgsConstructor
 @Slf4j
 public class ResponseHandler {
     private final SilentSender silent;
@@ -38,12 +41,10 @@ public class ResponseHandler {
 
     public void replyToStart(Update update) {
         Long chatId = AbilityUtils.getChatId(update);
-        silent.execute(SendMessage.builder()
-                .chatId(chatId)
-                .text(Constant.Message.WELCOME)
-                .replyMarkup(KeyboardFactory.withBeginConversationButton())
-                .build());
-        context.putState(chatId, UserState.AWAITING_BEGIN_CONVERSATION);
+        sendMessageAndPutState(chatId,
+                Message.WELCOME,
+                Keyboard.withBeginConversationButton(),
+                UserState.AWAITING_BEGIN_CONVERSATION);
     }
 
     public void replyToButtons(Update update) {
@@ -67,13 +68,11 @@ public class ResponseHandler {
     private void replyToBeginConversation(Update update) {
         Long chatId = AbilityUtils.getChatId(update);
 
-        if (update.getMessage().getText().equalsIgnoreCase(Constant.Button.START_CONVERSATION)) {
-            silent.execute(SendMessage.builder()
-                    .chatId(chatId)
-                    .text(Constant.Message.CHOOSE_MAIN_PAGE_ACTION)
-                    .replyMarkup(KeyboardFactory.withMainPageActions())
-                    .build());
-            context.putState(chatId, UserState.AWAITING_MAIN_PAGE_ACTION);
+        if (update.getMessage().getText().equalsIgnoreCase(Button.START_CONVERSATION)) {
+            sendMessageAndPutState(chatId,
+                    Message.CHOOSE_MAIN_PAGE_ACTION,
+                    Keyboard.withMainPageActions(),
+                    UserState.AWAITING_BEGIN_CONVERSATION);
         } else
             unexpectedMessage(chatId);
     }
@@ -81,21 +80,19 @@ public class ResponseHandler {
     private void replyToMainPageAction(Update update) {
         Long chatId = AbilityUtils.getChatId(update);
 
-        if (update.getMessage().getText().equalsIgnoreCase(Constant.Button.ADD_LINK)) {
-            silent.execute(SendMessage.builder()
-                    .text(Constant.Message.SUGGESTION_TO_LINK_INPUT)
-                    .replyMarkup(KeyboardFactory.withBackButton())
-                    .chatId(chatId)
-                    .build());
-            context.putState(chatId, UserState.AWAITING_LINK_INPUT);
-        } else if (update.getMessage().getText().equalsIgnoreCase(Constant.Button.MY_LINKS)) {
+        if (update.getMessage().getText().equalsIgnoreCase(Button.ADD_LINK)) {
+            sendMessageAndPutState(chatId,
+                    Message.SUGGESTION_TO_LINK_INPUT,
+                    Keyboard.withBackButton(),
+                    UserState.AWAITING_LINK_INPUT);
+        } else if (update.getMessage().getText().equalsIgnoreCase(Button.MY_LINKS)) {
             List<Link> links = linkRepository.findAllByChatId(chatId);
 
             StringBuilder text = new StringBuilder();
             AtomicInteger num = new AtomicInteger(1);
 
             if (links.isEmpty())
-                text.append(Constant.Message.LINKS_IS_EMPTY);
+                text.append(Message.LINKS_IS_EMPTY);
             else
                 links.stream()
                         .sorted((link1, link2) -> link2.getCreatedAt().compareTo(link1.getCreatedAt()))
@@ -104,12 +101,10 @@ public class ResponseHandler {
                                 .append(link.getTitle())
                                 .append("\n"));
 
-            silent.execute(SendMessage.builder()
-                    .text(String.valueOf(text))
-                    .replyMarkup(KeyboardFactory.withBackButton())
-                    .chatId(chatId)
-                    .build());
-            context.putState(chatId, UserState.WATCH_LINKS);
+            sendMessageAndPutState(chatId,
+                    String.valueOf(text),
+                    Keyboard.withBackButton(),
+                    UserState.WATCH_LINKS);
         } else
             unexpectedMessage(chatId);
     }
@@ -117,14 +112,12 @@ public class ResponseHandler {
     private void replyToLinkInput(Update update) {
         Long chatId = AbilityUtils.getChatId(update);
 
-        if (update.getMessage().getText().equalsIgnoreCase(Constant.Button.BACK)) {
+        if (update.getMessage().getText().equalsIgnoreCase(Button.BACK)) {
             context.popState(chatId);
-            silent.execute(SendMessage.builder()
-                    .chatId(chatId)
-                    .text(Constant.Message.CHOOSE_MAIN_PAGE_ACTION)
-                    .replyMarkup(KeyboardFactory.withMainPageActions())
-                    .build());
-            context.putState(chatId, UserState.AWAITING_MAIN_PAGE_ACTION);
+            sendMessageAndPutState(chatId,
+                    Message.CHOOSE_MAIN_PAGE_ACTION,
+                    Keyboard.withMainPageActions(),
+                    UserState.AWAITING_MAIN_PAGE_ACTION);
         } else if (update.getMessage().hasText()
                 && update.getMessage().getText().matches(".*(http(s)?://.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)")) {
             String url = update.getMessage().getText();
@@ -133,33 +126,24 @@ public class ResponseHandler {
                     .chatId(chatId)
                     .build());
             List<Offer> offers = parser.parseLink(link);
-            silent.execute(SendMessage.builder()
-                    .chatId(chatId)
-                    .text(Constant.Message.LINK_IS_ACCEPTED)
-                    .replyMarkup(KeyboardFactory.withMainPageActions())
-                    .build());
+            sendMessageAndPutState(chatId,
+                    Message.LINK_IS_ACCEPTED,
+                    Keyboard.withMainPageActions(),
+                    UserState.AWAITING_MAIN_PAGE_ACTION);
             sendOffers(offers, chatId);
-            context.putState(chatId, UserState.AWAITING_MAIN_PAGE_ACTION);
         } else
             unexpectedMessage(chatId);
-    }
-
-    private void sendOffers(List<Offer> offers, Long chatId) {
-        if (!offers.isEmpty())
-            offers.forEach(offer -> silent.send(offer.toString(), chatId));
     }
 
     private void replyToWatchLinks(Update update) {
         Long chatId = AbilityUtils.getChatId(update);
 
-        if (update.getMessage().getText().equalsIgnoreCase(Constant.Button.BACK)) {
+        if (update.getMessage().getText().equalsIgnoreCase(Button.BACK)) {
             context.popState(chatId);
-            silent.execute(SendMessage.builder()
-                    .chatId(chatId)
-                    .text(Constant.Message.CHOOSE_MAIN_PAGE_ACTION)
-                    .replyMarkup(KeyboardFactory.withMainPageActions())
-                    .build());
-            context.putState(chatId, UserState.AWAITING_MAIN_PAGE_ACTION);
+            sendMessageAndPutState(chatId,
+                    Message.CHOOSE_MAIN_PAGE_ACTION,
+                    Keyboard.withMainPageActions(),
+                    UserState.AWAITING_MAIN_PAGE_ACTION);
         } else
             unexpectedMessage(chatId);
     }
@@ -167,7 +151,7 @@ public class ResponseHandler {
     private void unexpectedMessage(long chatId) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
-        sendMessage.setText(Constant.Message.WRONG_INPUT);
+        sendMessage.setText(Message.WRONG_INPUT);
         silent.execute(sendMessage);
     }
 
@@ -181,6 +165,21 @@ public class ResponseHandler {
 
     public boolean userIsActive(Long chatId) {
         return context.userIsActive(chatId);
+    }
+
+    private void sendOffers(List<Offer> offers, Long chatId) {
+        if (!offers.isEmpty())
+            offers.forEach(offer -> silent.send(offer.toString(), chatId));
+    }
+
+    private void sendMessageAndPutState(Long chatId, String message, ReplyKeyboard keyboard, UserState userState) {
+        SendMessage sendMessage = SendMessage.builder()
+                .chatId(chatId)
+                .text(message)
+                .build();
+        if (keyboard != null) sendMessage.setReplyMarkup(keyboard);
+        silent.execute(sendMessage);
+        context.putState(chatId, userState);
     }
 
     @Scheduled(cron = "0 */5 * * * *", zone = "Europe/Moscow")
