@@ -58,7 +58,7 @@ public class Parser {
             return offer;
         }).toList();
         driver.close();
-        offerRepository.saveAll(offerList);
+        offerRepository.saveAllAndFlush(offerList);
 
         return offerList.stream().filter(offer -> {
             Integer priceBefore = offer.getPrice();
@@ -68,7 +68,7 @@ public class Parser {
                 promo = 20000;
             else promo = 10000;
 
-            boolean totalPrice = (priceBefore - promo - (priceBefore - promo) * bonusPercent) < 78000;
+            boolean totalPrice = (priceBefore - promo - (priceBefore - promo) * bonusPercent) < 75000;
             boolean scam = priceBefore > 90000;
             return totalPrice && scam;
         }).toList();
