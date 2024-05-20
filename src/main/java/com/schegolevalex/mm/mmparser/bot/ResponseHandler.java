@@ -5,7 +5,6 @@ import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.parser.Parser;
 import com.schegolevalex.mm.mmparser.repository.LinkRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -18,6 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 import static com.schegolevalex.mm.mmparser.bot.Constant.Button;
 import static com.schegolevalex.mm.mmparser.bot.Constant.Message;
@@ -112,7 +112,9 @@ public class ResponseHandler {
 
     private void replyToLinkInput(Update update) {
         Long chatId = AbilityUtils.getChatId(update);
-        String urlRegexp = ".*(http(s)?://.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
+        String messageWithUrlRegexp = ".*(http(s)?://.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
+        String urlRegexp = "(http(s)?://.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
+        Pattern pattern = Pattern.compile(urlRegexp);
 
         if (update.getMessage().getText().equalsIgnoreCase(Button.BACK)) {
             context.popState(chatId);
@@ -121,13 +123,16 @@ public class ResponseHandler {
                     Keyboard.withMainPageActions(),
                     UserState.AWAITING_MAIN_PAGE_ACTION);
         } else if (update.getMessage().hasText()
-                && update.getMessage().getText().matches(urlRegexp)) {
-            String url = update.getMessage().getText();
-            Link link = linkRepository.saveAndFlush(Link.builder()
+                && update.getMessage().getText().matches(messageWithUrlRegexp)) {
+
+            String text = update.getMessage().getText();
+            String url = pattern.matcher(text).group();
+
+            Link productLink = linkRepository.saveAndFlush(Link.builder()
                     .url(url)
                     .chatId(chatId)
                     .build());
-            List<Offer> offers = parser.parseLink(link);
+            List<Offer> offers = parser.parseLink(productLink);
             sendMessageAndPutState(chatId,
                     Message.LINK_IS_ACCEPTED,
                     Keyboard.withMainPageActions(),
@@ -186,7 +191,7 @@ public class ResponseHandler {
 
     @Scheduled(cron = "0 */2 * * * *", zone = "Europe/Moscow")
     private void parseAndNotify() {
-        linkRepository.findAll().forEach(productLink -> {
+        linkRepository.findAllByIsActive(true).forEach(productLink -> {
             List<Offer> offers = parser.parseLink(productLink);
             sendOffers(offers, productLink.getChatId());
         });
