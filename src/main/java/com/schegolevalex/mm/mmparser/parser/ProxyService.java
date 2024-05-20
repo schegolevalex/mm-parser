@@ -115,18 +115,18 @@ public class ProxyService {
     }
 
     private void populateProxies() {
-//        proxies.add(Proxy.builder()
-//                .username("vAGrAD")
-//                .password("zyAUGsyJATFA")
-//                .host("37.139.34.51")
-//                .port("10789")
-//                .build());
-//        proxies.add(Proxy.builder()
-//                .username("heZAgY")
-//                .password("As4Heu6kAgNe")
-//                .host("37.139.34.51")
-//                .port("11346")
-//                .build());
+        proxies.add(Proxy.builder()
+                .username("vAGrAD")
+                .password("zyAUGsyJATFA")
+                .host("37.139.34.51")
+                .port("10789")
+                .build());
+        proxies.add(Proxy.builder()
+                .username("heZAgY")
+                .password("As4Heu6kAgNe")
+                .host("37.139.34.51")
+                .port("11346")
+                .build());
         proxies.add(Proxy.builder()
                 .username("kAB3Se")
                 .password("AtEKakUz9yhY")

@@ -5,6 +5,7 @@ import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.parser.Parser;
 import com.schegolevalex.mm.mmparser.repository.LinkRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -111,6 +112,7 @@ public class ResponseHandler {
 
     private void replyToLinkInput(Update update) {
         Long chatId = AbilityUtils.getChatId(update);
+        String urlRegexp = ".*(http(s)?://.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
 
         if (update.getMessage().getText().equalsIgnoreCase(Button.BACK)) {
             context.popState(chatId);
@@ -119,7 +121,7 @@ public class ResponseHandler {
                     Keyboard.withMainPageActions(),
                     UserState.AWAITING_MAIN_PAGE_ACTION);
         } else if (update.getMessage().hasText()
-                && update.getMessage().getText().matches(".*(http(s)?://.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)")) {
+                && update.getMessage().getText().matches(urlRegexp)) {
             String url = update.getMessage().getText();
             Link link = linkRepository.saveAndFlush(Link.builder()
                     .url(url)
@@ -158,7 +160,7 @@ public class ResponseHandler {
     private void stopChat(long chatId) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
-        sendMessage.setText("👋");
+        sendMessage.setText(Message.BYE);
         sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
         silent.execute(sendMessage);
     }
@@ -182,7 +184,7 @@ public class ResponseHandler {
         context.putState(chatId, userState);
     }
 
-    @Scheduled(cron = "0 */5 * * * *", zone = "Europe/Moscow")
+    @Scheduled(cron = "0 */2 * * * *", zone = "Europe/Moscow")
     private void parseAndNotify() {
         linkRepository.findAll().forEach(productLink -> {
             List<Offer> offers = parser.parseLink(productLink);

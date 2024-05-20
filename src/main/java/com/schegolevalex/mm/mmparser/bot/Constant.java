@@ -14,6 +14,7 @@ public interface Constant {
         String WELCOME = "Привет, начинаем?";
         String LINK_IS_ACCEPTED = "Ссылка принята";
         String WRONG_INPUT = "Я ещё не знаю как отвечать на такое...";
+        String BYE = "👋";
     }
 
     interface Button {
