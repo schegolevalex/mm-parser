@@ -21,7 +21,10 @@ public class Offer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    String seller;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    Seller seller;
 
     Integer price;
 
@@ -35,7 +38,9 @@ public class Offer {
     @Column(updatable = false)
     Instant createdAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     Link link;
 
     @Override

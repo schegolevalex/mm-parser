@@ -7,34 +7,45 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Builder
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Link {
+@AllArgsConstructor
+@NoArgsConstructor
+public class Seller {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    String url;
-
-    Long chatId;
-
-    String title;
+    String name;
 
     @CreatedDate
     @Column(updatable = false)
     Instant createdAt;
 
+    @OneToMany(mappedBy = "seller"
+            , cascade = CascadeType.ALL
+            , fetch = FetchType.LAZY
+            , orphanRemoval = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<Offer> offers = new ArrayList<>();
+
     @Column(columnDefinition = "boolean default true")
     Boolean isActive;
 
-    @Override
-    public String toString() {
-        return url;
+    public void addOffer(Offer offer) {
+        offers.add(offer);
+        offer.setSeller(this);
+    }
+
+    public void removeOffer(Offer offer) {
+        offers.remove(offer);
+        offer.setSeller(null);
     }
 }

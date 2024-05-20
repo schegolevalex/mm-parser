@@ -2,11 +2,12 @@ package com.schegolevalex.mm.mmparser.parser;
 
 import com.schegolevalex.mm.mmparser.entity.Link;
 import com.schegolevalex.mm.mmparser.entity.Offer;
+import com.schegolevalex.mm.mmparser.entity.Seller;
 import com.schegolevalex.mm.mmparser.repository.LinkRepository;
 import com.schegolevalex.mm.mmparser.repository.OfferRepository;
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.openqa.selenium.By;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
@@ -28,18 +29,23 @@ public class Parser {
     private final ChromeOptions options = new ChromeOptions();
     private final ProxyService proxyService;
 
-    @SneakyThrows
+    @Transactional
     public List<Offer> parseLink(Link productLink) {
         proxyService.setProxy(options);
         WebDriver driver = new ChromeDriver(options);
         driver.manage().window().maximize();
         driver.get("https://megamarket.ru/");
         driver.get(productLink.getUrl());
-        Thread.sleep(2000);
-        String productTitle = driver.findElement(By.className("pdp-header__title_only-title")).getText();
-        Thread.sleep(2000);
 
-        productLink.setTitle(productTitle);
+        try {
+            Thread.sleep(2000);
+            String productTitle = driver.findElement(By.className("pdp-header__title_only-title")).getText();
+            Thread.sleep(2000);
+            productLink.setTitle(productTitle);
+        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+        }
+
         linkRepository.saveAndFlush(productLink);
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(5000));
@@ -49,7 +55,12 @@ public class Parser {
         } catch (Exception exception) {
             driver.findElement(By.className("out-of-stock-block-redesign__link")).click();
         }
-        Thread.sleep(5000);
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
         List<WebElement> webElements = driver.findElements(By.cssSelector("div[itemtype=\"http://schema.org/Offer\"]"));
         List<Offer> offerList = webElements.stream().map(webElement -> {
@@ -75,20 +86,22 @@ public class Parser {
     }
 
     private Offer parseOffer(WebElement webElement) {
-        Offer result = new Offer();
+        Offer offer = new Offer();
+        Seller seller = new Seller();
+        seller.addOffer(offer);
 
-        String seller = webElement.findElement(By.className("pdp-merchant-rating-block__merchant-name")).getText();
-        result.setSeller(seller);
+        String sellerName = webElement.findElement(By.className("pdp-merchant-rating-block__merchant-name")).getText();
+        seller.setName(sellerName);
 
         try {
             String tempBonusPercent = webElement.findElement(By.className("bonus-percent")).getText();
             String bonusPercent = tempBonusPercent
                     .substring(0, tempBonusPercent.length() - 1)
                     .replaceAll(" ", "");
-            result.setBonusPercent(Integer.valueOf(bonusPercent));
+            offer.setBonusPercent(Integer.valueOf(bonusPercent));
 
             String bonus = webElement.findElement(By.className("bonus-amount")).getText().replaceAll(" ", "");
-            result.setBonus(Integer.valueOf(bonus));
+            offer.setBonus(Integer.valueOf(bonus));
         } catch (Exception ex) {
 
         }
@@ -96,8 +109,8 @@ public class Parser {
         String tempPrice = webElement.findElement(By.className("product-offer-price__amount")).getText();
         String tempTempPrice = tempPrice.substring(0, tempPrice.length() - 2);
         String price = tempTempPrice.replaceAll(" ", "");
-        result.setPrice(Integer.valueOf(price));
-        return result;
+        offer.setPrice(Integer.valueOf(price));
+        return offer;
     }
 
     @PostConstruct

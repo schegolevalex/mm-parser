@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface LinkRepository extends JpaRepository<Link, Long> {
     List<Link> findAllByChatId(Long chatId);
+
+    List<Link> findAllByIsActive(Boolean isActive);
 }
