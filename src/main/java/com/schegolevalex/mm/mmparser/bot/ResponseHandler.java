@@ -191,8 +191,8 @@ public class ResponseHandler {
         context.putState(chatId, userState);
     }
 
-    @PostConstruct
-    @Scheduled(cron = "0 */3 * * * *", zone = "Europe/Moscow")
+//    @PostConstruct
+    @Scheduled(cron = "0 */10 * * * *", zone = "Europe/Moscow")
     protected void parseAndNotify() {
         linkRepository.findAllByIsActive(true).forEach(productLink -> {
             List<Offer> offers = parser.parseLink(productLink);

@@ -51,7 +51,7 @@ public class Parser {
                 if (outOfStockLink.isPresent())
                     outOfStockLink.get().click();
                 else
-                    log.error("Neither 'more-offers-button' nor 'out-of-stock-block-redesign__link' is clickable");
+                    log.error("Обе кнопки 'more-offers-button' и 'out-of-stock-block-redesign__link' не кликабельны");
             }
 
             List<WebElement> webElements = waitForElementsIsVisible(wait, By.cssSelector("div[itemtype=\"http://schema.org/Offer\"]"));
@@ -61,9 +61,9 @@ public class Parser {
                 return offer;
             }).toList();
 
-            offerRepository.saveAllAndFlush(offerList);
+            List<Offer> offers = offerRepository.saveAllAndFlush(offerList);
 
-            return filterOffers(offerList);
+            return filterOffers(offers);
         } finally {
             driver.quit();
         }
@@ -79,7 +79,7 @@ public class Parser {
 
     private List<WebElement> waitForElementsIsVisible(WebDriverWait wait, By locator) {
         try {
-            return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(locator));
+            return wait.withTimeout(Duration.ofSeconds(2)).until(ExpectedConditions.visibilityOfAllElementsLocatedBy(locator));
         } catch (NoSuchElementException | TimeoutException e) {
             return List.of();
         }
@@ -89,10 +89,10 @@ public class Parser {
         return offerList.stream().filter(offer -> {
             Integer priceBefore = offer.getPrice();
             double bonusPercent = (offer.getBonusPercent() + 2) / 100.0;
-            int promo = priceBefore > 100000 ? 20000 : 10000;
+            int promo = priceBefore > 110_000 ? 20_000 : 10_000;
 
-            boolean totalPrice = (priceBefore - promo - (priceBefore - promo) * bonusPercent) < 75000;
-            boolean scam = priceBefore > 90000;
+            boolean totalPrice = (priceBefore - promo - (priceBefore - promo) * bonusPercent) < 75_000;
+            boolean scam = priceBefore > 100_000;
             return totalPrice && scam;
         }).toList();
     }
@@ -115,7 +115,9 @@ public class Parser {
             String bonus = webElement.findElement(By.className("bonus-amount")).getText().replaceAll(" ", "");
             offer.setBonus(Integer.valueOf(bonus));
         } catch (NoSuchElementException e) {
-            log.error("Элемент не найден: ", e);
+            offer.setBonusPercent(0);
+            offer.setBonus(0);
+            log.error("Элемент не найден");
         } catch (NumberFormatException e) {
             log.error("Не удалось преобразовать в число: ", e);
         }
