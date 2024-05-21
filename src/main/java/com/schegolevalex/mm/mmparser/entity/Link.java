@@ -31,7 +31,7 @@ public class Link {
     Instant createdAt;
 
     @Column(columnDefinition = "boolean default true")
-    Boolean isActive;
+    boolean isActive = true;
 
     @Override
     public String toString() {

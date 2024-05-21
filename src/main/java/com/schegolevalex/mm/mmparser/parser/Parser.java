@@ -3,6 +3,7 @@ package com.schegolevalex.mm.mmparser.parser;
 import com.schegolevalex.mm.mmparser.entity.Link;
 import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.entity.Seller;
+import com.schegolevalex.mm.mmparser.repository.LinkRepository;
 import com.schegolevalex.mm.mmparser.repository.OfferRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
@@ -27,6 +28,7 @@ public class Parser {
     private final OfferRepository offerRepository;
     private final ChromeOptions options = new ChromeOptions();
     private final ProxyService proxyService;
+    private final LinkRepository linkRepository;
 
     @Transactional
     public List<Offer> parseLink(Link productLink) {
@@ -41,6 +43,7 @@ public class Parser {
 
             WebElement productTitle = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("pdp-header__title_only-title")));
             productLink.setTitle(productTitle.getText());
+            linkRepository.save(productLink);
 
             Optional<WebElement> moreOffersButton = waitForElementIsClickable(wait, By.className("more-offers-button"));
 
@@ -100,6 +103,7 @@ public class Parser {
     private Offer parseOffer(WebElement webElement) {
         Offer offer = new Offer();
         Seller seller = new Seller();
+        offer.setSeller(seller);
         seller.addOffer(offer);
 
         String sellerName = webElement.findElement(By.className("pdp-merchant-rating-block__merchant-name")).getText();

@@ -8,7 +8,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 @Entity
@@ -24,6 +23,8 @@ public class Seller {
 
     String name;
 
+    Double rating;
+
     @CreatedDate
     @Column(updatable = false)
     Instant createdAt;
@@ -37,7 +38,7 @@ public class Seller {
     List<Offer> offers = new ArrayList<>();
 
     @Column(columnDefinition = "boolean default true")
-    Boolean isActive;
+    boolean isActive = true;
 
     public void addOffer(Offer offer) {
         offers.add(offer);

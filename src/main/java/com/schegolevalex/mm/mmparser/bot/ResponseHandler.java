@@ -4,8 +4,6 @@ import com.schegolevalex.mm.mmparser.entity.Link;
 import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.parser.Parser;
 import com.schegolevalex.mm.mmparser.repository.LinkRepository;
-import jakarta.annotation.PostConstruct;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,6 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.schegolevalex.mm.mmparser.bot.Constant.Button;
@@ -75,7 +74,7 @@ public class ResponseHandler {
             sendMessageAndPutState(chatId,
                     Message.CHOOSE_MAIN_PAGE_ACTION,
                     Keyboard.withMainPageActions(),
-                    UserState.AWAITING_BEGIN_CONVERSATION);
+                    UserState.AWAITING_MAIN_PAGE_ACTION);
         } else
             unexpectedMessage(chatId);
     }
@@ -126,9 +125,9 @@ public class ResponseHandler {
                     UserState.AWAITING_MAIN_PAGE_ACTION);
         } else if (update.getMessage().hasText()
                 && update.getMessage().getText().matches(messageWithUrlRegexp)) {
-
-            String text = update.getMessage().getText();
-            String url = pattern.matcher(text).group();
+            String userText = update.getMessage().getText();
+            Matcher matcher = pattern.matcher(userText);
+            String url = matcher.find() ? matcher.group() : "";
 
             Link productLink = linkRepository.saveAndFlush(Link.builder()
                     .url(url)
@@ -191,7 +190,7 @@ public class ResponseHandler {
         context.putState(chatId, userState);
     }
 
-//    @PostConstruct
+    //    @PostConstruct
     @Scheduled(cron = "0 */10 * * * *", zone = "Europe/Moscow")
     protected void parseAndNotify() {
         linkRepository.findAllByIsActive(true).forEach(productLink -> {
