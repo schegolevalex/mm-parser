@@ -5,6 +5,7 @@ import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.parser.Parser;
 import com.schegolevalex.mm.mmparser.repository.LinkRepository;
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -192,7 +193,7 @@ public class ResponseHandler {
 
     @PostConstruct
     @Scheduled(cron = "0 */3 * * * *", zone = "Europe/Moscow")
-    private void parseAndNotify() {
+    protected void parseAndNotify() {
         linkRepository.findAllByIsActive(true).forEach(productLink -> {
             List<Offer> offers = parser.parseLink(productLink);
             sendOffers(offers, productLink.getChatId());

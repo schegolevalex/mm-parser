@@ -3,15 +3,13 @@ package com.schegolevalex.mm.mmparser.parser;
 import com.schegolevalex.mm.mmparser.entity.Link;
 import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.entity.Seller;
-import com.schegolevalex.mm.mmparser.repository.LinkRepository;
 import com.schegolevalex.mm.mmparser.repository.OfferRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.openqa.selenium.By;
-import org.openqa.selenium.PageLoadStrategy;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -20,12 +18,13 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class Parser {
     private final OfferRepository offerRepository;
-    private final LinkRepository linkRepository;
     private final ChromeOptions options = new ChromeOptions();
     private final ProxyService proxyService;
 
@@ -33,51 +32,64 @@ public class Parser {
     public List<Offer> parseLink(Link productLink) {
         proxyService.setProxy(options);
         WebDriver driver = new ChromeDriver(options);
-        driver.manage().window().maximize();
-        driver.get("https://megamarket.ru/");
-        driver.get(productLink.getUrl());
-
         try {
-            Thread.sleep(2000);
-            String productTitle = driver.findElement(By.className("pdp-header__title_only-title")).getText();
-            Thread.sleep(2000);
-            productLink.setTitle(productTitle);
-        } catch (InterruptedException e) {
-//            throw new RuntimeException(e);
+            driver.manage().window().maximize();
+            driver.get("https://megamarket.ru/");
+            driver.get(productLink.getUrl());
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+
+            WebElement productTitle = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("pdp-header__title_only-title")));
+            productLink.setTitle(productTitle.getText());
+
+            Optional<WebElement> moreOffersButton = waitForElementIsClickable(wait, By.className("more-offers-button"));
+
+            if (moreOffersButton.isPresent())
+                moreOffersButton.get().click();
+            else {
+                Optional<WebElement> outOfStockLink = waitForElementIsClickable(wait, By.className("out-of-stock-block-redesign__link"));
+                if (outOfStockLink.isPresent())
+                    outOfStockLink.get().click();
+                else
+                    log.error("Neither 'more-offers-button' nor 'out-of-stock-block-redesign__link' is clickable");
+            }
+
+            List<WebElement> webElements = waitForElementsIsVisible(wait, By.cssSelector("div[itemtype=\"http://schema.org/Offer\"]"));
+            List<Offer> offerList = webElements.stream().map(webElement -> {
+                Offer offer = parseOffer(webElement);
+                offer.setLink(productLink);
+                return offer;
+            }).toList();
+
+            offerRepository.saveAllAndFlush(offerList);
+
+            return filterOffers(offerList);
+        } finally {
+            driver.quit();
         }
+    }
 
-        linkRepository.saveAndFlush(productLink);
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(5000));
-        wait.until(ExpectedConditions.elementToBeClickable(By.className("more-offers-button")));
+    private Optional<WebElement> waitForElementIsClickable(WebDriverWait wait, By locator) {
         try {
-            driver.findElement(By.className("more-offers-button")).click();
-        } catch (Exception exception) {
-            driver.findElement(By.className("out-of-stock-block-redesign__link")).click();
+            return Optional.of(wait.until(ExpectedConditions.elementToBeClickable(locator)));
+        } catch (NoSuchElementException | TimeoutException e) {
+            return Optional.empty();
         }
+    }
 
+    private List<WebElement> waitForElementsIsVisible(WebDriverWait wait, By locator) {
         try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(locator));
+        } catch (NoSuchElementException | TimeoutException e) {
+            return List.of();
         }
+    }
 
-        List<WebElement> webElements = driver.findElements(By.cssSelector("div[itemtype=\"http://schema.org/Offer\"]"));
-        List<Offer> offerList = webElements.stream().map(webElement -> {
-            Offer offer = parseOffer(webElement);
-            offer.setLink(productLink);
-            return offer;
-        }).toList();
-        driver.close();
-        offerRepository.saveAllAndFlush(offerList);
-
+    private static @NotNull List<Offer> filterOffers(List<Offer> offerList) {
         return offerList.stream().filter(offer -> {
             Integer priceBefore = offer.getPrice();
             double bonusPercent = (offer.getBonusPercent() + 2) / 100.0;
-            int promo;
-            if (priceBefore > 100000)
-                promo = 20000;
-            else promo = 10000;
+            int promo = priceBefore > 100000 ? 20000 : 10000;
 
             boolean totalPrice = (priceBefore - promo - (priceBefore - promo) * bonusPercent) < 75000;
             boolean scam = priceBefore > 90000;
@@ -102,8 +114,10 @@ public class Parser {
 
             String bonus = webElement.findElement(By.className("bonus-amount")).getText().replaceAll(" ", "");
             offer.setBonus(Integer.valueOf(bonus));
-        } catch (Exception ex) {
-
+        } catch (NoSuchElementException e) {
+            log.error("Элемент не найден: ", e);
+        } catch (NumberFormatException e) {
+            log.error("Не удалось преобразовать в число: ", e);
         }
 
         String tempPrice = webElement.findElement(By.className("product-offer-price__amount")).getText();

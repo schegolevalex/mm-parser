@@ -127,12 +127,12 @@ public class ProxyService {
 //                .host("37.139.34.51")
 //                .port("11346")
 //                .build());
-        proxies.add(Proxy.builder()
-                .username("kAB3Se")
-                .password("AtEKakUz9yhY")
-                .host("37.139.34.51")
-                .port("11777")
-                .build());
+//        proxies.add(Proxy.builder()
+//                .username("kAB3Se")
+//                .password("AtEKakUz9yhY")
+//                .host("37.139.34.51")
+//                .port("11777")
+//                .build());
         proxies.add(Proxy.builder()
                 .username("BAy5Ty")
                 .password("Ep3megaBaT6Z")
