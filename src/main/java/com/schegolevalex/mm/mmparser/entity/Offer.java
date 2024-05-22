@@ -46,7 +46,7 @@ public class Offer {
     @Override
     public String toString() {
         return "Предложение:" +
-                "\n- продавец: \"" + seller + "\"" +
+                "\n- продавец: \"" + seller.getName() + "\"" +
                 "\n- цена: " + price +
                 "\n- процент бонусов: " + bonusPercent +
                 "\n- количество бонусов: " + bonus +

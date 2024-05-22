@@ -177,7 +177,21 @@ public class ResponseHandler {
 
     private void sendOffers(List<Offer> offers, Long chatId) {
         if (!offers.isEmpty())
-            offers.forEach(offer -> silent.send(offer.toString(), chatId));
+            offers.forEach(offer -> {
+                Integer priceBefore = offer.getPrice();
+                int promo = priceBefore > 110_000 ? 20_000 : 10_000;
+                double bonusPercent = (offer.getBonusPercent() + 2) / 100.0;
+                int totalPrice = (int) Math.round(priceBefore - promo - (priceBefore - promo) * bonusPercent);
+
+                String message = String.format(Message.OFFER,
+                        totalPrice,
+                        offer.getSeller().getName(),
+                        offer.getPrice(),
+                        offer.getBonusPercent() + 2,
+                        offer.getBonus(),
+                        offer.getLink().getUrl());
+                silent.send(message, chatId);
+            });
     }
 
     private void sendMessageAndPutState(Long chatId, String message, ReplyKeyboard keyboard, UserState userState) {
