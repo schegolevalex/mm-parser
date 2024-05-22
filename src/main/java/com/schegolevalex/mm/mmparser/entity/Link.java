@@ -30,7 +30,8 @@ public class Link {
     @Column(updatable = false)
     Instant createdAt;
 
-    @Column(columnDefinition = "boolean default true")
+    @Column(columnDefinition = "boolean default TRUE")
+    @Builder.Default
     boolean isActive = true;
 
     @Override

@@ -1,4 +1,3 @@
-version: '3.9'
 services:
   mm-parser-database:
     container_name: mm-parser-database

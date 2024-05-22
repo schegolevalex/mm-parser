@@ -38,7 +38,7 @@ public class Offer {
     @Column(updatable = false)
     Instant createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE/*, CascadeType.PERSIST*/})
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     Link link;

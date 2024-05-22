@@ -191,6 +191,7 @@ public class ResponseHandler {
     }
 
     //    @PostConstruct
+//    @Transactional(value = Transactional.TxType.REQUIRED)
     @Scheduled(cron = "0 */10 * * * *", zone = "Europe/Moscow")
     protected void parseAndNotify() {
         linkRepository.findAllByIsActive(true).forEach(productLink -> {

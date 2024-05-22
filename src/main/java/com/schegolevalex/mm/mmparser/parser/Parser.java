@@ -47,14 +47,15 @@ public class Parser {
 
             Optional<WebElement> moreOffersButton = waitForElementIsClickable(wait, By.className("more-offers-button"));
 
-            if (moreOffersButton.isPresent())
+            if (moreOffersButton.isPresent()) {
                 moreOffersButton.get().click();
-            else {
+            } else {
                 Optional<WebElement> outOfStockLink = waitForElementIsClickable(wait, By.className("out-of-stock-block-redesign__link"));
-                if (outOfStockLink.isPresent())
+                if (outOfStockLink.isPresent()) {
                     outOfStockLink.get().click();
-                else
+                } else {
                     log.error("Обе кнопки 'more-offers-button' и 'out-of-stock-block-redesign__link' не кликабельны");
+                }
             }
 
             List<WebElement> webElements = waitForElementsIsVisible(wait, By.cssSelector("div[itemtype=\"http://schema.org/Offer\"]"));
@@ -103,7 +104,6 @@ public class Parser {
     private Offer parseOffer(WebElement webElement) {
         Offer offer = new Offer();
         Seller seller = new Seller();
-        offer.setSeller(seller);
         seller.addOffer(offer);
 
         String sellerName = webElement.findElement(By.className("pdp-merchant-rating-block__merchant-name")).getText();
