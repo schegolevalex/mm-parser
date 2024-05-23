@@ -1,16 +1,16 @@
 package com.schegolevalex.mm.mmparser.parser;
 
-import com.schegolevalex.mm.mmparser.entity.Link;
 import com.schegolevalex.mm.mmparser.entity.Offer;
+import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.entity.Seller;
-import com.schegolevalex.mm.mmparser.repository.LinkRepository;
-import com.schegolevalex.mm.mmparser.repository.OfferRepository;
+import com.schegolevalex.mm.mmparser.service.OfferService;
+import com.schegolevalex.mm.mmparser.service.ProductService;
+import com.schegolevalex.mm.mmparser.service.SellerService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -26,23 +26,23 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class Parser {
-    private final OfferRepository offerRepository;
+    private final OfferService offerService;
     private final ChromeOptions options = new ChromeOptions();
     private final ProxyService proxyService;
-    private final LinkRepository linkRepository;
+    private final ProductService productService;
+    private final SellerService sellerService;
     private WebDriver driver;
 
     @Transactional
-    public List<Offer> parseLink(Link productLink) {
+    public List<Offer> parseProduct(Product product) {
         WebDriverWait wait5sec = new WebDriverWait(driver, Duration.ofSeconds(5));
         WebDriverWait wait10sec = new WebDriverWait(driver, Duration.ofSeconds(10));
-
         proxyService.setProxy(options);
-        driver.get(productLink.getUrl());
+        driver.get(product.getUrl());
 
         WebElement productTitle = wait5sec.until(ExpectedConditions.visibilityOfElementLocated(By.className("pdp-header__title_only-title")));
-        productLink.setTitle(productTitle.getText());
-        linkRepository.save(productLink);
+        product.setTitle(productTitle.getText());
+        productService.save(product);
 
         Optional<WebElement> moreOffersButton = waitForElementIsClickable(wait10sec, By.className("more-offers-button"));
 
@@ -58,15 +58,13 @@ public class Parser {
         }
 
         List<WebElement> webElements = waitForElementsIsVisible(wait5sec, By.cssSelector("div[itemtype=\"http://schema.org/Offer\"]"));
-        List<Offer> offerList = webElements.stream().map(webElement -> {
-            Offer offer = parseOffer(webElement);
-            offer.setLink(productLink);
-            return offer;
-        }).toList();
+        List<Offer> newOffers = webElements.stream().map(this::parseOffer).toList();
 
-        List<Offer> offers = offerRepository.saveAllAndFlush(offerList);
-
-        return filterOffers(offers);
+////////////////////////////////////////////////////////
+        newOffers.forEach(product::addOffer);
+        newOffers.forEach(offerService::checkPrevious);
+        return newOffers;
+////////////////////////////////////////////////////////
     }
 
     private Optional<WebElement> waitForElementIsClickable(WebDriverWait wait, By locator) {
@@ -85,48 +83,37 @@ public class Parser {
         }
     }
 
-    private static @NotNull List<Offer> filterOffers(List<Offer> offerList) {
-        return offerList.stream().filter(offer -> {
-            Integer priceBefore = offer.getPrice();
-            double bonusPercent = (offer.getBonusPercent() + 2) / 100.0;
-            int promo = priceBefore > 110_000 ? 20_000 : 10_000;
-
-            boolean totalPrice = (priceBefore - promo - (priceBefore - promo) * bonusPercent) < 75_000;
-            boolean scam = priceBefore > 100_000;
-            return totalPrice && scam;
-        }).toList();
-    }
-
     private Offer parseOffer(WebElement webElement) {
-        Offer offer = new Offer();
-        Seller seller = new Seller();
-        seller.addOffer(offer);
-
         String sellerName = webElement.findElement(By.className("pdp-merchant-rating-block__merchant-name")).getText();
+        Seller seller = sellerService.findByName(sellerName).orElseGet(Seller::new);
         seller.setName(sellerName);
+
+        Offer newOffer = new Offer();
+        newOffer.setSeller(seller);
 
         try {
             String tempBonusPercent = webElement.findElement(By.className("bonus-percent")).getText();
             String bonusPercent = tempBonusPercent
                     .substring(0, tempBonusPercent.length() - 1)
                     .replaceAll(" ", "");
-            offer.setBonusPercent(Integer.valueOf(bonusPercent));
+            newOffer.setBonusPercent(Integer.valueOf(bonusPercent));
 
             String bonus = webElement.findElement(By.className("bonus-amount")).getText().replaceAll(" ", "");
-            offer.setBonus(Integer.valueOf(bonus));
+            newOffer.setBonus(Integer.valueOf(bonus));
         } catch (NoSuchElementException e) {
-            offer.setBonusPercent(0);
-            offer.setBonus(0);
-            log.error("Элемент не найден");
+            newOffer.setBonusPercent(0);
+            newOffer.setBonus(0);
+            log.error("Элементы с информацией о бонусах не найден");
         } catch (NumberFormatException e) {
-            log.error("Не удалось преобразовать в число: ", e);
+            log.error("Не удалось преобразовать информацию в число: ", e);
         }
 
         String tempPrice = webElement.findElement(By.className("product-offer-price__amount")).getText();
         String tempTempPrice = tempPrice.substring(0, tempPrice.length() - 2);
         String price = tempTempPrice.replaceAll(" ", "");
-        offer.setPrice(Integer.valueOf(price));
-        return offer;
+        newOffer.setPrice(Integer.valueOf(price));
+
+        return newOffer;
     }
 
     @PostConstruct

@@ -24,10 +24,6 @@ public class Offer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @ToString.Exclude
-    Seller seller;
-
     Integer price;
 
     @Column(columnDefinition = "integer default 0")
@@ -43,17 +39,11 @@ public class Offer {
     @LastModifiedDate
     Instant updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE/*, CascadeType.PERSIST*/})
+    @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
-    Link link;
+    Product product;
 
-//    @Override
-//    public String toString() {
-//        return "Предложение:" +
-//                "\n- продавец: \"" + seller.getName() + "\"" +
-//                "\n- цена: " + price +
-//                "\n- процент бонусов: " + bonusPercent +
-//                "\n- количество бонусов: " + bonus +
-//                "\n- ссылка: " + link + ")";
-//    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
+    Seller seller;
 }
