@@ -36,21 +36,23 @@ public class Parser {
         WebDriver driver = new ChromeDriver(options);
         try {
             driver.manage().window().maximize();
-            driver.get("https://megamarket.ru/");
+            String baseUrl = "https://megamarket.ru/";
+            WebDriverWait wait5sec = new WebDriverWait(driver, Duration.ofSeconds(5));
+            WebDriverWait wait10sec = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+            driver.get(baseUrl);
             driver.get(productLink.getUrl());
 
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-
-            WebElement productTitle = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("pdp-header__title_only-title")));
+            WebElement productTitle = wait5sec.until(ExpectedConditions.visibilityOfElementLocated(By.className("pdp-header__title_only-title")));
             productLink.setTitle(productTitle.getText());
             linkRepository.save(productLink);
 
-            Optional<WebElement> moreOffersButton = waitForElementIsClickable(wait, By.className("more-offers-button"));
+            Optional<WebElement> moreOffersButton = waitForElementIsClickable(wait10sec, By.className("more-offers-button"));
 
             if (moreOffersButton.isPresent()) {
                 moreOffersButton.get().click();
             } else {
-                Optional<WebElement> outOfStockLink = waitForElementIsClickable(wait, By.className("out-of-stock-block-redesign__link"));
+                Optional<WebElement> outOfStockLink = waitForElementIsClickable(wait10sec, By.className("out-of-stock-block-redesign__link"));
                 if (outOfStockLink.isPresent()) {
                     outOfStockLink.get().click();
                 } else {
@@ -58,7 +60,7 @@ public class Parser {
                 }
             }
 
-            List<WebElement> webElements = waitForElementsIsVisible(wait, By.cssSelector("div[itemtype=\"http://schema.org/Offer\"]"));
+            List<WebElement> webElements = waitForElementsIsVisible(wait5sec, By.cssSelector("div[itemtype=\"http://schema.org/Offer\"]"));
             List<Offer> offerList = webElements.stream().map(webElement -> {
                 Offer offer = parseOffer(webElement);
                 offer.setLink(productLink);
@@ -75,7 +77,7 @@ public class Parser {
 
     private Optional<WebElement> waitForElementIsClickable(WebDriverWait wait, By locator) {
         try {
-            return Optional.of(wait.until(ExpectedConditions.elementToBeClickable(locator)));
+            return Optional.of(wait.until(ExpectedConditions.visibilityOfElementLocated(locator)));
         } catch (NoSuchElementException | TimeoutException e) {
             return Optional.empty();
         }
@@ -83,7 +85,7 @@ public class Parser {
 
     private List<WebElement> waitForElementsIsVisible(WebDriverWait wait, By locator) {
         try {
-            return wait.withTimeout(Duration.ofSeconds(2)).until(ExpectedConditions.visibilityOfAllElementsLocatedBy(locator));
+            return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(locator));
         } catch (NoSuchElementException | TimeoutException e) {
             return List.of();
         }
@@ -141,11 +143,11 @@ public class Parser {
         options.addArguments("--disable-blink-features=AutomationControlled");
 
         options.setPageLoadStrategy(PageLoadStrategy.EAGER);
+        options.addArguments("--headless=new");
 //        options.addArguments("--user-data-dir=/home/schegolevalex/.config/google-chrome");
-
+//
 //        options.addArguments("--display=:1");
 //        options.addArguments("referer=https://www.google.com/search?q=%D1%81%D0%B1%D0%B5%D1%80%D0%BC%D0%B5%D0%B3%D0%B0%D0%BC%D0%B0%D1%80%D0%BA%D0%B5%D1%82&sca_esv=5f32bda464ccee7b&ei=mvrAZc3EDM2nwPAPi4aikAs&oq=%D1%81%D0%B1%D0%B5%D1%80%D0%BC%D0%B5&gs_lp=Egxnd3Mtd2l6LXNlcnAiDNGB0LHQtdGA0LzQtSoCCAAyCBAAGIAEGLADMggQABiABBiwAzIIEAAYgAQYsAMyCBAAGIAEGLADMggQABiABBiwAzIIEAAYgAQYsAMyCBAAGIAEGLADMggQABiABBiwAzIIEAAYgAQYsAMyBxAAGB4YsANI9QtQAFgAcAF4AJABAJgBAKABAKoBALgBA8gBAOIDBBgBIEGIBgGQBgo&sclient=gws-wiz-serp");
-//        options.addArguments("--headless=chrome");
 //        options.addArguments("--no-sandbox");
 //        options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
 //        options.setExperimentalOption("useAutomationExtension", false);
