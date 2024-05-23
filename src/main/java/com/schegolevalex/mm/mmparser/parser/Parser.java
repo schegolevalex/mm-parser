@@ -6,6 +6,7 @@ import com.schegolevalex.mm.mmparser.entity.Seller;
 import com.schegolevalex.mm.mmparser.repository.LinkRepository;
 import com.schegolevalex.mm.mmparser.repository.OfferRepository;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,50 +30,43 @@ public class Parser {
     private final ChromeOptions options = new ChromeOptions();
     private final ProxyService proxyService;
     private final LinkRepository linkRepository;
+    private WebDriver driver;
 
     @Transactional
     public List<Offer> parseLink(Link productLink) {
+        WebDriverWait wait5sec = new WebDriverWait(driver, Duration.ofSeconds(5));
+        WebDriverWait wait10sec = new WebDriverWait(driver, Duration.ofSeconds(10));
+
         proxyService.setProxy(options);
-        WebDriver driver = new ChromeDriver(options);
-        try {
-            driver.manage().window().maximize();
-            String baseUrl = "https://megamarket.ru/";
-            WebDriverWait wait5sec = new WebDriverWait(driver, Duration.ofSeconds(5));
-            WebDriverWait wait10sec = new WebDriverWait(driver, Duration.ofSeconds(10));
+        driver.get(productLink.getUrl());
 
-            driver.get(baseUrl);
-            driver.get(productLink.getUrl());
+        WebElement productTitle = wait5sec.until(ExpectedConditions.visibilityOfElementLocated(By.className("pdp-header__title_only-title")));
+        productLink.setTitle(productTitle.getText());
+        linkRepository.save(productLink);
 
-            WebElement productTitle = wait5sec.until(ExpectedConditions.visibilityOfElementLocated(By.className("pdp-header__title_only-title")));
-            productLink.setTitle(productTitle.getText());
-            linkRepository.save(productLink);
+        Optional<WebElement> moreOffersButton = waitForElementIsClickable(wait10sec, By.className("more-offers-button"));
 
-            Optional<WebElement> moreOffersButton = waitForElementIsClickable(wait10sec, By.className("more-offers-button"));
-
-            if (moreOffersButton.isPresent()) {
-                moreOffersButton.get().click();
+        if (moreOffersButton.isPresent()) {
+            moreOffersButton.get().click();
+        } else {
+            Optional<WebElement> outOfStockLink = waitForElementIsClickable(wait10sec, By.className("out-of-stock-block-redesign__link"));
+            if (outOfStockLink.isPresent()) {
+                outOfStockLink.get().click();
             } else {
-                Optional<WebElement> outOfStockLink = waitForElementIsClickable(wait10sec, By.className("out-of-stock-block-redesign__link"));
-                if (outOfStockLink.isPresent()) {
-                    outOfStockLink.get().click();
-                } else {
-                    log.error("Обе кнопки 'more-offers-button' и 'out-of-stock-block-redesign__link' не кликабельны");
-                }
+                log.error("Обе кнопки 'more-offers-button' и 'out-of-stock-block-redesign__link' не кликабельны");
             }
-
-            List<WebElement> webElements = waitForElementsIsVisible(wait5sec, By.cssSelector("div[itemtype=\"http://schema.org/Offer\"]"));
-            List<Offer> offerList = webElements.stream().map(webElement -> {
-                Offer offer = parseOffer(webElement);
-                offer.setLink(productLink);
-                return offer;
-            }).toList();
-
-            List<Offer> offers = offerRepository.saveAllAndFlush(offerList);
-
-            return filterOffers(offers);
-        } finally {
-            driver.quit();
         }
+
+        List<WebElement> webElements = waitForElementsIsVisible(wait5sec, By.cssSelector("div[itemtype=\"http://schema.org/Offer\"]"));
+        List<Offer> offerList = webElements.stream().map(webElement -> {
+            Offer offer = parseOffer(webElement);
+            offer.setLink(productLink);
+            return offer;
+        }).toList();
+
+        List<Offer> offers = offerRepository.saveAllAndFlush(offerList);
+
+        return filterOffers(offers);
     }
 
     private Optional<WebElement> waitForElementIsClickable(WebDriverWait wait, By locator) {
@@ -144,6 +138,7 @@ public class Parser {
 
         options.setPageLoadStrategy(PageLoadStrategy.EAGER);
         options.addArguments("--headless=new");
+
 //        options.addArguments("--user-data-dir=/home/schegolevalex/.config/google-chrome");
 //
 //        options.addArguments("--display=:1");
@@ -192,5 +187,19 @@ public class Parser {
 //        driver.manage().addCookie(new Cookie("spsc", "1714651427122_8bdb4198e4dd85449d9f94b32a4c9619_2dc4c47e5beb4aae25be080fa9d16c8093e7e989cef732b63b8bada59af3d7da"));
 //        driver.manage().addCookie(new Cookie("ssaid", "0a8c2ba0-087c-11ef-8a99-53062e1b8cf4"));
 //        driver.manage().addCookie(new Cookie("uxs_uid", "0c27b330-087c-11ef-ac0b-dbfe4f1636f2"));
+    }
+
+    @PostConstruct
+    private void openBaseUrl() {
+        proxyService.setProxy(options);
+        driver = new ChromeDriver(options);
+        driver.manage().window().maximize();
+        String baseUrl = "https://megamarket.ru/";
+        driver.get(baseUrl);
+    }
+
+    @PreDestroy
+    private void closeDriver() {
+        driver.quit();
     }
 }
