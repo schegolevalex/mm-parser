@@ -10,11 +10,12 @@ import java.time.Instant;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Builder
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class Link {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,8 +35,14 @@ public class Link {
     @Builder.Default
     boolean isActive = true;
 
+    public Link(String url, Long chatId, String title) {
+        this.url = url;
+        this.chatId = chatId;
+        this.title = title;
+    }
+
     @Override
     public String toString() {
-        return url;
+        return "url = " + url;
     }
 }
