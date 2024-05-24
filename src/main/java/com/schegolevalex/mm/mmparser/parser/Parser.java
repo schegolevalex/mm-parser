@@ -3,6 +3,7 @@ package com.schegolevalex.mm.mmparser.parser;
 import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.entity.Seller;
+import com.schegolevalex.mm.mmparser.repository.ProductRepository;
 import com.schegolevalex.mm.mmparser.service.OfferService;
 import com.schegolevalex.mm.mmparser.service.ProductService;
 import com.schegolevalex.mm.mmparser.service.SellerService;
@@ -25,67 +26,39 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class Parser {
     private final OfferService offerService;
     private final ChromeOptions options = new ChromeOptions();
     private final ProxyService proxyService;
-    private final ProductService productService;
     private final SellerService sellerService;
     private WebDriver driver;
 
-    @Transactional
     public List<Offer> parseProduct(Product product) {
-        WebDriverWait wait5sec = new WebDriverWait(driver, Duration.ofSeconds(5));
         WebDriverWait wait10sec = new WebDriverWait(driver, Duration.ofSeconds(10));
         proxyService.setProxy(options);
-        driver.get(product.getUrl());
+        driver.get(product.getUrl() + "#?details_block=prices");
 
-        WebElement productTitle = wait5sec.until(ExpectedConditions.visibilityOfElementLocated(By.className("pdp-header__title_only-title")));
+        WebElement productTitle = wait10sec.until(ExpectedConditions.visibilityOfElementLocated(By.className("pdp-header__title_only-title")));
         product.setTitle(productTitle.getText());
-        productService.save(product);
 
-        Optional<WebElement> moreOffersButton = waitForElementIsClickable(wait10sec, By.className("more-offers-button"));
-
-        if (moreOffersButton.isPresent()) {
-            moreOffersButton.get().click();
-        } else {
-            Optional<WebElement> outOfStockLink = waitForElementIsClickable(wait10sec, By.className("out-of-stock-block-redesign__link"));
-            if (outOfStockLink.isPresent()) {
-                outOfStockLink.get().click();
-            } else {
-                log.error("Обе кнопки 'more-offers-button' и 'out-of-stock-block-redesign__link' не кликабельны");
-            }
-        }
-
-        List<WebElement> webElements = waitForElementsIsVisible(wait5sec, By.cssSelector("div[itemtype=\"http://schema.org/Offer\"]"));
+        List<WebElement> webElements = waitForElementsIsVisible(wait10sec, By.cssSelector("div[itemtype=\"http://schema.org/Offer\"]"));
         List<Offer> newOffers = webElements.stream().map(this::parseOffer).toList();
 
-////////////////////////////////////////////////////////
-        newOffers.forEach(product::addOffer);
-        newOffers.forEach(offerService::checkPrevious);
-        return newOffers;
-////////////////////////////////////////////////////////
-    }
-
-    private Optional<WebElement> waitForElementIsClickable(WebDriverWait wait, By locator) {
-        try {
-            return Optional.of(wait.until(ExpectedConditions.visibilityOfElementLocated(locator)));
-        } catch (NoSuchElementException | TimeoutException e) {
-            return Optional.empty();
-        }
-    }
-
-    private List<WebElement> waitForElementsIsVisible(WebDriverWait wait, By locator) {
-        try {
-            return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(locator));
-        } catch (NoSuchElementException | TimeoutException e) {
-            return List.of();
-        }
+        newOffers.forEach(offer -> {
+            product.addOffer(offer);
+            offer.getSeller().addProduct(product);
+        });
+        return newOffers.stream().map(offerService::checkPrevious).toList();
     }
 
     private Offer parseOffer(WebElement webElement) {
         String sellerName = webElement.findElement(By.className("pdp-merchant-rating-block__merchant-name")).getText();
-        Seller seller = sellerService.findByName(sellerName).orElseGet(Seller::new);
+        Seller seller = sellerService.findByName(sellerName).orElseGet(() -> {
+            Seller newSeller = new Seller();
+            newSeller.setName(sellerName);
+            return sellerService.save(newSeller);
+        });
         seller.setName(sellerName);
 
         Offer newOffer = new Offer();
@@ -109,11 +82,18 @@ public class Parser {
         }
 
         String tempPrice = webElement.findElement(By.className("product-offer-price__amount")).getText();
-        String tempTempPrice = tempPrice.substring(0, tempPrice.length() - 2);
-        String price = tempTempPrice.replaceAll(" ", "");
+        String price = tempPrice.substring(0, tempPrice.length() - 2).replaceAll(" ", "");
         newOffer.setPrice(Integer.valueOf(price));
 
         return newOffer;
+    }
+
+    private List<WebElement> waitForElementsIsVisible(WebDriverWait wait, By locator) {
+        try {
+            return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(locator));
+        } catch (NoSuchElementException | TimeoutException e) {
+            return List.of();
+        }
     }
 
     @PostConstruct
@@ -135,7 +115,15 @@ public class Parser {
 //        options.setExperimentalOption("useAutomationExtension", false);
     }
 
-    private void setCookies(WebDriver driver) {
+//    private Optional<WebElement> waitForElementIsClickable(WebDriverWait wait, By locator) {
+//        try {
+//            return Optional.of(wait.until(ExpectedConditions.visibilityOfElementLocated(locator)));
+//        } catch (NoSuchElementException | TimeoutException e) {
+//            return Optional.empty();
+//        }
+//    }
+    
+//    private void setCookies(WebDriver driver) {
 //        driver.manage().addCookie(new Cookie("AEC", "AQTF6Hzov47M_Vr7cbDLzzeWE2Oh0JeRsiMuK2nzW2SjbuQ619kWORY4zw"));
 //        driver.manage().addCookie(new Cookie("APISID", "oNv9nlOtPfU2Y2v9/Ahu0sfc9kUv-9gP4C"));
 //        driver.manage().addCookie(new Cookie("DV", "g9_z001W6Q9WsO9g7sjbrkfqGjuT81idS42dMzB-qAEAAEAIMU5ewDV2cAAAADSuK0_N0U9ZNAAAAFgvVcgWkPXiFQAAAA"));
@@ -174,7 +162,7 @@ public class Parser {
 //        driver.manage().addCookie(new Cookie("spsc", "1714651427122_8bdb4198e4dd85449d9f94b32a4c9619_2dc4c47e5beb4aae25be080fa9d16c8093e7e989cef732b63b8bada59af3d7da"));
 //        driver.manage().addCookie(new Cookie("ssaid", "0a8c2ba0-087c-11ef-8a99-53062e1b8cf4"));
 //        driver.manage().addCookie(new Cookie("uxs_uid", "0c27b330-087c-11ef-ac0b-dbfe4f1636f2"));
-    }
+//    }
 
     @PostConstruct
     private void openBaseUrl() {

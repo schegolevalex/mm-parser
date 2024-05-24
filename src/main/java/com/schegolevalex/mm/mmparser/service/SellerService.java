@@ -17,4 +17,8 @@ public class SellerService {
     public Optional<Seller> findByName(String sellerName) {
         return sellerRepository.findByName(sellerName);
     }
+
+    public Seller save(Seller newSeller) {
+        return sellerRepository.save(newSeller);
+    }
 }

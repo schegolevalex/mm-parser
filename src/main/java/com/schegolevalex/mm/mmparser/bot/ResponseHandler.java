@@ -5,6 +5,8 @@ import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.parser.Parser;
 import com.schegolevalex.mm.mmparser.service.OfferService;
 import com.schegolevalex.mm.mmparser.service.ProductService;
+import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -132,7 +134,9 @@ public class ResponseHandler {
             String userText = update.getMessage().getText();
             Matcher matcher = pattern.matcher(userText);
             String productUrl = matcher.find() ? matcher.group() : "";
-
+            if (!productUrl.endsWith("/")) {
+                productUrl += "/";
+            }
             Product product = productService.saveAndFlush(Product.builder()
                     .url(productUrl)
                     .chatId(chatId)
@@ -210,13 +214,13 @@ public class ResponseHandler {
         context.putState(chatId, userState);
     }
 
-    //    @PostConstruct
-//    @Transactional(value = Transactional.TxType.REQUIRED)
-    @Scheduled(cron = "0 */1 * * * *", zone = "Europe/Moscow")
+    @Transactional
+    @Scheduled(cron = "30 */1 * * * *", zone = "Europe/Moscow")
     protected void parseAndNotify() {
         productService.findAllByIsActive(true).forEach(product -> {
             List<Offer> offers = parser.parseProduct(product);
-            sendNotifies(offers, product.getChatId());
+            List<Offer> filteredOffers = offerService.filterOffersWithDefaultParameters(offers);
+            sendNotifies(filteredOffers, product.getChatId());
         });
     }
 }

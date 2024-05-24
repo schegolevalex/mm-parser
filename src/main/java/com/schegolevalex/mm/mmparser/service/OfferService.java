@@ -24,7 +24,7 @@ public class OfferService {
             double bonusPercent = (offer.getBonusPercent() + 2) / 100.0;
             int promo = priceBefore > 110_000 ? 20_000 : 10_000;
 
-            boolean totalPrice = (priceBefore - promo - (priceBefore - promo) * bonusPercent) < 75_000;
+            boolean totalPrice = (priceBefore - promo - (priceBefore - promo) * bonusPercent) < 79_000;
             boolean scam = priceBefore > 100_000;
             return totalPrice && scam;
         }).toList();
