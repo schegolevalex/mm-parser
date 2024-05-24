@@ -54,12 +54,12 @@ public class Parser {
 
     private Offer parseOffer(WebElement webElement) {
         String sellerName = webElement.findElement(By.className("pdp-merchant-rating-block__merchant-name")).getText();
-        Seller seller = sellerService.findByName(sellerName).orElseGet(() -> {
-            Seller newSeller = new Seller();
-            newSeller.setName(sellerName);
-            return sellerService.save(newSeller);
-        });
+        String rating = webElement.findElement(By.className("pdp-merchant-rating-block__rating")).findElement(By.tagName("span")).getText();
+
+        Seller seller = sellerService.findByName(sellerName)
+                .orElseGet(Seller::new);
         seller.setName(sellerName);
+        seller.setRating(Double.valueOf(rating));
 
         Offer newOffer = new Offer();
         newOffer.setSeller(seller);

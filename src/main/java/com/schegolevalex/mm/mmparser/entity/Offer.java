@@ -43,7 +43,7 @@ public class Offer {
     @ToString.Exclude
     Product product;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @ToString.Exclude
     Seller seller;
 }
