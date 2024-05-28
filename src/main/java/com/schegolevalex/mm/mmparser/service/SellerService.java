@@ -10,12 +10,16 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+//@Transactional
 public class SellerService {
     private final SellerRepository sellerRepository;
 
     public Optional<Seller> findByName(String sellerName) {
         return sellerRepository.findByName(sellerName);
+    }
+
+    public Optional<Seller> findByNameAndRating(String sellerName, Double rating) {
+        return sellerRepository.findByNameAndRating(sellerName, rating);
     }
 
     public Seller save(Seller newSeller) {

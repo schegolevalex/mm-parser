@@ -1,15 +1,15 @@
 package com.schegolevalex.mm.mmparser.service;
 
 import com.schegolevalex.mm.mmparser.entity.Offer;
+import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.repository.OfferRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@Transactional
+//@Transactional
 @RequiredArgsConstructor
 public class OfferService {
     private final OfferRepository offerRepository;
@@ -30,16 +30,20 @@ public class OfferService {
         }).toList();
     }
 
-    public Offer checkPrevious(Offer offer) {
-        return offerRepository.save(offerRepository.checkPrevious(offer.getPrice(),
+    public boolean isPresent(Product product, Offer offer) {
+        return offerRepository.findTheSame(offer.getPrice(),
                         offer.getBonusPercent(),
                         offer.getBonus(),
-                        offer.getProduct().getUrl(),
-                        offer.getSeller().getName())
-                .orElse(offer));
+                        product.getUrl(),
+                        offer.getSeller().getName(),
+                        offer.getSeller().getRating()).isPresent();
     }
 
     public Offer save(Offer newOffer) {
         return offerRepository.save(newOffer);
+    }
+
+    public List<Offer> saveAll(List<Offer> offers) {
+        return offerRepository.saveAll(offers);
     }
 }

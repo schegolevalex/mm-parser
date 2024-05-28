@@ -5,7 +5,6 @@ import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.parser.Parser;
 import com.schegolevalex.mm.mmparser.service.OfferService;
 import com.schegolevalex.mm.mmparser.service.ProductService;
-import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -28,6 +27,7 @@ import static com.schegolevalex.mm.mmparser.bot.Constant.Message;
 
 @Component
 @Slf4j
+@Transactional
 public class ResponseHandler {
     private final SilentSender silent;
     private final OfferService offerService;
@@ -185,7 +185,7 @@ public class ResponseHandler {
         return context.userIsActive(chatId);
     }
 
-    private void sendNotifies(List<Offer> offers, Long chatId) {
+    protected void sendNotifies(List<Offer> offers, Long chatId) {
         if (!offers.isEmpty())
             offers.forEach(offer -> {
                 Integer priceBefore = offer.getPrice();
@@ -214,13 +214,17 @@ public class ResponseHandler {
         context.putState(chatId, userState);
     }
 
-    @Transactional
     @Scheduled(cron = "30 */1 * * * *", zone = "Europe/Moscow")
     protected void parseAndNotify() {
         productService.findAllByIsActive(true).forEach(product -> {
-            List<Offer> offers = parser.parseProduct(product);
-            List<Offer> filteredOffers = offerService.filterOffersWithDefaultParameters(offers);
-            sendNotifies(filteredOffers, product.getChatId());
+            List<Offer> parsedOffers = parser.parseProduct(product);
+            List<Offer> newOffers = parsedOffers.stream()
+                    .filter(offer -> !offerService.isPresent(product, offer))
+                    .toList();
+            newOffers.forEach(product::addOffer);
+            List<Offer> filteredOffers = offerService.filterOffersWithDefaultParameters(newOffers);
+            if (!filteredOffers.isEmpty())
+                sendNotifies(filteredOffers, product.getChatId());
         });
     }
 }

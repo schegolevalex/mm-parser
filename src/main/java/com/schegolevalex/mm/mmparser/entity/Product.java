@@ -48,6 +48,7 @@ public class Product {
             , cascade = CascadeType.ALL
             , fetch = FetchType.LAZY
             , orphanRemoval = true)
+    @Builder.Default
     @ToString.Exclude
     List<Offer> offers = new ArrayList<>();
 
