@@ -1,10 +1,10 @@
 package com.schegolevalex.mm.mmparser.repository;
 
 import com.schegolevalex.mm.mmparser.entity.Offer;
-import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -15,8 +15,7 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
             "and o.bonusPercent = :bonusPercent " +
             "and o.bonus = :bonus " +
             "and o.product.url = :url " +
-            "and o.seller.name = :sellerName " +
-            "and o.seller.rating = :rating")
-    @Transactional(Transactional.TxType.NOT_SUPPORTED)
-    Optional<Offer> findTheSame(Integer price, Integer bonusPercent, Integer bonus, String url, String sellerName, Double rating);
+            "and o.seller.marketId = :marketId")
+    @Transactional
+    Optional<Offer> findTheSame(Integer price, Integer bonusPercent, Integer bonus, String url, String marketId);
 }

@@ -2,104 +2,29 @@ package com.schegolevalex.mm.mmparser.parser;
 
 import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.entity.Product;
-import com.schegolevalex.mm.mmparser.entity.Seller;
-import com.schegolevalex.mm.mmparser.service.OfferService;
-import com.schegolevalex.mm.mmparser.service.SellerService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.*;
+import org.openqa.selenium.PageLoadStrategy;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-import java.time.Duration;
 import java.util.List;
-import java.util.Optional;
 
-@Service
-@RequiredArgsConstructor
+@Component
 @Slf4j
-@Transactional
-public class Parser {
-    private final ChromeOptions options = new ChromeOptions();
-    private final ProxyService proxyService;
-    private final SellerService sellerService;
-    private WebDriver driver;
+public abstract class Parser {
+    protected final ChromeOptions options = new ChromeOptions();
+    protected final ProxyService proxyService;
+    protected WebDriver driver;
 
-    public List<Offer> parseProduct(Product product) {
-        WebDriverWait wait10sec = new WebDriverWait(driver, Duration.ofSeconds(10));
-        proxyService.setProxy(options);
-        driver.get(product.getUrl() + "#?details_block=prices");
-
-        String productTitle = wait10sec
-                .until(ExpectedConditions.visibilityOfElementLocated(By.className("pdp-header__title_only-title")))
-                .getText();
-        product.setTitle(productTitle);
-
-        List<WebElement> webElements = waitForElementsIsVisible(wait10sec, By.cssSelector("div[itemtype=\"http://schema.org/Offer\"]"));
-
-        return webElements.stream().map(webElement -> parseOffer(webElement, product)).toList();
+    protected Parser(ProxyService proxyService) {
+        this.proxyService = proxyService;
     }
 
-    private Offer parseOffer(WebElement webElement, Product product) {
-        String sellerName = webElement.findElement(By.className("pdp-merchant-rating-block__merchant-name")).getText();
-        Double rating = Double.valueOf(webElement.findElement(By.className("pdp-merchant-rating-block__rating")).findElement(By.tagName("span")).getText());
-
-        Optional<Seller> maybeSeller = sellerService.findByNameAndRating(sellerName, rating);
-        Seller seller;
-
-        if (maybeSeller.isPresent()) {
-            seller = maybeSeller.get();
-            log.trace("Найден существующий продавец: {}", seller);
-        } else {
-            seller = new Seller();
-            seller.setName(sellerName);
-            seller.setRating(rating);
-            log.trace("Создан новый продавец: {}", seller);
-        }
-        seller.addProduct(product); // **************************************
-
-        Offer offer = new Offer();
-        offer.setSeller(seller);
-
-        try {
-            String tempBonusPercent = webElement.findElement(By.className("bonus-percent")).getText();
-            String bonusPercent = tempBonusPercent
-                    .substring(0, tempBonusPercent.length() - 1)
-                    .replaceAll(" ", "");
-            offer.setBonusPercent(Integer.valueOf(bonusPercent));
-
-            String bonus = webElement.findElement(By.className("bonus-amount")).getText().replaceAll(" ", "");
-            offer.setBonus(Integer.valueOf(bonus));
-        } catch (NoSuchElementException e) {
-            offer.setBonusPercent(0);
-            offer.setBonus(0);
-            log.error("Элементы с информацией о бонусах не найден");
-        } catch (NumberFormatException e) {
-            log.error("Не удалось преобразовать информацию в число: ", e);
-        }
-
-        String tempPrice = webElement.findElement(By.className("product-offer-price__amount")).getText();
-        String price = tempPrice.substring(0, tempPrice.length() - 2).replaceAll(" ", "");
-        offer.setPrice(Integer.valueOf(price));
-
-        return offer;
-    }
-
-    private List<WebElement> waitForElementsIsVisible(WebDriverWait wait, By locator) {
-        try {
-            return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(locator));
-        } catch (NoSuchElementException | TimeoutException e) {
-            return List.of();
-        }
-    }
+    public abstract List<Offer> parseProduct(Product product);
 
     @PostConstruct
     private void prepareOptions() {
@@ -118,11 +43,18 @@ public class Parser {
         driver = new ChromeDriver(options);
         driver.manage().window().maximize();
         String baseUrl = "https://megamarket.ru/";
+        log.info("Открываем главную страницу: {}", baseUrl);
         driver.get(baseUrl);
     }
 
     @PreDestroy
     private void closeDriver() {
         driver.quit();
+    }
+
+    protected void openProductUrl(String url) {
+        proxyService.setProxy(options);
+        log.info("Открываем страницу товара: {}", url);
+        driver.get(url + "#?details_block=prices");
     }
 }

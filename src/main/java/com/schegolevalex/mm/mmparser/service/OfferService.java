@@ -21,10 +21,12 @@ public class OfferService {
     public List<Offer> filterOffersWithDefaultParameters(List<Offer> offers) {
         return offers.stream().filter(offer -> {
             Integer priceBefore = offer.getPrice();
-            double bonusPercent = (offer.getBonusPercent() + 2) / 100.0;
+            double bonusPercent = offer.getBonusPercent() / 100.0;
             int promo = priceBefore > 110_000 ? 20_000 : 10_000;
 
-            boolean totalPrice = (priceBefore - promo - (priceBefore - promo) * bonusPercent) < 79_000;
+            double sberprime = priceBefore * bonusPercent > 2_000 ? 2_000 : (priceBefore * bonusPercent);
+
+            boolean totalPrice = (priceBefore - promo - (priceBefore - promo) * bonusPercent - sberprime) < 79_000;
             boolean scam = priceBefore > 100_000;
             return totalPrice && scam;
         }).toList();
@@ -32,11 +34,10 @@ public class OfferService {
 
     public boolean isPresent(Product product, Offer offer) {
         return offerRepository.findTheSame(offer.getPrice(),
-                        offer.getBonusPercent(),
-                        offer.getBonus(),
-                        product.getUrl(),
-                        offer.getSeller().getName(),
-                        offer.getSeller().getRating()).isPresent();
+                offer.getBonusPercent(),
+                offer.getBonus(),
+                product.getUrl(),
+                offer.getSeller().getMarketId()).isPresent();
     }
 
     public Offer save(Offer newOffer) {

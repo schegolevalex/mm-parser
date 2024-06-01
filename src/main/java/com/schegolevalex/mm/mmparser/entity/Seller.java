@@ -39,6 +39,12 @@ public class Seller {
     @Column(columnDefinition = "boolean default true")
     boolean isActive = true;
 
+    String ogrn;
+
+    String email;
+
+    String marketId;
+
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "seller_product",
             joinColumns = @JoinColumn(name = "seller_id"),

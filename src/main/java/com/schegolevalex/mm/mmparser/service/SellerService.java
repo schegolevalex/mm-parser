@@ -18,8 +18,12 @@ public class SellerService {
         return sellerRepository.findByName(sellerName);
     }
 
-    public Optional<Seller> findByNameAndRating(String sellerName, Double rating) {
-        return sellerRepository.findByNameAndRating(sellerName, rating);
+    public Optional<Seller> findByNameAndRating(String sellerName, Double rating, String ogrn) {
+        return sellerRepository.findByNameAndRatingAndOgrn(sellerName, rating, ogrn);
+    }
+
+    public Optional<Seller> findByMarketId(String marketId) {
+        return sellerRepository.findByMarketId(marketId);
     }
 
     public Seller save(Seller newSeller) {

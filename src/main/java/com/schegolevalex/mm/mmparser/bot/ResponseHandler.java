@@ -5,11 +5,11 @@ import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.parser.Parser;
 import com.schegolevalex.mm.mmparser.service.OfferService;
 import com.schegolevalex.mm.mmparser.service.ProductService;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.telegram.abilitybots.api.sender.SilentSender;
 import org.telegram.abilitybots.api.util.AbilityUtils;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -189,9 +189,10 @@ public class ResponseHandler {
         if (!offers.isEmpty())
             offers.forEach(offer -> {
                 Integer priceBefore = offer.getPrice();
+                double bonusPercent = offer.getBonusPercent() / 100.0;
                 int promo = priceBefore > 110_000 ? 20_000 : 10_000;
-                double bonusPercent = (offer.getBonusPercent() + 2) / 100.0;
-                int totalPrice = (int) Math.round(priceBefore - promo - (priceBefore - promo) * bonusPercent);
+                double sberprime = priceBefore * bonusPercent > 2_000 ? 2_000 : (priceBefore * bonusPercent);
+                int totalPrice = (int) Math.round(priceBefore - promo - (priceBefore - promo) * bonusPercent - sberprime);
 
                 String message = String.format(Message.OFFER,
                         totalPrice,

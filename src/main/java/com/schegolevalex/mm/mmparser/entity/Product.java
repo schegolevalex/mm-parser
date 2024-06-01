@@ -31,6 +31,8 @@ public class Product {
 
     String title;
 
+    String sku;
+
     @CreatedDate
     @Column(updatable = false)
     Instant createdAt;
