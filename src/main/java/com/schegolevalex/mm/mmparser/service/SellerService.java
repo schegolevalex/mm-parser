@@ -2,7 +2,6 @@ package com.schegolevalex.mm.mmparser.service;
 
 import com.schegolevalex.mm.mmparser.entity.Seller;
 import com.schegolevalex.mm.mmparser.repository.SellerRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

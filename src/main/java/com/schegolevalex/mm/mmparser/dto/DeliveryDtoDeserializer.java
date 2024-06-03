@@ -19,13 +19,26 @@ public class DeliveryDtoDeserializer extends StdDeserializer<DeliveryDto> {
 
     @Override
     public DeliveryDto deserialize(JsonParser parser, DeserializationContext ctx) throws IOException, JacksonException {
-        JsonNode offerNode = parser.getCodec().readTree(parser);
-
+        JsonNode deliveriesNode = parser.getCodec().readTree(parser);
         DeliveryDto deliveryDto = new DeliveryDto();
-        deliveryDto.setType(offerNode.path("displayName").asText());
-        deliveryDto.setDate(offerNode.path("displayDeliveryDate").asText());
-        deliveryDto.setPrice(offerNode.path("price").asInt());
-
+        for (JsonNode deliveryNode : deliveriesNode) {
+            if ("Доставка по клику".equals(deliveryNode.get("displayName").asText())) {
+                deliveryDto.setClickCourierDate(deliveryNode.get("displayDeliveryDate").asText());
+                deliveryDto.setClickCourierPrice(deliveryNode.get("price").asInt());
+            }
+            if ("Пункты выдачи".equals(deliveryNode.get("displayName").asText())) {
+                deliveryDto.setPickupDate(deliveryNode.get("displayDeliveryDate").asText());
+                deliveryDto.setPickupPrice(deliveryNode.get("price").asInt());
+            }
+            if ("Забрать в магазине".equals(deliveryNode.get("displayName").asText())) {
+                deliveryDto.setStoreDate(deliveryNode.get("displayDeliveryDate").asText());
+                deliveryDto.setStorePrice(deliveryNode.get("price").asInt());
+            }
+            if ("Доставка курьером продавца".equals(deliveryNode.get("displayName").asText())) {
+                deliveryDto.setCourierDate(deliveryNode.get("displayDeliveryDate").asText());
+                deliveryDto.setCourierPrice(deliveryNode.get("price").asInt());
+            }
+        }
         return deliveryDto;
     }
 }

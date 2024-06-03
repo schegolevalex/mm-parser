@@ -11,9 +11,15 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @JsonDeserialize(using = DeliveryDtoDeserializer.class)
 public class DeliveryDto {
-    String type;
+    String storeDate;
+    Integer storePrice;
 
-    String date;
+    String courierDate;
+    Integer courierPrice;
 
-    Integer price;
+    String clickCourierDate;
+    Integer clickCourierPrice;
+
+    String pickupDate;
+    Integer pickupPrice;
 }

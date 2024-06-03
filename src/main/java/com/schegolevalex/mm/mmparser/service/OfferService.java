@@ -1,5 +1,6 @@
 package com.schegolevalex.mm.mmparser.service;
 
+import com.schegolevalex.mm.mmparser.entity.Delivery;
 import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.repository.OfferRepository;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -34,13 +36,30 @@ public class OfferService {
     }
 
     public boolean isPresent(Product product, Offer offer) {
-        return offerRepository.findExist(offer.getPrice(),
-                        offer.getBonusPercent(),
-                        offer.getBonus(),
-                        product.getUrl(),
-                        offer.getSeller().getMarketId())
-                .filter(existOffer -> offer.getDeliveries().containsAll(existOffer.getDeliveries()))
-                .isPresent();
+        Delivery delivery = offer.getDelivery();
+        String marketId = offer.getSeller().getMarketId();
+        String clickCourierDate = delivery.getClickCourierDate();
+        Integer clickCourierPrice = delivery.getClickCourierPrice();
+        String pickupDate = delivery.getPickupDate();
+        Integer pickupPrice = delivery.getPickupPrice();
+        String storeDate = delivery.getStoreDate();
+        Integer storePrice = delivery.getStorePrice();
+        String courierDate = delivery.getCourierDate();
+        Integer courierPrice = delivery.getCourierPrice();
+        Optional<Offer> exist = offerRepository.findExist(offer.getPrice(),
+                offer.getBonusPercent(),
+                offer.getBonus(),
+                product.getUrl(),
+                marketId,
+                clickCourierDate,
+                clickCourierPrice,
+                pickupDate,
+                pickupPrice,
+                storeDate,
+                storePrice,
+                courierDate,
+                courierPrice);
+        return exist.isPresent();
     }
 
     public Offer save(Offer newOffer) {

@@ -92,13 +92,10 @@ public class JsonParser extends Parser {
                     }
                     seller.addProduct(product);
 
-                    List<Delivery> deliveries = new ArrayList<>();
-                    for (JsonNode deliveryNode : offerNode.get("delivery")) {
-                        deliveries.add(modelMapper.map(objectMapper.convertValue(deliveryNode, DeliveryDto.class), Delivery.class));
-                    }
+                    Delivery delivery = modelMapper.map(objectMapper.convertValue(offerNode.path("delivery"), DeliveryDto.class), Delivery.class);
 
                     offer.setSeller(seller);
-                    offer.addDeliveries(deliveries);
+                    offer.setDelivery(delivery);
                     offers.add(offer);
                 }
             }

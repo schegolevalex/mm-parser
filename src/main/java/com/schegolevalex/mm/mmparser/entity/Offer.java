@@ -9,9 +9,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -54,25 +51,6 @@ public class Offer {
     @EqualsAndHashCode.Exclude
     Seller seller;
 
-    @OneToMany(mappedBy = "offer"
-            , cascade = CascadeType.ALL
-            , fetch = FetchType.LAZY
-            , orphanRemoval = true)
-    @Builder.Default
-    @ToString.Exclude
-    Set<Delivery> deliveries = new HashSet<>();
-
-    public void addDelivery(Delivery delivery) {
-        deliveries.add(delivery);
-        delivery.setOffer(this);
-    }
-
-    public void addDeliveries(List<Delivery> deliveriesList) {
-        deliveriesList.forEach(this::addDelivery);
-    }
-
-    public void removeDelivery(Delivery delivery) {
-        deliveries.remove(delivery);
-        delivery.setOffer(null);
-    }
+    @Embedded
+    Delivery delivery;
 }

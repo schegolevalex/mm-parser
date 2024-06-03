@@ -1,12 +1,10 @@
 package com.schegolevalex.mm.mmparser.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Embeddable;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-@Entity
-@EntityListeners(AuditingEntityListener.class)
+@Embeddable
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 @AllArgsConstructor
@@ -16,19 +14,15 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @ToString
 @EqualsAndHashCode
 public class Delivery {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Exclude
-    Long id;
+    String storeDate;
+    Integer storePrice;
 
-    String type;
+    String courierDate;
+    Integer courierPrice;
 
-    String date;
+    String clickCourierDate;
+    Integer clickCourierPrice;
 
-    Integer price;
-
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    Offer offer;
+    String pickupDate;
+    Integer pickupPrice;
 }
