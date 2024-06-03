@@ -2,6 +2,7 @@ package com.schegolevalex.mm.mmparser.bot;
 
 import com.schegolevalex.mm.mmparser.config.BotConfiguration;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,7 +38,6 @@ public class ParserBot extends AbilityBot {
     }
 
     public Ability start() {
-        db.clear();
         return Ability.builder()
                 .name("start")
                 .info(Constant.Info.START)
@@ -69,5 +69,10 @@ public class ParserBot extends AbilityBot {
     @SneakyThrows
     private void setStartDescription() {
         execute(new SetMyDescription(Constant.Info.BOT_DESCRIPTION, "ru"));
+    }
+
+    @PreDestroy
+    private void clearDb() {
+        db.clear();
     }
 }
