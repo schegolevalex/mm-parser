@@ -43,6 +43,7 @@ public class Seller {
 
     String email;
 
+    @Column(unique = true)
     String marketId;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})

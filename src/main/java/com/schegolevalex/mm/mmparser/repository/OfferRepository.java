@@ -17,5 +17,7 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
             "and o.product.url = :url " +
             "and o.seller.marketId = :marketId")
     @Transactional
-    Optional<Offer> findTheSame(Integer price, Integer bonusPercent, Integer bonus, String url, String marketId);
+    Optional<Offer> findExist(Integer price, Integer bonusPercent, Integer bonus, String url, String marketId);
+
+    // todo сделать отдельный метод на проверку по Delivery
 }

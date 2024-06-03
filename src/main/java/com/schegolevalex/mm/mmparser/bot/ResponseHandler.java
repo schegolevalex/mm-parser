@@ -120,8 +120,6 @@ public class ResponseHandler {
     private void replyToLinkInput(Update update) {
         Long chatId = AbilityUtils.getChatId(update);
         String messageWithUrlRegexp = ".*(http(s)?://.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
-        String urlRegexp = "(http(s)?://.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
-        Pattern pattern = Pattern.compile(urlRegexp);
 
         if (update.getMessage().getText().equalsIgnoreCase(Button.BACK)) {
             context.popState(chatId);
@@ -131,24 +129,26 @@ public class ResponseHandler {
                     UserState.AWAITING_MAIN_PAGE_ACTION);
         } else if (update.getMessage().hasText()
                 && update.getMessage().getText().matches(messageWithUrlRegexp)) {
+            String urlRegexp = "(http(s)?://.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
+            Pattern pattern = Pattern.compile(urlRegexp);
             String userText = update.getMessage().getText();
             Matcher matcher = pattern.matcher(userText);
-            String productUrl = matcher.find() ? matcher.group() : "";
+            String productUrl = matcher.find() ? matcher.group() : ""; //todo: fix
             if (!productUrl.endsWith("/")) {
                 productUrl += "/";
             }
-            Product product = productService.saveAndFlush(Product.builder()
+            Product product = productService.save(Product.builder()
                     .url(productUrl)
                     .chatId(chatId)
                     .build());
-            List<Offer> offers = parser.parseProduct(product);
-            List<Offer> filteredOffers = offerService.filterOffersWithDefaultParameters(offers);
-
             sendMessageAndPutState(chatId,
                     Message.LINK_IS_ACCEPTED,
                     Keyboard.withMainPageActions(),
                     UserState.AWAITING_MAIN_PAGE_ACTION);
-            sendNotifies(filteredOffers, chatId);
+//            List<Offer> offers = parser.parseProduct(product);
+//            List<Offer> filteredOffers = offerService.filterOffersWithDefaultParameters(offers);
+//
+//            sendNotifies(filteredOffers, chatId);
         } else
             unexpectedMessage(chatId);
     }

@@ -37,9 +37,6 @@ public class OfferDtoDeserializer extends StdDeserializer<OfferDto> {
                 }
             }
         }
-
-        SellerDto sellerDto = new ObjectMapper().treeToValue(offerNode, SellerDto.class);
-
-        return new OfferDto(price, bonusPercent, bonus, sellerDto);
+        return new OfferDto(price, bonusPercent, bonus);
     }
 }

@@ -5,11 +5,12 @@ import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.repository.OfferRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-//@Transactional
+@Transactional
 @RequiredArgsConstructor
 public class OfferService {
     private final OfferRepository offerRepository;
@@ -33,11 +34,13 @@ public class OfferService {
     }
 
     public boolean isPresent(Product product, Offer offer) {
-        return offerRepository.findTheSame(offer.getPrice(),
-                offer.getBonusPercent(),
-                offer.getBonus(),
-                product.getUrl(),
-                offer.getSeller().getMarketId()).isPresent();
+        return offerRepository.findExist(offer.getPrice(),
+                        offer.getBonusPercent(),
+                        offer.getBonus(),
+                        product.getUrl(),
+                        offer.getSeller().getMarketId())
+                .filter(existOffer -> offer.getDeliveries().containsAll(existOffer.getDeliveries()))
+                .isPresent();
     }
 
     public Offer save(Offer newOffer) {

@@ -9,12 +9,11 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonDeserialize(using = OfferDtoDeserializer.class)
-public class OfferDto {
+@JsonDeserialize(using = DeliveryDtoDeserializer.class)
+public class DeliveryDto {
+    String type;
+
+    String date;
 
     Integer price;
-
-    Integer bonusPercent;
-
-    Integer bonus;
 }

@@ -4,7 +4,10 @@ import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.schegolevalex.mm.mmparser.dto.DeliveryDto;
 import com.schegolevalex.mm.mmparser.dto.OfferDto;
+import com.schegolevalex.mm.mmparser.dto.SellerDto;
+import com.schegolevalex.mm.mmparser.entity.Delivery;
 import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.entity.Seller;
@@ -52,13 +55,12 @@ public class JsonParser extends Parser {
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfElementLocated(By.tagName("html")));
 
         String page = driver.getPageSource();
-        saveFile(page);
+//        saveFile(page);
         String jsonString = getJsonString(Jsoup.parse(page));
 
         List<Offer> offers = new ArrayList<>();
-        JsonNode rootNode;
         try {
-            rootNode = objectMapper.readTree(jsonString);
+            JsonNode rootNode = objectMapper.readTree(jsonString);
             if (product.getTitle() == null || product.getTitle().isEmpty()) {
                 JsonPointer productTitlePointer = JsonPointer.compile("/hydratorState/PrefetchStore/componentsInitialState/catalog.details/mainInfo/name");
                 String productTitle = rootNode.at(productTitlePointer).asText();
@@ -77,27 +79,29 @@ public class JsonParser extends Parser {
             if (offersNode.isArray()) {
                 for (JsonNode offerNode : offersNode) {
                     Offer offer = modelMapper.map(objectMapper.convertValue(offerNode, OfferDto.class), Offer.class);
+                    Seller seller = modelMapper.map(objectMapper.convertValue(offerNode, SellerDto.class), Seller.class);
 
-                    Seller seller = offer.getSeller();
                     Optional<Seller> maybeExistSeller = sellerService.findByMarketId(seller.getMarketId());
-
                     if (maybeExistSeller.isPresent()) {
                         seller = maybeExistSeller.get();
                         offer.setSeller(seller);
                         log.info("Найден существующий продавец: {}", seller);
                     } else {
-//                        sellerService.save(seller); // ****************************************************************
+                        seller = sellerService.save(seller);
                         log.info("Создан новый продавец: {}", seller);
                     }
                     seller.addProduct(product);
 
+                    List<Delivery> deliveries = new ArrayList<>();
+                    for (JsonNode deliveryNode : offerNode.get("delivery")) {
+                        deliveries.add(modelMapper.map(objectMapper.convertValue(deliveryNode, DeliveryDto.class), Delivery.class));
+                    }
+
+                    offer.setSeller(seller);
+                    offer.addDeliveries(deliveries);
                     offers.add(offer);
                 }
             }
-
-            // todo проверять на существование Seller'а
-            // todo решить ошибку с detached Seller
-
         } catch (JsonProcessingException e) {
             log.error("Не удалось распарсить JSON", e);
             throw new RuntimeException(e);
