@@ -133,22 +133,21 @@ public class ResponseHandler {
             Pattern pattern = Pattern.compile(urlRegexp);
             String userText = update.getMessage().getText();
             Matcher matcher = pattern.matcher(userText);
-            String productUrl = matcher.find() ? matcher.group() : ""; //todo: fix
-            if (!productUrl.endsWith("/")) {
-                productUrl += "/";
-            }
-            Product product = productService.save(Product.builder()
-                    .url(productUrl)
-                    .chatId(chatId)
-                    .build());
-            sendMessageAndPutState(chatId,
-                    Message.LINK_IS_ACCEPTED,
-                    Keyboard.withMainPageActions(),
-                    UserState.AWAITING_MAIN_PAGE_ACTION);
-//            List<Offer> offers = parser.parseProduct(product);
-//            List<Offer> filteredOffers = offerService.filterOffersWithDefaultParameters(offers);
-//
-//            sendNotifies(filteredOffers, chatId);
+            if (matcher.find()) {
+                String productUrl = matcher.group();
+                if (!productUrl.endsWith("/")) {
+                    productUrl += "/";
+                }
+                productService.save(Product.builder()
+                        .url(productUrl)
+                        .chatId(chatId)
+                        .build());
+                sendMessageAndPutState(chatId,
+                        Message.LINK_IS_ACCEPTED,
+                        Keyboard.withMainPageActions(),
+                        UserState.AWAITING_MAIN_PAGE_ACTION);
+            } else
+                unexpectedMessage(chatId);
         } else
             unexpectedMessage(chatId);
     }
