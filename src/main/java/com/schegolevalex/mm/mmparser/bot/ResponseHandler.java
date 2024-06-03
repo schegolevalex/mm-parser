@@ -1,13 +1,15 @@
 package com.schegolevalex.mm.mmparser.bot;
 
-import com.schegolevalex.mm.mmparser.entity.Link;
 import com.schegolevalex.mm.mmparser.entity.Offer;
+import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.parser.Parser;
-import com.schegolevalex.mm.mmparser.repository.LinkRepository;
+import com.schegolevalex.mm.mmparser.service.OfferService;
+import com.schegolevalex.mm.mmparser.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.telegram.abilitybots.api.sender.SilentSender;
 import org.telegram.abilitybots.api.util.AbilityUtils;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -25,18 +27,22 @@ import static com.schegolevalex.mm.mmparser.bot.Constant.Message;
 
 @Component
 @Slf4j
+@Transactional
 public class ResponseHandler {
     private final SilentSender silent;
-    private final LinkRepository linkRepository;
+    private final OfferService offerService;
+    private final ProductService productService;
     private final Context context;
     private final Parser parser;
 
-    public ResponseHandler(@Lazy SilentSender silent,
-                           LinkRepository linkRepository,
-                           Context context,
-                           Parser parser) {
+    public ResponseHandler(@Lazy SilentSender silent
+            , OfferService offerService
+            , ProductService productService
+            , Context context
+            , Parser parser) {
         this.silent = silent;
-        this.linkRepository = linkRepository;
+        this.offerService = offerService;
+        this.productService = productService;
         this.context = context;
         this.parser = parser;
     }
@@ -88,19 +94,19 @@ public class ResponseHandler {
                     Keyboard.withBackButton(),
                     UserState.AWAITING_LINK_INPUT);
         } else if (update.getMessage().getText().equalsIgnoreCase(Button.MY_LINKS)) {
-            List<Link> links = linkRepository.findAllByChatId(chatId);
+            List<Product> products = productService.findAllByChatId(chatId);
 
             StringBuilder text = new StringBuilder();
             AtomicInteger num = new AtomicInteger(1);
 
-            if (links.isEmpty())
+            if (products.isEmpty())
                 text.append(Message.LINKS_IS_EMPTY);
             else
-                links.stream()
-                        .sorted((link1, link2) -> link2.getCreatedAt().compareTo(link1.getCreatedAt()))
-                        .forEach(link -> text.append(num.getAndIncrement())
+                products.stream()
+                        .sorted((product1, product2) -> product2.getCreatedAt().compareTo(product1.getCreatedAt()))
+                        .forEach(product -> text.append(num.getAndIncrement())
                                 .append(". ")
-                                .append(link.getTitle())
+                                .append(product.getTitle())
                                 .append("\n"));
 
             sendMessageAndPutState(chatId,
@@ -114,8 +120,6 @@ public class ResponseHandler {
     private void replyToLinkInput(Update update) {
         Long chatId = AbilityUtils.getChatId(update);
         String messageWithUrlRegexp = ".*(http(s)?://.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
-        String urlRegexp = "(http(s)?://.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
-        Pattern pattern = Pattern.compile(urlRegexp);
 
         if (update.getMessage().getText().equalsIgnoreCase(Button.BACK)) {
             context.popState(chatId);
@@ -125,20 +129,26 @@ public class ResponseHandler {
                     UserState.AWAITING_MAIN_PAGE_ACTION);
         } else if (update.getMessage().hasText()
                 && update.getMessage().getText().matches(messageWithUrlRegexp)) {
+            String urlRegexp = "(http(s)?://.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
+            Pattern pattern = Pattern.compile(urlRegexp);
             String userText = update.getMessage().getText();
             Matcher matcher = pattern.matcher(userText);
-            String url = matcher.find() ? matcher.group() : "";
-
-            Link productLink = linkRepository.saveAndFlush(Link.builder()
-                    .url(url)
+            String productUrl = matcher.find() ? matcher.group() : ""; //todo: fix
+            if (!productUrl.endsWith("/")) {
+                productUrl += "/";
+            }
+            Product product = productService.save(Product.builder()
+                    .url(productUrl)
                     .chatId(chatId)
                     .build());
-            List<Offer> offers = parser.parseLink(productLink);
             sendMessageAndPutState(chatId,
                     Message.LINK_IS_ACCEPTED,
                     Keyboard.withMainPageActions(),
                     UserState.AWAITING_MAIN_PAGE_ACTION);
-            sendOffers(offers, chatId);
+//            List<Offer> offers = parser.parseProduct(product);
+//            List<Offer> filteredOffers = offerService.filterOffersWithDefaultParameters(offers);
+//
+//            sendNotifies(filteredOffers, chatId);
         } else
             unexpectedMessage(chatId);
     }
@@ -175,13 +185,14 @@ public class ResponseHandler {
         return context.userIsActive(chatId);
     }
 
-    private void sendOffers(List<Offer> offers, Long chatId) {
+    protected void sendNotifies(List<Offer> offers, Long chatId) {
         if (!offers.isEmpty())
             offers.forEach(offer -> {
                 Integer priceBefore = offer.getPrice();
+                double bonusPercent = offer.getBonusPercent() / 100.0;
                 int promo = priceBefore > 110_000 ? 20_000 : 10_000;
-                double bonusPercent = (offer.getBonusPercent() + 2) / 100.0;
-                int totalPrice = (int) Math.round(priceBefore - promo - (priceBefore - promo) * bonusPercent);
+                double sberprime = priceBefore * bonusPercent > 2_000 ? 2_000 : (priceBefore * bonusPercent);
+                int totalPrice = (int) Math.round(priceBefore - promo - (priceBefore - promo) * bonusPercent - sberprime);
 
                 String message = String.format(Message.OFFER,
                         totalPrice,
@@ -189,7 +200,7 @@ public class ResponseHandler {
                         offer.getPrice(),
                         offer.getBonusPercent() + 2,
                         offer.getBonus(),
-                        offer.getLink().getUrl());
+                        offer.getProduct().getUrl());
                 silent.send(message, chatId);
             });
     }
@@ -204,13 +215,17 @@ public class ResponseHandler {
         context.putState(chatId, userState);
     }
 
-    //    @PostConstruct
-//    @Transactional(value = Transactional.TxType.REQUIRED)
     @Scheduled(cron = "0 */10 * * * *", zone = "Europe/Moscow")
     protected void parseAndNotify() {
-        linkRepository.findAllByIsActive(true).forEach(productLink -> {
-            List<Offer> offers = parser.parseLink(productLink);
-            sendOffers(offers, productLink.getChatId());
+        productService.findAllByIsActive(true).forEach(product -> {
+            List<Offer> parsedOffers = parser.parseProduct(product);
+            List<Offer> newOffers = parsedOffers.stream()
+                    .filter(offer -> !offerService.isPresent(product, offer))
+                    .toList();
+            newOffers.forEach(product::addOffer);
+            List<Offer> filteredOffers = offerService.filterOffersWithDefaultParameters(newOffers);
+            if (!filteredOffers.isEmpty())
+                sendNotifies(filteredOffers, product.getChatId());
         });
     }
 }

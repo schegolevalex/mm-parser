@@ -5,26 +5,26 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode
 public class Offer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    Seller seller;
+    Long id;
 
     Integer price;
 
@@ -38,18 +38,19 @@ public class Offer {
     @Column(updatable = false)
     Instant createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE/*, CascadeType.PERSIST*/})
+    @LastModifiedDate
+    Instant updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    Link link;
+    Product product;
 
-    @Override
-    public String toString() {
-        return "Предложение:" +
-                "\n- продавец: \"" + seller.getName() + "\"" +
-                "\n- цена: " + price +
-                "\n- процент бонусов: " + bonusPercent +
-                "\n- количество бонусов: " + bonus +
-                "\n- ссылка: " + link + ")";
-    }
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    Seller seller;
+
+    @Embedded
+    Delivery delivery;
 }

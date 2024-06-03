@@ -23,7 +23,7 @@ public class ProxyService {
 
     public void setProxy(ChromeOptions options) {
         int extNumber = new Random().nextInt(extensions.size());
-        log.info("******************** Выбран {} прокси", extNumber + 1);
+        log.info("Выбран прокси-сервер №{}", extNumber + 1);
         options.addExtensions(extensions.get(extNumber));
     }
 

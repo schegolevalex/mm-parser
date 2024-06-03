@@ -4,18 +4,22 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class Seller {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,24 +33,37 @@ public class Seller {
     @Column(updatable = false)
     Instant createdAt;
 
-    @OneToMany(mappedBy = "seller"
-            , cascade = CascadeType.ALL
-            , fetch = FetchType.LAZY
-            , orphanRemoval = true)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    List<Offer> offers = new ArrayList<>();
+    @LastModifiedDate
+    Instant updatedAt;
 
     @Column(columnDefinition = "boolean default true")
     boolean isActive = true;
 
-    public void addOffer(Offer offer) {
-        offers.add(offer);
-        offer.setSeller(this);
+    String ogrn;
+
+    String email;
+
+    @Column(unique = true)
+    String marketId;
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "seller_product",
+            joinColumns = @JoinColumn(name = "seller_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id"))
+    @ToString.Exclude
+    Set<Product> products = new HashSet<>();
+
+    public void addProduct(Product product) {
+        products.add(product);
+        product.getSellers().add(this);
     }
 
-    public void removeOffer(Offer offer) {
-        offers.remove(offer);
-        offer.setSeller(null);
+    public void addProducts(List<Product> productList) {
+        productList.forEach(this::addProduct);
+    }
+
+    public void removeProduct(Product product) {
+        products.remove(product);
+        product.getSellers().remove(this);
     }
 }
