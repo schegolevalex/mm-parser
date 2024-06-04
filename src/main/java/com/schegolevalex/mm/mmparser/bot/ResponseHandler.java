@@ -180,8 +180,8 @@ public class ResponseHandler {
         silent.execute(sendMessage);
     }
 
-    public boolean userIsActive(Long chatId) {
-        return context.userIsActive(chatId);
+    public boolean isActiveUser(Long chatId) {
+        return context.isActiveUser(chatId);
     }
 
     protected void sendNotifies(List<Offer> offers, Long chatId) {
@@ -214,7 +214,7 @@ public class ResponseHandler {
         context.putState(chatId, userState);
     }
 
-    @Scheduled(cron = "0 */10 * * * *", zone = "Europe/Moscow")
+    @Scheduled(cron = "0 */1 * * * *", zone = "Europe/Moscow")
     protected void parseAndNotify() {
         productService.findAllByIsActive(true).forEach(product -> {
             List<Offer> parsedOffers = parser.parseProduct(product);

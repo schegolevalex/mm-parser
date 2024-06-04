@@ -49,7 +49,7 @@ public class ParserBot extends AbilityBot {
 
     public Reply replyToButtons() {
         BiConsumer<BaseAbilityBot, Update> action = (bot, upd) -> responseHandler.replyToButtons(upd);
-        return Reply.of(action, Flag.TEXT, upd -> responseHandler.userIsActive(getChatId(upd)));
+        return Reply.of(action, Flag.TEXT, upd -> responseHandler.isActiveUser(getChatId(upd)));
     }
 
     @Override

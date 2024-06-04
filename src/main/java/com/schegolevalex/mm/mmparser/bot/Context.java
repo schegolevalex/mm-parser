@@ -24,7 +24,7 @@ public class Context {
         return chatStates.get(chatId).pop();
     }
 
-    public boolean userIsActive(Long chatId) {
+    public boolean isActiveUser(Long chatId) {
         return chatStates.containsKey(chatId);
     }
 }
