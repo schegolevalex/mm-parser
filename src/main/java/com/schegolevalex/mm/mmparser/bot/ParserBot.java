@@ -3,14 +3,19 @@ package com.schegolevalex.mm.mmparser.bot;
 import com.schegolevalex.mm.mmparser.config.BotConfiguration;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.telegram.abilitybots.api.bot.AbilityBot;
-import org.telegram.abilitybots.api.bot.BaseAbilityBot;
-import org.telegram.abilitybots.api.objects.Ability;
-import org.telegram.abilitybots.api.objects.Flag;
-import org.telegram.abilitybots.api.objects.Reply;
+import org.telegram.telegrambots.abilitybots.api.bot.AbilityBot;
+import org.telegram.telegrambots.abilitybots.api.bot.BaseAbilityBot;
+import org.telegram.telegrambots.abilitybots.api.objects.Ability;
+import org.telegram.telegrambots.abilitybots.api.objects.Flag;
+import org.telegram.telegrambots.abilitybots.api.objects.Reply;
+import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
+import org.telegram.telegrambots.longpolling.BotSession;
+import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer;
+import org.telegram.telegrambots.longpolling.starter.AfterBotRegistration;
+import org.telegram.telegrambots.longpolling.starter.SpringLongPollingBot;
+import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.description.SetMyDescription;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -20,21 +25,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import static org.telegram.abilitybots.api.objects.Locality.ALL;
-import static org.telegram.abilitybots.api.objects.Privacy.PUBLIC;
-import static org.telegram.abilitybots.api.util.AbilityUtils.getChatId;
+import static org.telegram.telegrambots.abilitybots.api.objects.Locality.ALL;
+import static org.telegram.telegrambots.abilitybots.api.objects.Privacy.PUBLIC;
+import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
-public class ParserBot extends AbilityBot {
+public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer {
 
-    private final Long creatorId;
     private final ResponseHandler responseHandler;
+    private final BotConfiguration botConfiguration;
 
     @Autowired
     public ParserBot(BotConfiguration botConfiguration, ResponseHandler responseHandler) {
-        super(botConfiguration.getBotToken(), botConfiguration.getBotUsername());
-        this.creatorId = botConfiguration.getCreatorId();
+        super(new OkHttpTelegramClient(botConfiguration.getBotToken()), botConfiguration.getBotUsername());
         this.responseHandler = responseHandler;
+        this.botConfiguration = botConfiguration;
     }
 
     public Ability start() {
@@ -54,25 +59,38 @@ public class ParserBot extends AbilityBot {
 
     @Override
     public long creatorId() {
-        return this.creatorId;
+        return botConfiguration.getCreatorId();
     }
 
     @PostConstruct
-    @SneakyThrows
     private void setMyCommands() {
         List<BotCommand> botCommands = new ArrayList<>();
         botCommands.add(new BotCommand("start", Constant.Info.START));
-        execute(new SetMyCommands(botCommands, null, null));
+        silent.execute(new SetMyCommands(botCommands, null, null));
     }
 
     @PostConstruct
-    @SneakyThrows
     private void setStartDescription() {
-        execute(new SetMyDescription(Constant.Info.BOT_DESCRIPTION, "ru"));
+        silent.execute(new SetMyDescription(Constant.Info.BOT_DESCRIPTION, "ru"));
     }
 
     @PreDestroy
     private void clearDb() {
         db.clear();
+    }
+
+    @Override
+    public String getBotToken() {
+        return botConfiguration.getBotToken();
+    }
+
+    @Override
+    public LongPollingUpdateConsumer getUpdatesConsumer() {
+        return this;
+    }
+
+    @AfterBotRegistration
+    public void afterRegistration(BotSession botSession) {
+        this.onRegister();
     }
 }

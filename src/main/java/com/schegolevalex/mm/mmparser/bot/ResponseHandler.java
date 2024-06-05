@@ -10,8 +10,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.telegram.abilitybots.api.sender.SilentSender;
-import org.telegram.abilitybots.api.util.AbilityUtils;
+import org.telegram.telegrambots.abilitybots.api.sender.SilentSender;
+import org.telegram.telegrambots.abilitybots.api.util.AbilityUtils;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
@@ -166,18 +166,18 @@ public class ResponseHandler {
     }
 
     private void unexpectedMessage(long chatId) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(chatId);
-        sendMessage.setText(Message.WRONG_INPUT);
-        silent.execute(sendMessage);
+        silent.execute(SendMessage.builder()
+                .chatId(chatId)
+                .text(Message.WRONG_INPUT)
+                .build());
     }
 
     private void stopChat(long chatId) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(chatId);
-        sendMessage.setText(Message.BYE);
-        sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
-        silent.execute(sendMessage);
+        silent.execute(SendMessage.builder()
+                .chatId(chatId)
+                .text(Message.BYE)
+                .replyMarkup(new ReplyKeyboardRemove(true))
+                .build());
     }
 
     public boolean isActiveUser(Long chatId) {
