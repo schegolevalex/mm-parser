@@ -42,3 +42,4 @@ build/
 /schegolev_test_bot
 /.attach_*
 /output
+/.fuse*
