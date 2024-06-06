@@ -4,7 +4,8 @@ public interface Constant {
     interface Info {
         //        String CHAT_STATES = "chatStates";
         String BOT_DESCRIPTION = "mm-bot";
-        String START = "начало работы";
+        String START = "начать работы";
+        String STOP = "завершить работу";
     }
 
     interface Message {
