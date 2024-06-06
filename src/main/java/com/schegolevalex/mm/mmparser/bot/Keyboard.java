@@ -12,13 +12,17 @@ public class Keyboard {
         KeyboardRow row = new KeyboardRow();
         row.add(Constant.Button.ADD_LINK);
         row.add(Constant.Button.MY_LINKS);
-        return new ReplyKeyboardMarkup(List.of(row));
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(List.of(row));
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        return replyKeyboardMarkup;
     }
 
     public static ReplyKeyboard withBackButton() {
         KeyboardRow row = new KeyboardRow();
         row.add(Constant.Button.BACK);
-        return new ReplyKeyboardMarkup(List.of(row));
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(List.of(row));
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        return replyKeyboardMarkup;
     }
 
     public static ReplyKeyboard withOkButton() {
