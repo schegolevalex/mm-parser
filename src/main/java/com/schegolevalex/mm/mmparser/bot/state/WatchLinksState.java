@@ -3,30 +3,58 @@ package com.schegolevalex.mm.mmparser.bot.state;
 import com.schegolevalex.mm.mmparser.bot.Constant;
 import com.schegolevalex.mm.mmparser.bot.Keyboard;
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
+import com.schegolevalex.mm.mmparser.entity.Product;
+import com.schegolevalex.mm.mmparser.service.ProductService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
 public class WatchLinksState extends AbstractState {
-    public WatchLinksState(@Lazy ParserBot bot) {
+    private final ProductService productService;
+
+    public WatchLinksState(@Lazy ParserBot bot, ProductService productService) {
         super(bot);
+        this.productService = productService;
+    }
+
+    @Override
+    public void route(Update update) {
+        Long chatId = getChatId(update);
+        switch (update.getMessage().getText()) {
+            case (Constant.Button.BACK) -> context.popState(chatId);
+            default -> bot.unexpectedMessage(chatId);
+        }
     }
 
     @Override
     public void reply(Update update) {
         Long chatId = getChatId(update);
+        List<Product> products = productService.findAllByChatId(chatId);
 
-        if (update.getMessage().getText().equalsIgnoreCase(Constant.Button.BACK)) {
-            bot.getContext().popState(chatId);
-            bot.sendMessageAndPutState(chatId,
-                    Constant.Message.CHOOSE_MAIN_PAGE_ACTION,
-                    Keyboard.withMainPageActions(),
-                    BotState.MAIN_PAGE_ACTION);
-        } else
-            bot.unexpectedMessage(chatId);
+        StringBuilder text = new StringBuilder();
+        AtomicInteger num = new AtomicInteger(1);
+
+        if (products.isEmpty())
+            text.append(Constant.Message.LINKS_IS_EMPTY);
+        else
+            products.stream()
+                    .sorted((product1, product2) -> product2.getCreatedAt().compareTo(product1.getCreatedAt()))
+                    .forEach(product -> text.append(num.getAndIncrement())
+                            .append(". ")
+                            .append(product.getTitle())
+                            .append("\n"));
+        bot.getSilent().execute(SendMessage.builder()
+                .chatId(chatId)
+                .text(text.toString())
+                .replyMarkup(Keyboard.withBackButton())
+                .build());
     }
 
     @Override

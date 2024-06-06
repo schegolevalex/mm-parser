@@ -9,7 +9,7 @@ public interface Constant {
     }
 
     interface Message {
-        String CHOOSE_MAIN_PAGE_ACTION = "Выберите действие:";
+        String CHOOSE_ACTION = "Выберите действие:";
         String SUGGESTION_TO_LINK_INPUT = "Введите ссылку:";
         String LINKS_IS_EMPTY = "Вы еще не добавили ни одну ссылку";
         String WELCOME = "Привет, начинаем?";
@@ -23,15 +23,22 @@ public interface Constant {
                 - процент бонусов: %d%%\n
                 - количество бонусов: %d\n
                 - ссылка: %s""";
+        String CHOOSE_SETTINGS = "Что настроим?";
+        String PROMOS_IS_EMPTY = "Список промокодов пуст";
     }
 
     interface Button {
-        String MY_LINKS = "📝 Мои ссылки";
-        String ADD_LINK = "➕ Добавить ссылку";
-        String BACK = "⬅ Назад";
-        String MAIN_PAGE = "🏠 На главную";
+        String MY_LINKS = "📝 мои ссылки";
+        String ADD_LINK = "➕ добавить ссылку";
+        String BACK = "⬅ назад";
+        String MAIN_PAGE = "🏠 на главную";
         String OK = "OK";
-        String START_CONVERSATION = "Начинаем";
+        String START_CONVERSATION = "начинаем";
+        String SETTINGS = "⚙️ настройки";
+        String PROMOS_SETTINGS = "🟢 промокоды";
+        String CASHBACK_SETTINGS = "🔵 кэшбэк Сберпрайм";
+        String ADD_PROMO = "➕ добавить промокод";
+        String MY_PROMOS = "📝 мои промокоды";
 
 //        String EDIT_REMINDER_TEXT = "✏️ Изменить текст";
 //        String EDIT_REMINDER_DATE = "📝 Изменить дату";

@@ -11,9 +11,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
-public class MainPageActionState extends AbstractState {
-
-    public MainPageActionState(@Lazy ParserBot bot) {
+public class SettingsState extends AbstractState {
+    public SettingsState(@Lazy ParserBot bot) {
         super(bot);
     }
 
@@ -21,9 +20,9 @@ public class MainPageActionState extends AbstractState {
     public void route(Update update) {
         Long chatId = getChatId(update);
         switch (update.getMessage().getText()) {
-            case (Constant.Button.ADD_LINK) -> context.putState(chatId, BotState.SUGGESTION_TO_INPUT_LINK);
-            case (Constant.Button.MY_LINKS) -> context.putState(chatId, BotState.WATCH_LINKS);
-            case (Constant.Button.SETTINGS) -> context.putState(chatId, BotState.SETTINGS);
+            case (Constant.Button.PROMOS_SETTINGS) -> context.putState(chatId, BotState.PROMOS_SETTINGS);
+            case (Constant.Button.CASHBACK_SETTINGS) -> context.putState(chatId, BotState.CASHBACK_SETTINGS);
+            case (Constant.Button.BACK) -> context.popState(chatId);
             default -> bot.unexpectedMessage(chatId);
         }
     }
@@ -32,13 +31,13 @@ public class MainPageActionState extends AbstractState {
     public void reply(Update update) {
         bot.getSilent().execute(SendMessage.builder()
                 .chatId(getChatId(update))
-                .text(Constant.Message.CHOOSE_ACTION)
-                .replyMarkup(Keyboard.withMainPageActions())
+                .text(Constant.Message.CHOOSE_SETTINGS)
+                .replyMarkup(Keyboard.withSettings())
                 .build());
     }
 
     @Override
     public BotState getType() {
-        return BotState.MAIN_PAGE_ACTION;
+        return BotState.SETTINGS;
     }
 }

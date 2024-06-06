@@ -18,9 +18,7 @@ import org.telegram.telegrambots.abilitybots.api.objects.Ability;
 import org.telegram.telegrambots.abilitybots.api.objects.Flag;
 import org.telegram.telegrambots.abilitybots.api.objects.Reply;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
-import org.telegram.telegrambots.longpolling.BotSession;
 import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer;
-import org.telegram.telegrambots.longpolling.starter.AfterBotRegistration;
 import org.telegram.telegrambots.longpolling.starter.SpringLongPollingBot;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
@@ -68,10 +66,11 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                 .info(Constant.Info.START)
                 .locality(ALL)
                 .privacy(PUBLIC)
-                .action(ctx -> sendMessageAndPutState(getChatId(ctx.update()),
-                        Constant.Message.CHOOSE_MAIN_PAGE_ACTION,
-                        Keyboard.withMainPageActions(),
-                        BotState.MAIN_PAGE_ACTION))
+                .action(ctx -> {
+                    context.putState(getChatId(ctx.update()), BotState.NEW_STATE);
+                    context.peekState(getChatId(ctx.update())).route(ctx.update());
+                    context.peekState(getChatId(ctx.update())).reply(ctx.update());
+                })
                 .build();
     }
 
@@ -90,7 +89,10 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
     }
 
     public Reply replyToButtons() {
-        return Reply.of((bot, upd) -> context.peekState(getChatId(upd)).reply(upd),
+        return Reply.of((bot, upd) -> {
+                    context.peekState(getChatId(upd)).route(upd);
+                    context.peekState(getChatId(upd)).reply(upd);
+                },
                 Flag.TEXT,
                 update -> context.isActiveUser(getChatId(update)),
                 update -> !update.getMessage().getText().startsWith("/"));

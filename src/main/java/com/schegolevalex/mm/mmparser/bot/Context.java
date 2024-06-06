@@ -2,7 +2,7 @@ package com.schegolevalex.mm.mmparser.bot;
 
 import com.schegolevalex.mm.mmparser.bot.state.AbstractState;
 import com.schegolevalex.mm.mmparser.bot.state.BotState;
-import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -11,10 +11,13 @@ import java.util.Map;
 import java.util.Stack;
 
 @Component
-@RequiredArgsConstructor
 public class Context {
     private final List<AbstractState> possibleStates;
     private final Map<Long, Stack<AbstractState>> chatStates = new HashMap<>();
+
+    public Context(@Lazy List<AbstractState> possibleStates) {
+        this.possibleStates = possibleStates;
+    }
 
     public boolean putState(Long chatId, BotState botState) {
         return chatStates.computeIfAbsent(chatId, k -> new Stack<>()).add(findState(botState));
