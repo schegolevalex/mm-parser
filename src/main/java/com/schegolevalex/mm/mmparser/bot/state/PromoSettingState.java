@@ -11,8 +11,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
-public class SettingsState extends AbstractState {
-    public SettingsState(@Lazy ParserBot bot) {
+public class PromoSettingState extends AbstractState {
+    public PromoSettingState(@Lazy ParserBot bot) {
         super(bot);
     }
 
@@ -20,8 +20,8 @@ public class SettingsState extends AbstractState {
     public void route(Update update) {
         Long chatId = getChatId(update);
         switch (update.getMessage().getText()) {
-            case (Constant.Button.PROMOS_SETTINGS) -> context.putState(chatId, BotState.PROMOS_SETTINGS);
-            case (Constant.Button.CASHBACK_SETTINGS) -> context.putState(chatId, BotState.CASHBACK_SETTINGS);
+            case (Constant.Button.ADD_PROMO) -> context.putState(chatId, BotState.ADD_PROMO);
+            case (Constant.Button.MY_PROMOS) -> context.putState(chatId, BotState.WATCH_PROMOS);
             case (Constant.Button.BACK) -> context.popState(chatId);
             default -> context.putState(chatId, BotState.UNEXPECTED);
         }
@@ -31,13 +31,13 @@ public class SettingsState extends AbstractState {
     public void reply(Update update) {
         bot.getSilent().execute(SendMessage.builder()
                 .chatId(getChatId(update))
-                .text(Constant.Message.CHOOSE_SETTINGS)
-                .replyMarkup(Keyboard.withSettings())
+                .text(Constant.Message.CHOOSE_ACTION)
+                .replyMarkup(Keyboard.withPromoSettingsActions())
                 .build());
     }
 
     @Override
     public BotState getType() {
-        return BotState.SETTINGS;
+        return BotState.PROMOS_SETTINGS;
     }
 }

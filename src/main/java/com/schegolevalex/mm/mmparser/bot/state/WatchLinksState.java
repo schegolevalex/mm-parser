@@ -29,7 +29,7 @@ public class WatchLinksState extends AbstractState {
         Long chatId = getChatId(update);
         switch (update.getMessage().getText()) {
             case (Constant.Button.BACK) -> context.popState(chatId);
-            default -> bot.unexpectedMessage(chatId);
+            default -> context.putState(chatId, BotState.UNEXPECTED);
         }
     }
 

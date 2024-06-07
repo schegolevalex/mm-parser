@@ -66,4 +66,21 @@ public class Keyboard {
         replyKeyboardMarkup.setResizeKeyboard(true);
         return replyKeyboardMarkup;
     }
+
+    public static ReplyKeyboard withCashbackLevels() {
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add("0%");
+        row1.add("2%");
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add("5%");
+        row2.add("7%");
+        KeyboardRow row3 = new KeyboardRow();
+        row3.add("9%");
+        row3.add("12%");
+        KeyboardRow row4 = new KeyboardRow();
+        row4.add(Constant.Button.BACK);
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(List.of(row1, row2, row3, row4));
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        return replyKeyboardMarkup;
+    }
 }

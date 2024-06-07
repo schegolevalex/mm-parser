@@ -24,7 +24,7 @@ public class MainPageActionState extends AbstractState {
             case (Constant.Button.ADD_LINK) -> context.putState(chatId, BotState.SUGGESTION_TO_INPUT_LINK);
             case (Constant.Button.MY_LINKS) -> context.putState(chatId, BotState.WATCH_LINKS);
             case (Constant.Button.SETTINGS) -> context.putState(chatId, BotState.SETTINGS);
-            default -> bot.unexpectedMessage(chatId);
+            default -> context.putState(chatId, BotState.UNEXPECTED);
         }
     }
 

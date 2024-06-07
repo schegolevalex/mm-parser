@@ -29,7 +29,7 @@ public class SuggestionToInputLinkState extends AbstractState {
         } else if (userText.matches(MESSAGE_WITH_URL_REGEXP)) {
             context.putState(chatId, BotState.INPUT_LINK);
         } else
-            bot.unexpectedMessage(chatId);
+            context.putState(chatId, BotState.UNEXPECTED);
     }
 
     @Override

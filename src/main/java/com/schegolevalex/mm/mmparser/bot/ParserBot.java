@@ -1,6 +1,5 @@
 package com.schegolevalex.mm.mmparser.bot;
 
-import com.schegolevalex.mm.mmparser.bot.state.BotState;
 import com.schegolevalex.mm.mmparser.config.BotConfiguration;
 import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.parser.Parser;
@@ -25,7 +24,6 @@ import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.description.SetMyDescription;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 
 import java.util.ArrayList;
@@ -67,7 +65,6 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                 .locality(ALL)
                 .privacy(PUBLIC)
                 .action(ctx -> {
-                    context.putState(getChatId(ctx.update()), BotState.NEW_STATE);
                     context.peekState(getChatId(ctx.update())).route(ctx.update());
                     context.peekState(getChatId(ctx.update())).reply(ctx.update());
                 })
@@ -98,13 +95,6 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                 update -> !update.getMessage().getText().startsWith("/"));
     }
 
-    public void unexpectedMessage(long chatId) {
-        silent.execute(SendMessage.builder()
-                .chatId(chatId)
-                .text(Constant.Message.WRONG_INPUT)
-                .build());
-    }
-
     private void sendNotifies(List<Offer> offers, Long chatId) {
         if (!offers.isEmpty())
             offers.forEach(offer -> {
@@ -125,17 +115,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
             });
     }
 
-    public void sendMessageAndPutState(Long chatId, String message, ReplyKeyboard keyboard, BotState botState) {
-        SendMessage sendMessage = SendMessage.builder()
-                .chatId(chatId)
-                .text(message)
-                .build();
-        if (keyboard != null) sendMessage.setReplyMarkup(keyboard);
-        silent.execute(sendMessage);
-        context.putState(chatId, botState);
-    }
-
-    @Scheduled(cron = "0 */10 * * * *", zone = "Europe/Moscow")
+    @Scheduled(cron = "0 */1 * * * *", zone = "Europe/Moscow")
     protected void parseAndNotify() {
         productService.findAllByIsActive(true).forEach(product -> {
             List<Offer> parsedOffers = parser.parseProduct(product);

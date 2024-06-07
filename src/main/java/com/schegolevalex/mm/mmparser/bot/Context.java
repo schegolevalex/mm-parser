@@ -19,16 +19,18 @@ public class Context {
         this.possibleStates = possibleStates;
     }
 
-    public boolean putState(Long chatId, BotState botState) {
-        return chatStates.computeIfAbsent(chatId, k -> new Stack<>()).add(findState(botState));
+    public void putState(Long chatId, BotState botState) {
+        Stack<AbstractState> stack = getStateStack(chatId);
+        if (stack.peek().getType() != botState)
+            stack.push(findState(botState));
     }
 
     public AbstractState peekState(Long chatId) {
-        return chatStates.get(chatId).peek();
+        return getStateStack(chatId).peek();
     }
 
     public AbstractState popState(Long chatId) {
-        return chatStates.get(chatId).pop();
+        return getStateStack(chatId).pop();
     }
 
     public boolean isActiveUser(Long chatId) {
@@ -41,5 +43,16 @@ public class Context {
                 .filter(state -> state.getType().equals(botState))
                 .findFirst()
                 .orElse(null);
+    }
+
+    private Stack<AbstractState> getStateStack(Long chatId) {
+        Stack<AbstractState> stack;
+        if (!chatStates.containsKey(chatId)) {
+            stack = new Stack<>();
+            stack.push(findState(BotState.NEW_STATE));
+            chatStates.put(chatId, stack);
+        } else
+            stack = chatStates.get(chatId);
+        return stack;
     }
 }

@@ -14,7 +14,7 @@ public interface Constant {
         String LINKS_IS_EMPTY = "Вы еще не добавили ни одну ссылку";
         String WELCOME = "Привет, начинаем?";
         String LINK_IS_ACCEPTED = "Ссылка принята";
-        String WRONG_INPUT = "Я ещё не знаю как отвечать на такое...";
+        String UNEXPECTED_INPUT = "Я ещё не знаю как отвечать на такое...";
         String BYE = "👋";
         String OFFER = """
                 Предложение (~%d рублей):\n
@@ -25,6 +25,7 @@ public interface Constant {
                 - ссылка: %s""";
         String CHOOSE_SETTINGS = "Что настроим?";
         String PROMOS_IS_EMPTY = "Список промокодов пуст";
+        String CHOOSE_YOUR_SBERPRIME_LEVEL = "Выберите Ваш уровень Сберпрайм на текущий месяц";
     }
 
     interface Button {
@@ -35,17 +36,10 @@ public interface Constant {
         String OK = "OK";
         String START_CONVERSATION = "начинаем";
         String SETTINGS = "⚙️ настройки";
-        String PROMOS_SETTINGS = "🟢 промокоды";
-        String CASHBACK_SETTINGS = "🔵 кэшбэк Сберпрайм";
+        String PROMOS_SETTINGS = "🔵 промокоды";
+        String CASHBACK_SETTINGS = "🟢 кэшбэк Сберпрайм";
         String ADD_PROMO = "➕ добавить промокод";
         String MY_PROMOS = "📝 мои промокоды";
-
-//        String EDIT_REMINDER_TEXT = "✏️ Изменить текст";
-//        String EDIT_REMINDER_DATE = "📝 Изменить дату";
-//        String EDIT_REMINDER_TIME = "🕙 Изменить время";
-//        String DELETE_REMINDER = "❌ Удалить";
-//        String CONFIRM_TO_DELETE_REMINDER = "🆗 Да, удалить напоминание";
-//        String[] DAYS_OF_WEEK = new String[]{"ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"};
     }
 
 //    interface Callback {
