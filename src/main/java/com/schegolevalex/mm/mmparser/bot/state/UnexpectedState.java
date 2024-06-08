@@ -10,7 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
-public class UnexpectedState extends AbstractState {
+public class UnexpectedState extends BaseState {
     public UnexpectedState(@Lazy ParserBot bot) {
         super(bot);
     }

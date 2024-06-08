@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
-public class WatchLinksState extends AbstractState {
+public class WatchLinksState extends BaseState {
     private final ProductService productService;
 
     public WatchLinksState(@Lazy ParserBot bot, ProductService productService) {
@@ -28,7 +28,7 @@ public class WatchLinksState extends AbstractState {
     public void route(Update update) {
         Long chatId = getChatId(update);
         switch (update.getMessage().getText()) {
-            case (Constant.Button.BACK) -> context.popState(chatId);
+            case (Constant.Button.BACK) -> context.putState(chatId, BotState.MAIN_PAGE_ACTION);
             default -> context.putState(chatId, BotState.UNEXPECTED);
         }
     }

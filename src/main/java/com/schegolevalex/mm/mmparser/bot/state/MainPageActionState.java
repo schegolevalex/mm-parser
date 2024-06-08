@@ -11,7 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
-public class MainPageActionState extends AbstractState {
+public class MainPageActionState extends BaseState {
 
     public MainPageActionState(@Lazy ParserBot bot) {
         super(bot);

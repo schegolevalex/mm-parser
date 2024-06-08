@@ -25,7 +25,7 @@ public class SellerService {
         return sellerRepository.findByMarketId(marketId);
     }
 
-    public Seller save(Seller newSeller) {
-        return sellerRepository.save(newSeller);
+    public Seller save(Seller seller) {
+        return sellerRepository.save(seller);
     }
 }

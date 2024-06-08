@@ -13,7 +13,7 @@ public interface Constant {
         String SUGGESTION_TO_LINK_INPUT = "Введите ссылку:";
         String LINKS_IS_EMPTY = "Вы еще не добавили ни одну ссылку";
         String WELCOME = "Привет, начинаем?";
-        String LINK_IS_ACCEPTED = "Ссылка принята";
+        String LINK_IS_ACCEPTED = "Ссылка принята! Можете добавить еще одну или вернуться назад";
         String UNEXPECTED_INPUT = "Я ещё не знаю как отвечать на такое...";
         String BYE = "👋";
         String OFFER = """
@@ -25,7 +25,7 @@ public interface Constant {
                 - ссылка: %s""";
         String CHOOSE_SETTINGS = "Что настроим?";
         String PROMOS_IS_EMPTY = "Список промокодов пуст";
-        String CHOOSE_YOUR_SBERPRIME_LEVEL = "Выберите Ваш уровень Сберпрайм на текущий месяц";
+        String CHOOSE_YOUR_CASHBACK_LEVEL = "Выберите Ваш уровень Сберпрайм на текущий месяц";
     }
 
     interface Button {

@@ -2,9 +2,11 @@ package com.schegolevalex.mm.mmparser.bot;
 
 import com.schegolevalex.mm.mmparser.config.BotConfiguration;
 import com.schegolevalex.mm.mmparser.entity.Offer;
+import com.schegolevalex.mm.mmparser.entity.User;
 import com.schegolevalex.mm.mmparser.parser.Parser;
 import com.schegolevalex.mm.mmparser.service.OfferService;
 import com.schegolevalex.mm.mmparser.service.ProductService;
+import com.schegolevalex.mm.mmparser.service.UserService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.Getter;
@@ -43,19 +45,21 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
     private final Parser parser;
     private final ProductService productService;
     private final OfferService offerService;
+    private final UserService userService;
 
     @Autowired
     public ParserBot(BotConfiguration botConfiguration,
                      Context context,
                      Parser parser,
                      ProductService productService,
-                     OfferService offerService) {
+                     OfferService offerService, UserService userService) {
         super(new OkHttpTelegramClient(botConfiguration.getBotToken()), botConfiguration.getBotUsername());
         this.botConfiguration = botConfiguration;
         this.context = context;
         this.parser = parser;
         this.productService = productService;
         this.offerService = offerService;
+        this.userService = userService;
     }
 
     public Ability start() {
@@ -65,8 +69,19 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                 .locality(ALL)
                 .privacy(PUBLIC)
                 .action(ctx -> {
-                    context.peekState(getChatId(ctx.update())).route(ctx.update());
-                    context.peekState(getChatId(ctx.update())).reply(ctx.update());
+                    Long chatId = getChatId(ctx.update());
+
+                    if (userService.findByChatId(chatId).isEmpty()) {
+                        userService.save(User.builder()
+                                .chatId(chatId)
+                                .nickname((ctx.user().getUserName() != null) ? ctx.user().getUserName() : null)
+                                .firstName(ctx.user().getFirstName())
+                                .lastName((ctx.user().getLastName() != null) ? ctx.user().getLastName() : null)
+                                .isPremium((ctx.user().getIsPremium() != null) ? ctx.user().getIsPremium() : false)
+                                .build());
+                    }
+                    context.peekState(chatId).route(ctx.update());
+                    context.peekState(chatId).reply(ctx.update());
                 })
                 .build();
     }
@@ -90,9 +105,9 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                     context.peekState(getChatId(upd)).route(upd);
                     context.peekState(getChatId(upd)).reply(upd);
                 },
-                Flag.TEXT,
-                update -> context.isActiveUser(getChatId(update)),
-                update -> !update.getMessage().getText().startsWith("/"));
+                Flag.TEXT.or(Flag.CALLBACK_QUERY),
+                update -> context.isActiveUser(getChatId(update))/*,
+                update -> !update.getMessage().getText().startsWith("/")*/);
     }
 
     private void sendNotifies(List<Offer> offers, Long chatId) {
@@ -115,7 +130,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
             });
     }
 
-    @Scheduled(cron = "0 */1 * * * *", zone = "Europe/Moscow")
+    @Scheduled(cron = "0 */10 * * * *", zone = "Europe/Moscow")
     protected void parseAndNotify() {
         productService.findAllByIsActive(true).forEach(product -> {
             List<Offer> parsedOffers = parser.parseProduct(product);
@@ -125,7 +140,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
             newOffers.forEach(product::addOffer);
             List<Offer> filteredOffers = offerService.filterOffersWithDefaultParameters(newOffers);
             if (!filteredOffers.isEmpty())
-                sendNotifies(filteredOffers, product.getChatId());
+                sendNotifies(filteredOffers, product.getUser().getChatId());
         });
     }
 

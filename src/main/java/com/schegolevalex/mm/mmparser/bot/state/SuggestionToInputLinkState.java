@@ -12,8 +12,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
-public class SuggestionToInputLinkState extends AbstractState {
-    private static final String MESSAGE_WITH_URL_REGEXP = ".*(http(s)?://.)?(www\\.)?megamarket\\.ru\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
+public class SuggestionToInputLinkState extends BaseState {
+    private static final String MESSAGE_WITH_URL_REGEXP = ".*(http(s)?://)?(www\\.)?megamarket\\.ru\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
 
     public SuggestionToInputLinkState(@Lazy ParserBot bot) {
         super(bot);

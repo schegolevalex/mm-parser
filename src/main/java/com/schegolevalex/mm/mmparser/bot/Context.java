@@ -1,6 +1,6 @@
 package com.schegolevalex.mm.mmparser.bot;
 
-import com.schegolevalex.mm.mmparser.bot.state.AbstractState;
+import com.schegolevalex.mm.mmparser.bot.state.BaseState;
 import com.schegolevalex.mm.mmparser.bot.state.BotState;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -12,24 +12,24 @@ import java.util.Stack;
 
 @Component
 public class Context {
-    private final List<AbstractState> possibleStates;
-    private final Map<Long, Stack<AbstractState>> chatStates = new HashMap<>();
+    private final List<BaseState> possibleStates;
+    private final Map<Long, Stack<BaseState>> chatStates = new HashMap<>();
 
-    public Context(@Lazy List<AbstractState> possibleStates) {
+    public Context(@Lazy List<BaseState> possibleStates) {
         this.possibleStates = possibleStates;
     }
 
     public void putState(Long chatId, BotState botState) {
-        Stack<AbstractState> stack = getStateStack(chatId);
+        Stack<BaseState> stack = getStateStack(chatId);
         if (stack.peek().getType() != botState)
             stack.push(findState(botState));
     }
 
-    public AbstractState peekState(Long chatId) {
+    public BaseState peekState(Long chatId) {
         return getStateStack(chatId).peek();
     }
 
-    public AbstractState popState(Long chatId) {
+    public BaseState popState(Long chatId) {
         return getStateStack(chatId).pop();
     }
 
@@ -37,7 +37,7 @@ public class Context {
         return chatStates.containsKey(chatId);
     }
 
-    private AbstractState findState(BotState botState) {
+    private BaseState findState(BotState botState) {
         return possibleStates
                 .stream()
                 .filter(state -> state.getType().equals(botState))
@@ -45,8 +45,8 @@ public class Context {
                 .orElse(null);
     }
 
-    private Stack<AbstractState> getStateStack(Long chatId) {
-        Stack<AbstractState> stack;
+    private Stack<BaseState> getStateStack(Long chatId) {
+        Stack<BaseState> stack;
         if (!chatStates.containsKey(chatId)) {
             stack = new Stack<>();
             stack.push(findState(BotState.NEW_STATE));

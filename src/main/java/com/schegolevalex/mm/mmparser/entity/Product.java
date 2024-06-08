@@ -27,8 +27,6 @@ public class Product {
 
     String url;
 
-    Long chatId;
-
     String title;
 
     String sku;
@@ -53,6 +51,9 @@ public class Product {
     @Builder.Default
     @ToString.Exclude
     List<Offer> offers = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    User user;
 
     public void addOffer(Offer offer) {
         offers.add(offer);

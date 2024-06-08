@@ -11,7 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
-public class PromoSettingState extends AbstractState {
+public class PromoSettingState extends BaseState {
     public PromoSettingState(@Lazy ParserBot bot) {
         super(bot);
     }
@@ -22,7 +22,7 @@ public class PromoSettingState extends AbstractState {
         switch (update.getMessage().getText()) {
             case (Constant.Button.ADD_PROMO) -> context.putState(chatId, BotState.ADD_PROMO);
             case (Constant.Button.MY_PROMOS) -> context.putState(chatId, BotState.WATCH_PROMOS);
-            case (Constant.Button.BACK) -> context.popState(chatId);
+            case (Constant.Button.BACK) -> context.putState(chatId, BotState.SETTINGS);
             default -> context.putState(chatId, BotState.UNEXPECTED);
         }
     }

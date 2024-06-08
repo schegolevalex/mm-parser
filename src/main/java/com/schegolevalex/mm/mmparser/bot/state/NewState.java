@@ -7,7 +7,7 @@ import org.telegram.telegrambots.abilitybots.api.util.AbilityUtils;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
-public class NewState extends AbstractState {
+public class NewState extends BaseState {
 
     public NewState(@Lazy ParserBot bot) {
         super(bot);
