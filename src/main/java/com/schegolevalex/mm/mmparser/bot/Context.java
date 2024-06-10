@@ -2,6 +2,7 @@ package com.schegolevalex.mm.mmparser.bot;
 
 import com.schegolevalex.mm.mmparser.bot.state.BaseState;
 import com.schegolevalex.mm.mmparser.bot.state.BotState;
+import com.schegolevalex.mm.mmparser.entity.Promo;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import java.util.Stack;
 public class Context {
     private final List<BaseState> possibleStates;
     private final Map<Long, Stack<BaseState>> chatStates = new HashMap<>();
+    private final Map<Long, Promo> tempPromo = new HashMap<>();
 
     public Context(@Lazy List<BaseState> possibleStates) {
         this.possibleStates = possibleStates;
@@ -54,5 +56,21 @@ public class Context {
         } else
             stack = chatStates.get(chatId);
         return stack;
+    }
+
+    public void putPromo(Long chatId, Promo promo) {
+        tempPromo.put(chatId, promo);
+    }
+
+    public Promo getPromo(Long chatId) {
+        return tempPromo.get(chatId);
+    }
+
+    public void clearPromo(Long chatId) {
+        tempPromo.remove(chatId);
+    }
+
+    public void clearState(Long chatId) {
+        chatStates.remove(chatId);
     }
 }

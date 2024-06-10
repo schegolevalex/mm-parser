@@ -58,6 +58,7 @@ public class CashbackSettingsState extends BaseState {
                     .chatId(getChatId(update))
                     .text(Constant.Message.CHOOSE_YOUR_CASHBACK_LEVEL)
                     .replyMarkup(Keyboard.withCashbackLevels(cashbackLevel))
+                    .parseMode("MarkdownV2")
                     .build());
     }
 

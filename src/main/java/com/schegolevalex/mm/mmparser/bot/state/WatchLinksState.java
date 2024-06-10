@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -45,7 +46,7 @@ public class WatchLinksState extends BaseState {
             text.append(Constant.Message.LINKS_IS_EMPTY);
         else
             products.stream()
-                    .sorted((product1, product2) -> product2.getCreatedAt().compareTo(product1.getCreatedAt()))
+                    .sorted(Comparator.comparing(Product::getCreatedAt))
                     .forEach(product -> text.append(num.getAndIncrement())
                             .append(". ")
                             .append(product.getTitle())

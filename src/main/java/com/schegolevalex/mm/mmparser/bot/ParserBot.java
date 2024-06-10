@@ -70,6 +70,8 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                 .privacy(PUBLIC)
                 .action(ctx -> {
                     Long chatId = getChatId(ctx.update());
+                    context.clearState(getChatId(ctx.update()));
+                    context.clearPromo(getChatId(ctx.update()));
 
                     if (userService.findByChatId(chatId).isEmpty()) {
                         userService.save(User.builder()
@@ -92,11 +94,15 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                 .info(Constant.Info.STOP)
                 .locality(ALL)
                 .privacy(PUBLIC)
-                .action(ctx -> silent.execute(SendMessage.builder()
-                        .chatId(getChatId(ctx.update()))
-                        .text(Constant.Message.BYE)
-                        .replyMarkup(new ReplyKeyboardRemove(true))
-                        .build()))
+                .action(ctx -> {
+                    context.clearState(getChatId(ctx.update()));
+                    context.clearPromo(getChatId(ctx.update()));
+                    silent.execute(SendMessage.builder()
+                            .chatId(getChatId(ctx.update()))
+                            .text(Constant.Message.BYE)
+                            .replyMarkup(new ReplyKeyboardRemove(true))
+                            .build());
+                })
                 .build();
     }
 
@@ -168,7 +174,8 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
     private void setMyCommands() {
         List<BotCommand> botCommands = new ArrayList<>();
         botCommands.add(new BotCommand("start", Constant.Info.START));
-        silent.execute(new SetMyCommands(botCommands, null, null));
+        botCommands.add(new BotCommand("stop", Constant.Info.STOP));
+        silent.execute(new SetMyCommands(botCommands));
     }
 
     @PostConstruct

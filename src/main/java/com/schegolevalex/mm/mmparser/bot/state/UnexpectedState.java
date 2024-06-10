@@ -18,7 +18,6 @@ public class UnexpectedState extends BaseState {
     @Override
     public void route(Update update) {
         context.popState(getChatId(update));
-        context.popState(getChatId(update));
     }
 
     @Override
@@ -27,6 +26,7 @@ public class UnexpectedState extends BaseState {
                 .chatId(getChatId(update))
                 .text(Constant.Message.UNEXPECTED_INPUT)
                 .build());
+        this.route(update);
     }
 
     @Override

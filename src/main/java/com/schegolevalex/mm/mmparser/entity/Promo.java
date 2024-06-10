@@ -3,8 +3,10 @@ package com.schegolevalex.mm.mmparser.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +27,10 @@ public class Promo {
 
     @ManyToOne(fetch = FetchType.LAZY)
     User user;
+
+    @CreatedDate
+    @Column(updatable = false)
+    Instant createdAt;
 
     @OneToMany(mappedBy = "promo"
             , cascade = CascadeType.ALL

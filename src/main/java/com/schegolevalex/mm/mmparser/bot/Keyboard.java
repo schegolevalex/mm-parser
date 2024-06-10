@@ -17,35 +17,46 @@ public class Keyboard {
         row1.add(Constant.Button.MY_LINKS);
         KeyboardRow row2 = new KeyboardRow();
         row2.add(Constant.Button.SETTINGS);
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(List.of(row1, row2));
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        return replyKeyboardMarkup;
+        return ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row1, row2))
+                .resizeKeyboard(true)
+                .build();
     }
 
     public static ReplyKeyboard withBackButton() {
         KeyboardRow row = new KeyboardRow();
         row.add(Constant.Button.BACK);
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(List.of(row));
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        return replyKeyboardMarkup;
+        return ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row))
+                .resizeKeyboard(true)
+                .build();
     }
 
     public static ReplyKeyboard withOkButton() {
         KeyboardRow row = new KeyboardRow();
         row.add(Constant.Button.OK);
-        return new ReplyKeyboardMarkup(List.of(row));
+        return ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row))
+                .resizeKeyboard(true)
+                .build();
     }
 
     public static ReplyKeyboard withMainPageButton() {
         KeyboardRow row = new KeyboardRow();
         row.add(Constant.Button.MAIN_PAGE);
-        return new ReplyKeyboardMarkup(List.of(row));
+        return ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row))
+                .resizeKeyboard(true)
+                .build();
     }
 
     public static ReplyKeyboard withBeginConversationButton() {
         KeyboardRow row = new KeyboardRow();
         row.add(Constant.Button.START_CONVERSATION);
-        return new ReplyKeyboardMarkup(List.of(row));
+        return ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row))
+                .resizeKeyboard(true)
+                .build();
     }
 
     public static ReplyKeyboard withSettings() {
@@ -54,9 +65,10 @@ public class Keyboard {
         row1.add(Constant.Button.CASHBACK_SETTINGS);
         KeyboardRow row2 = new KeyboardRow();
         row2.add(Constant.Button.BACK);
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(List.of(row1, row2));
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        return replyKeyboardMarkup;
+        return ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row1, row2))
+                .resizeKeyboard(true)
+                .build();
     }
 
     public static ReplyKeyboard withPromoSettingsActions() {
@@ -65,9 +77,10 @@ public class Keyboard {
         row1.add(Constant.Button.MY_PROMOS);
         KeyboardRow row2 = new KeyboardRow();
         row2.add(Constant.Button.BACK);
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(List.of(row1, row2));
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        return replyKeyboardMarkup;
+        return ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row1, row2))
+                .resizeKeyboard(true)
+                .build();
     }
 
     public static InlineKeyboardMarkup withCashbackLevels(Long cashbackLevel) {
@@ -116,4 +129,37 @@ public class Keyboard {
                 .build());
         return new InlineKeyboardMarkup(List.of(row1, row2));
     }
+
+    public static ReplyKeyboard continueAddOrSavePromoSteps() {
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(Constant.Button.YES_ADD_MORE_PROMO_STEPS);
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(Constant.Button.NO_SAVE_PROMO);
+        KeyboardRow row3 = new KeyboardRow();
+        row3.add(Constant.Button.BACK);
+        return ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row1, row2, row3))
+                .resizeKeyboard(true)
+                .build();
+    }
+
+    public static InlineKeyboardMarkup withDeletePromoButton(Long id) {
+        InlineKeyboardRow row1 = new InlineKeyboardRow();
+        row1.add(InlineKeyboardButton.builder()
+                .text(Constant.Button.DELETE_PROMO)
+                .callbackData(Constant.Button.DELETE_PROMO + Constant.DELIMITER + id.toString())
+                .build());
+        return new InlineKeyboardMarkup(List.of(row1));
+    }
+
+//    public static ReplyKeyboard withBackToPromoSettingsButton() {
+//        KeyboardRow row1 = new KeyboardRow();
+//        row1.add(Constant.Button.PROMOS_SETTINGS);
+//        row1.add(Constant.Button.MY_PROMOS);
+//        KeyboardRow row2 = new KeyboardRow();
+//        row2.add(Constant.Button.BACK);
+//        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(List.of(row1, row2));
+//        replyKeyboardMarkup.setResizeKeyboard(true);
+//        return replyKeyboardMarkup;
+//    }
 }
