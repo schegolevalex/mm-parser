@@ -16,6 +16,7 @@ public class Context {
     private final List<BaseState> possibleStates;
     private final Map<Long, Stack<BaseState>> chatStates = new HashMap<>();
     private final Map<Long, Promo> tempPromo = new HashMap<>();
+    private final Map<Long, Long> configurableProductIds = new HashMap<>();
 
     public Context(@Lazy List<BaseState> possibleStates) {
         this.possibleStates = possibleStates;
@@ -58,6 +59,10 @@ public class Context {
         return stack;
     }
 
+    public void clearState(Long chatId) {
+        chatStates.remove(chatId);
+    }
+
     public void putPromo(Long chatId, Promo promo) {
         tempPromo.put(chatId, promo);
     }
@@ -70,7 +75,15 @@ public class Context {
         tempPromo.remove(chatId);
     }
 
-    public void clearState(Long chatId) {
-        chatStates.remove(chatId);
+    public void putConfigurableProductId(Long chatId, Long productId) {
+        configurableProductIds.put(chatId, productId);
+    }
+
+    public Long getConfigurableProductId(Long chatId) {
+        return configurableProductIds.get(chatId);
+    }
+
+    public void clearConfigurableProductId(Long chatId) {
+        configurableProductIds.remove(chatId);
     }
 }

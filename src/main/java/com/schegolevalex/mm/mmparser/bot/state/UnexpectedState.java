@@ -29,10 +29,10 @@ public class UnexpectedState extends BaseState {
                     .messageId(update.getMessage().getMessageId())
                     .build());
         }
-        bot.getSilent().execute(SendMessage.builder()
-                .chatId(getChatId(update))
-                .text(Constant.Message.UNEXPECTED_INPUT)
-                .build());
+//        bot.getSilent().execute(SendMessage.builder()
+//                .chatId(getChatId(update))
+//                .text(Constant.Message.UNEXPECTED_INPUT)
+//                .build());
         this.route(update);
     }
 
