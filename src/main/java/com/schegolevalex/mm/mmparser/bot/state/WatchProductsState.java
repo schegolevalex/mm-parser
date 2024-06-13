@@ -32,8 +32,16 @@ public class WatchProductsState extends BaseState {
     public void route(Update update) {
         Long chatId = getChatId(update);
 
-        if (update.hasCallbackQuery() && update.getCallbackQuery().getData().startsWith(Constant.Button.PRODUCT_SETTINGS)) {
-            context.putState(chatId, BotState.PRODUCT_SETTINGS);
+        if (update.hasCallbackQuery()) {
+            String callbackData = update.getCallbackQuery().getData();
+            if (callbackData.startsWith(Constant.Button.NOTIFICATIONS_SETTINGS))
+                context.putState(chatId, BotState.NOTIFICATIONS_SETTINGS);
+            else if (callbackData.startsWith(Constant.Button.APPLY_PROMO))
+                context.putState(chatId, BotState.APPLY_PROMO);
+            else if (callbackData.startsWith(Constant.Button.DELETE_PRODUCT))
+                context.putState(chatId, BotState.DELETE_PRODUCT);
+            else
+                context.putState(chatId, BotState.UNEXPECTED);
         } else {
             switch (update.getMessage().getText()) {
                 case (Constant.Button.ADD_PRODUCT) -> context.putState(chatId, BotState.SUGGESTION_TO_INPUT_LINK);
@@ -46,8 +54,8 @@ public class WatchProductsState extends BaseState {
 
     @Override
     public void reply(Update update) {
-//        if (update.hasCallbackQuery())
-//            return;
+        if (update.hasCallbackQuery())
+            return;
 
         Long chatId = getChatId(update);
         List<Product> products = productService.findAllByChatIdAndIsActive(chatId, true);
@@ -72,11 +80,12 @@ public class WatchProductsState extends BaseState {
                                     .isDisabled(true)
                                     .build())
                             .build()));
-            bot.getSilent().execute(SendMessage.builder()
-                    .chatId(getChatId(update))
-                    .text(Constant.Message.CHOOSE_ACTION)
-                    .replyMarkup(Keyboard.withMainPageActions())
-                    .build());
+
+//            bot.getSilent().execute(SendMessage.builder()
+//                    .chatId(getChatId(update))
+//                    .text(Constant.Message.CHOOSE_ACTION)
+//                    .replyMarkup(Keyboard.withMainPageActions())
+//                    .build());
         }
     }
 
