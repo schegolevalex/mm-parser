@@ -11,9 +11,9 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
-public class MainPageActionState extends BaseState {
+public class MainPageState extends BaseState {
 
-    public MainPageActionState(@Lazy ParserBot bot) {
+    public MainPageState(@Lazy ParserBot bot) {
         super(bot);
     }
 
@@ -21,8 +21,8 @@ public class MainPageActionState extends BaseState {
     public void route(Update update) {
         Long chatId = getChatId(update);
         switch (update.getMessage().getText()) {
-            case (Constant.Button.ADD_LINK) -> context.putState(chatId, BotState.SUGGESTION_TO_INPUT_LINK);
-            case (Constant.Button.MY_LINKS) -> context.putState(chatId, BotState.WATCH_LINKS);
+            case (Constant.Button.ADD_PRODUCT) -> context.putState(chatId, BotState.SUGGESTION_TO_INPUT_LINK);
+            case (Constant.Button.MY_PRODUCTS) -> context.putState(chatId, BotState.WATCH_PRODUCTS);
             case (Constant.Button.SETTINGS) -> context.putState(chatId, BotState.SETTINGS);
             default -> context.putState(chatId, BotState.UNEXPECTED);
         }

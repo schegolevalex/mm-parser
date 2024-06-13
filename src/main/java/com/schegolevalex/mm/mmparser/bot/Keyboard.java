@@ -1,5 +1,6 @@
 package com.schegolevalex.mm.mmparser.bot;
 
+import com.schegolevalex.mm.mmparser.entity.Promo;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -7,14 +8,16 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Keyboard {
 
     public static ReplyKeyboard withMainPageActions() {
         KeyboardRow row1 = new KeyboardRow();
-        row1.add(Constant.Button.ADD_LINK);
-        row1.add(Constant.Button.MY_LINKS);
+        row1.add(Constant.Button.ADD_PRODUCT);
+        row1.add(Constant.Button.MY_PRODUCTS);
         KeyboardRow row2 = new KeyboardRow();
         row2.add(Constant.Button.SETTINGS);
         return ReplyKeyboardMarkup.builder()
@@ -143,13 +146,48 @@ public class Keyboard {
                 .build();
     }
 
-    public static InlineKeyboardMarkup withDeletePromoButton(Long id) {
+    public static InlineKeyboardMarkup withDeletePromoButton(Long promoId) {
         InlineKeyboardRow row1 = new InlineKeyboardRow();
         row1.add(InlineKeyboardButton.builder()
                 .text(Constant.Button.DELETE_PROMO)
-                .callbackData(Constant.Button.DELETE_PROMO + Constant.DELIMITER + id.toString())
+                .callbackData(Constant.Button.DELETE_PROMO + Constant.DELIMITER + promoId)
                 .build());
         return new InlineKeyboardMarkup(List.of(row1));
+    }
+
+    public static InlineKeyboardMarkup withProductButton(Long productId) {
+        InlineKeyboardRow row1 = new InlineKeyboardRow();
+        row1.add(InlineKeyboardButton.builder()
+                .text(Constant.Button.NOTIFICATIONS_SETTINGS)
+                .callbackData(Constant.Button.APPLY_PROMO + Constant.DELIMITER + productId)
+                .build());
+        InlineKeyboardRow row2 = new InlineKeyboardRow();
+        row2.add(InlineKeyboardButton.builder()
+                .text(Constant.Button.APPLY_PROMO)
+                .callbackData(Constant.Button.APPLY_PROMO + Constant.DELIMITER + productId)
+                .build());
+        InlineKeyboardRow row3 = new InlineKeyboardRow();
+        row3.add(InlineKeyboardButton.builder()
+                .text(Constant.Button.DELETE_PRODUCT)
+                .callbackData(Constant.Button.DELETE_PRODUCT + Constant.DELIMITER + productId)
+                .build());
+        return new InlineKeyboardMarkup(List.of(row1, row2, row3));
+    }
+
+    public static InlineKeyboardMarkup withSelectPromoToProduct(List<Promo> promos, long productId) {
+        List<InlineKeyboardRow> keyboard = new ArrayList<>();
+        promos.forEach(promo -> {
+            InlineKeyboardRow row = new InlineKeyboardRow();
+            row.add(InlineKeyboardButton.builder()
+                    .text(promo.getPromoSteps().stream()
+                            .map(promoStep -> String.format(Constant.Message.PROMO, promoStep.getDiscount(), promoStep.getPriceFrom()))
+                            .collect(Collectors.joining("; ")))
+                    .callbackData(Constant.Button.MY_PRODUCTS + Constant.DELIMITER + productId + Constant.DELIMITER
+                            + Constant.Button.MY_PROMOS + Constant.DELIMITER + promo.getId())
+                    .build());
+            keyboard.add(row);
+        });
+        return new InlineKeyboardMarkup(keyboard);
     }
 
 //    public static ReplyKeyboard withBackToPromoSettingsButton() {

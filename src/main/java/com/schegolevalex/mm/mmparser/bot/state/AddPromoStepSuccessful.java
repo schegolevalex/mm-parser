@@ -4,12 +4,15 @@ import com.schegolevalex.mm.mmparser.bot.Constant;
 import com.schegolevalex.mm.mmparser.bot.Keyboard;
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
 import com.schegolevalex.mm.mmparser.entity.Promo;
+import com.schegolevalex.mm.mmparser.entity.PromoStep;
 import com.schegolevalex.mm.mmparser.service.UserService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
+import java.util.Comparator;
 
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
@@ -30,8 +33,10 @@ public class AddPromoStepSuccessful extends BaseState {
         switch (text) {
             case Constant.Button.YES_ADD_MORE_PROMO_STEPS -> context.putState(chatId, BotState.ADD_PROMO_STEP_DISCOUNT);
             case Constant.Button.NO_SAVE_PROMO -> {
+                Promo promo = context.getPromo(chatId);
+                promo.getPromoSteps().sort(Comparator.comparing(PromoStep::getPriceFrom));
                 userService.findByChatId(chatId).orElseThrow(() -> new RuntimeException("User not found"))
-                        .addPromo(context.getPromo(chatId));
+                        .addPromo(promo);
                 context.clearPromo(chatId);
                 context.putState(chatId, BotState.PROMOS_SETTINGS);
             }

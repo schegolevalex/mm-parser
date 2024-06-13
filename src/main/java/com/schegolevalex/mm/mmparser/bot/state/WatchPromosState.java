@@ -33,7 +33,7 @@ public class WatchPromosState extends BaseState {
     public void route(Update update) {
         Long chatId = getChatId(update);
         if (update.hasCallbackQuery() && update.getCallbackQuery().getData().startsWith(Constant.Button.DELETE_PROMO)) {
-            promoService.delete(Long.parseLong(update.getCallbackQuery().getData().split(Constant.DELIMITER)[1]));
+            promoService.deleteById(Long.parseLong(update.getCallbackQuery().getData().split(Constant.DELIMITER)[1]));
             bot.getSilent().execute(DeleteMessage.builder()
                     .chatId(chatId)
                     .messageId(update.getCallbackQuery().getMessage().getMessageId())
@@ -73,7 +73,7 @@ public class WatchPromosState extends BaseState {
                             .text(num.getAndIncrement() + ". " +
                                     promo.getPromoSteps().stream()
                                             .map(promoStep -> String.format(Constant.Message.PROMO, promoStep.getDiscount(), promoStep.getPriceFrom()))
-                                            .collect(Collectors.joining(", ")))
+                                            .collect(Collectors.joining("; ")))
                             .replyMarkup(Keyboard.withDeletePromoButton(promo.getId()))
                             .build()));
         }

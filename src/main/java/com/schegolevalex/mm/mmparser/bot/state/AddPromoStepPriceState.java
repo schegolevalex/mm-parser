@@ -35,6 +35,12 @@ public class AddPromoStepPriceState extends BaseState {
                 case Constant.Button.BACK -> context.popState(chatId);
                 default -> context.putState(chatId, BotState.UNEXPECTED);
             }
+        } catch (IllegalArgumentException e) {
+            // todo перепредумать отправку сообщения отсюда
+            bot.getSilent().execute(SendMessage.builder()
+                    .chatId(chatId)
+                    .text(e.getMessage())
+                    .build());
         }
     }
 

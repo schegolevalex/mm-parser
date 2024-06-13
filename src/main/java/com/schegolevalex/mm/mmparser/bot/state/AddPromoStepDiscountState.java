@@ -27,9 +27,9 @@ public class AddPromoStepDiscountState extends BaseState {
         try {
             int discount = Integer.parseInt(text);
             Promo promo = context.getPromo(chatId);
-            promo.addPromoStep(PromoStep.builder()
-                    .discount(discount)
-                    .build());
+            PromoStep promoStep = new PromoStep();
+            promoStep.setDiscount(discount);
+            promo.addPromoStep(promoStep);
             context.putState(chatId, BotState.ADD_PROMO_STEP_PRICE);
         } catch (NumberFormatException e) {
             switch (text) {
@@ -38,6 +38,12 @@ public class AddPromoStepDiscountState extends BaseState {
                 case Constant.Button.BACK -> context.putState(chatId, BotState.SETTINGS);
                 default -> context.putState(chatId, BotState.UNEXPECTED);
             }
+        } catch (IllegalArgumentException e) {
+            // todo перепредумать отправку сообщения отсюда
+            bot.getSilent().execute(SendMessage.builder()
+                    .chatId(chatId)
+                    .text(e.getMessage())
+                    .build());
         }
     }
 

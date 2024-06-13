@@ -70,8 +70,8 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                 .privacy(PUBLIC)
                 .action(ctx -> {
                     Long chatId = getChatId(ctx.update());
-                    context.clearState(getChatId(ctx.update()));
-                    context.clearPromo(getChatId(ctx.update()));
+                    this.context.clearState(chatId);
+                    this.context.clearPromo(chatId);
 
                     if (userService.findByChatId(chatId).isEmpty()) {
                         userService.save(User.builder()
@@ -82,8 +82,8 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                                 .isPremium((ctx.user().getIsPremium() != null) ? ctx.user().getIsPremium() : false)
                                 .build());
                     }
-                    context.peekState(chatId).route(ctx.update());
-                    context.peekState(chatId).reply(ctx.update());
+                    this.context.peekState(chatId).route(ctx.update());
+                    this.context.peekState(chatId).reply(ctx.update());
                 })
                 .build();
     }
@@ -95,10 +95,11 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                 .locality(ALL)
                 .privacy(PUBLIC)
                 .action(ctx -> {
-                    context.clearState(getChatId(ctx.update()));
-                    context.clearPromo(getChatId(ctx.update()));
+                    Long chatId = getChatId(ctx.update());
+                    context.clearState(chatId);
+                    context.clearPromo(chatId);
                     silent.execute(SendMessage.builder()
-                            .chatId(getChatId(ctx.update()))
+                            .chatId(chatId)
                             .text(Constant.Message.BYE)
                             .replyMarkup(new ReplyKeyboardRemove(true))
                             .build());
@@ -113,7 +114,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                 },
                 Flag.TEXT.or(Flag.CALLBACK_QUERY),
                 update -> context.isActiveUser(getChatId(update))/*,
-                update -> !update.getMessage().getText().startsWith("/")*/);
+                update -> (!update.getMessage().getText().startsWith("/stop"))*/); // todo если включить, то работает /stop, но не работают callback кнопок
     }
 
     private void sendNotifies(List<Offer> offers, Long chatId) {

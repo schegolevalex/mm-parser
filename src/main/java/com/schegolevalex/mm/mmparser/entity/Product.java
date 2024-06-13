@@ -20,9 +20,11 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Exclude
     Long id;
 
     String url;
@@ -30,6 +32,10 @@ public class Product {
     String title;
 
     String sku;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @EqualsAndHashCode.Exclude
+    Promo promo;
 
     @CreatedDate
     @Column(updatable = false)
@@ -41,7 +47,7 @@ public class Product {
 
     @ManyToMany(mappedBy = "products", fetch = FetchType.LAZY)
     @Builder.Default
-    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     Set<Seller> sellers = new HashSet<>();
 
     @OneToMany(mappedBy = "product"
@@ -49,10 +55,11 @@ public class Product {
             , fetch = FetchType.LAZY
             , orphanRemoval = true)
     @Builder.Default
-    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     List<Offer> offers = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @EqualsAndHashCode.Exclude
     User user;
 
     public void addOffer(Offer offer) {
