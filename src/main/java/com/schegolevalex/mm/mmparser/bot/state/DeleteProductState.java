@@ -1,14 +1,13 @@
 package com.schegolevalex.mm.mmparser.bot.state;
 
 import com.schegolevalex.mm.mmparser.bot.Constant;
-import com.schegolevalex.mm.mmparser.bot.Keyboard;
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
 import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.service.ProductService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
@@ -25,23 +24,17 @@ public class DeleteProductState extends BaseState {
 
     @Override
     public void route(Update update) {
-        Long chatId = getChatId(update);
-        switch (update.getMessage().getText()) {
-            case (Constant.Button.BACK_TO_PRODUCTS_LIST) -> context.putState(chatId, BotState.WATCH_PRODUCTS);
-            default -> context.putState(chatId, BotState.UNEXPECTED);
-        }
+        context.popState(getChatId(update));
     }
 
     @Override
     public void reply(Update update) {
-        Long chatId = getChatId(update);
-        Long configurableProductId = context.getConfigurableProductId(chatId);
-        Product product = productService.findById(configurableProductId).orElseThrow(() -> new RuntimeException("Product not found"));
+        long productId = Long.parseLong(update.getCallbackQuery().getData().split(Constant.DELIMITER)[1]);
+        Product product = productService.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
         product.setActive(false);
-        bot.getSilent().execute(SendMessage.builder()
-                .chatId(chatId)
-                .text(String.format(Constant.Message.PRODUCT_IS_DELETED, product.getTitle()))
-                .replyMarkup(Keyboard.withBackToProductListButton())
+        bot.getSilent().execute(DeleteMessage.builder()
+                .chatId(getChatId(update))
+                .messageId(update.getCallbackQuery().getMessage().getMessageId())
                 .build());
     }
 
