@@ -46,8 +46,8 @@ public class WatchProductsState extends BaseState {
 
     @Override
     public void reply(Update update) {
-        if (update.hasCallbackQuery())
-            return;
+//        if (update.hasCallbackQuery())
+//            return;
 
         Long chatId = getChatId(update);
         List<Product> products = productService.findAllByChatIdAndIsActive(chatId, true);
@@ -67,7 +67,7 @@ public class WatchProductsState extends BaseState {
                             .text(num.getAndIncrement() + ". " +
                                     product.getTitle() + "\n" +
                                     product.getUrl())
-                            .replyMarkup(Keyboard.withGoToProductSettingsButton(product.getId()))
+                            .replyMarkup(Keyboard.withProductSettings(product.getId()))
                             .linkPreviewOptions(LinkPreviewOptions.builder()
                                     .isDisabled(true)
                                     .build())

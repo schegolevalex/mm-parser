@@ -168,13 +168,23 @@ public class Keyboard {
         return new InlineKeyboardMarkup(List.of(row));
     }
 
-    public static InlineKeyboardMarkup withGoToProductSettingsButton(Long productId) {
-        InlineKeyboardRow row = new InlineKeyboardRow();
-        row.add(InlineKeyboardButton.builder()
-                .text(Button.PRODUCT_SETTINGS)
-                .callbackData(Button.PRODUCT_SETTINGS + DELIMITER + productId)
+    public static InlineKeyboardMarkup withProductSettings(Long productId) {
+        InlineKeyboardRow row1 = new InlineKeyboardRow();
+        row1.add(InlineKeyboardButton.builder()
+                .text(Constant.Button.NOTIFICATIONS_SETTINGS)
+                .callbackData(Constant.Button.NOTIFICATIONS_SETTINGS + Constant.DELIMITER + productId)
                 .build());
-        return new InlineKeyboardMarkup(List.of(row));
+        InlineKeyboardRow row2 = new InlineKeyboardRow();
+        row2.add(InlineKeyboardButton.builder()
+                .text(Constant.Button.APPLY_PROMO)
+                .callbackData(Constant.Button.APPLY_PROMO + Constant.DELIMITER + productId)
+                .build());
+        InlineKeyboardRow row3 = new InlineKeyboardRow();
+        row3.add(InlineKeyboardButton.builder()
+                .text(Constant.Button.DELETE_PRODUCT)
+                .callbackData(Constant.Button.DELETE_PRODUCT + Constant.DELIMITER + productId)
+                .build());
+        return new InlineKeyboardMarkup(List.of(row1, row2, row3));
     }
 
     public static ReplyKeyboard withProductSettingsActions() {
@@ -191,24 +201,6 @@ public class Keyboard {
                 .resizeKeyboard(true)
                 .build();
     }
-
-
-//        InlineKeyboardRow row1 = new InlineKeyboardRow();
-//        row1.add(InlineKeyboardButton.builder()
-//                .text(Constant.Button.NOTIFICATIONS_SETTINGS)
-//                .callbackData(Constant.Button.APPLY_PROMO + Constant.DELIMITER + productId)
-//                .build());
-//        InlineKeyboardRow row2 = new InlineKeyboardRow();
-//        row2.add(InlineKeyboardButton.builder()
-//                .text(Constant.Button.APPLY_PROMO)
-//                .callbackData(Constant.Button.APPLY_PROMO + Constant.DELIMITER + productId)
-//                .build());
-//        InlineKeyboardRow row3 = new InlineKeyboardRow();
-//        row3.add(InlineKeyboardButton.builder()
-//                .text(Constant.Button.DELETE_PRODUCT)
-//                .callbackData(Constant.Button.DELETE_PRODUCT + Constant.DELIMITER + productId)
-//                .build());
-//        return new InlineKeyboardMarkup(List.of(row1, row2, row3));
 
     public static InlineKeyboardMarkup withSelectPromoToProduct(List<Promo> promos, Product product) {
         List<InlineKeyboardRow> keyboard = new ArrayList<>();
