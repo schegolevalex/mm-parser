@@ -10,13 +10,10 @@ import com.schegolevalex.mm.mmparser.service.PromoService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
@@ -36,53 +33,53 @@ public class ApplyPromoState extends BaseState {
     public void route(Update update) {
         Long chatId = getChatId(update);
 
-        if (update.hasCallbackQuery() && update.getCallbackQuery().getData().startsWith(Constant.Button.MY_PRODUCTS)) {
-            long productId = Long.parseLong(update.getCallbackQuery().getData().split(Constant.DELIMITER)[1]);
-            Product product = productService.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
-            long promoId = Long.parseLong(update.getCallbackQuery().getData().split(Constant.DELIMITER)[3]);
-            Promo promo = promoService.findById(promoId).orElseThrow(() -> new RuntimeException("Promo not found"));
-            promo.addProduct(product);
-            context.putState(chatId, BotState.WATCH_PRODUCTS);
-        } else {
+        if (update.hasCallbackQuery()) {
+            String callbackData = update.getCallbackQuery().getData();
+            if (callbackData.startsWith(Constant.Button.BACK))
+                context.putState(chatId, BotState.WATCH_PRODUCTS);
+            else if (callbackData.startsWith(Constant.Button.MY_PRODUCTS)) {
+                long productId = Long.parseLong(callbackData.split(Constant.DELIMITER)[1]);
+                long promoId = Long.parseLong(callbackData.split(Constant.DELIMITER)[3]);
+                Product product = productService.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
+                Promo promo = promoService.findById(promoId).orElseThrow(() -> new RuntimeException("Promo not found"));
+                promo.addProduct(product);
+            }
+        } else
             switch (update.getMessage().getText()) {
-                case (Constant.Button.NOTIFICATIONS_SETTINGS) -> context.putState(chatId, BotState.NOTIFICATIONS_SETTINGS);
-                case (Constant.Button.APPLY_PROMO) -> context.putState(chatId, BotState.APPLY_PROMO_SETTINGS);
-                case (Constant.Button.DELETE_PRODUCT) -> context.putState(chatId, BotState.DELETE_PRODUCT);
-                case (Constant.Button.BACK) -> context.putState(chatId, BotState.WATCH_PRODUCTS);
+                case (Constant.Button.ADD_PRODUCT) -> context.putState(chatId, BotState.SUGGESTION_TO_INPUT_LINK);
+                case (Constant.Button.MY_PRODUCTS) -> context.putState(chatId, BotState.WATCH_PRODUCTS);
+                case (Constant.Button.SETTINGS) -> context.putState(chatId, BotState.SETTINGS);
                 default -> context.putState(chatId, BotState.UNEXPECTED);
             }
-        }
     }
 
     @Override
     public void reply(Update update) {
         Long chatId = getChatId(update);
-        Long configurableProductId = context.getConfigurableProductId(chatId);
-        Product product = productService.findById(configurableProductId).orElseThrow(() -> new RuntimeException("Product not found"));
 
+        long productId = Long.parseLong(update.getCallbackQuery().getData().split(Constant.DELIMITER)[1]);
+
+        Product product = productService.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
         List<Promo> promos = promoService.findAllByChatId(chatId);
+
+        int page = 1;
+        if (update.hasCallbackQuery() && update.getCallbackQuery().getData().startsWith(Constant.Button.PAGE))
+            page = Integer.parseInt(update.getCallbackQuery().getData().split(Constant.DELIMITER)[1]);
+
+
         if (promos.isEmpty()) {
-            bot.getSilent().execute(SendMessage.builder()
-                    .chatId(chatId)
-                    .text(Constant.Message.PROMOS_IS_EMPTY)
-                    .build());
+            // todo
         } else {
-            AtomicInteger num = new AtomicInteger(1);
-            promos.stream()
-                    .sorted(Comparator.comparing(Promo::getCreatedAt))
-                    .forEach(promo -> bot.getSilent().execute(SendMessage.builder()
-                            .chatId(chatId)
-                            .text((product.getPromo() == promo ? "✅ " : "") + num.getAndIncrement() + ". " +
-                                    promo.getPromoSteps().stream()
-                                            .map(promoStep -> String.format(Constant.Message.PROMO, promoStep.getDiscount(), promoStep.getPriceFrom()))
-                                            .collect(Collectors.joining("; ")))
-                            .replyMarkup(Keyboard.withChoosePromoForProductButton(promo.getId(), configurableProductId))
-                            .build()));
+            bot.getSilent().execute(EditMessageReplyMarkup.builder()
+                    .chatId(chatId)
+                    .messageId(update.getCallbackQuery().getMessage().getMessageId())
+                    .replyMarkup(Keyboard.withPromosForProduct(promos, productId, product.getPromo(), page))
+                    .build());
         }
     }
 
     @Override
     public BotState getType() {
-        return BotState.APPLY_PROMO_SETTINGS;
+        return BotState.APPLY_PROMO;
     }
 }

@@ -43,7 +43,7 @@ public class Promo {
     List<PromoStep> promoSteps = new ArrayList<>();
 
     @OneToMany(mappedBy = "promo"
-            , cascade = CascadeType.ALL
+            , cascade = CascadeType.ALL //todo получается, что при удалении промо сразу удаляется продукты, которые ссылаются на него
             , fetch = FetchType.LAZY
             , orphanRemoval = true)
     @Builder.Default

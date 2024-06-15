@@ -72,5 +72,9 @@ public interface Constant {
         String PRODUCT_SETTINGS = "❗️настройки";
         String BACK_TO_PRODUCTS_LIST = "⬅ назад к списку товаров";
         String CHOOSE_PROMO = "выбрать промокод";
+        String PREVIOUS_PAGE = "<<";
+        String NEXT_PAGE = ">>";
+        String PAGE = "page";
+        String EMPTY = " ";
     }
 }

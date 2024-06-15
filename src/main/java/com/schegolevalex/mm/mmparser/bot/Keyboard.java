@@ -1,7 +1,7 @@
 package com.schegolevalex.mm.mmparser.bot;
 
-import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.entity.Promo;
+import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import static com.schegolevalex.mm.mmparser.bot.Constant.*;
 
+@Slf4j
 public class Keyboard {
 
     public static ReplyKeyboard withMainPageActions() {
@@ -202,24 +203,6 @@ public class Keyboard {
                 .build();
     }
 
-    public static InlineKeyboardMarkup withSelectPromoToProduct(List<Promo> promos, Product product) {
-        List<InlineKeyboardRow> keyboard = new ArrayList<>();
-
-        promos.forEach(promo -> {
-            InlineKeyboardRow row = new InlineKeyboardRow();
-            row.add(InlineKeyboardButton.builder()
-                    .text((product.getPromo() == promo ? "✅ " : "") + promo.getPromoSteps().stream()
-                            .map(promoStep -> String.format(Message.PROMO, promoStep.getDiscount(), promoStep.getPriceFrom()))
-                            .collect(Collectors.joining("; ")))
-                    .callbackData(Button.MY_PRODUCTS + DELIMITER + product.getId() + DELIMITER
-                            + Button.MY_PROMOS + DELIMITER + promo.getId())
-                    .build());
-            keyboard.add(row);
-        });
-
-        return new InlineKeyboardMarkup(keyboard);
-    }
-
     public static ReplyKeyboard withBackToProductListButton() {
         KeyboardRow row = new KeyboardRow();
         row.add(Button.BACK_TO_PRODUCTS_LIST);
@@ -229,14 +212,61 @@ public class Keyboard {
                 .build();
     }
 
-//    public static ReplyKeyboard withBackToPromoSettingsButton() {
-//        KeyboardRow row1 = new KeyboardRow();
-//        row1.add(Constant.Button.PROMOS_SETTINGS);
-//        row1.add(Constant.Button.MY_PROMOS);
-//        KeyboardRow row2 = new KeyboardRow();
-//        row2.add(Constant.Button.BACK);
-//        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(List.of(row1, row2));
-//        replyKeyboardMarkup.setResizeKeyboard(true);
-//        return replyKeyboardMarkup;
-//    }
+    public static InlineKeyboardMarkup withPromosForProduct(List<Promo> promos, long productId, Promo selectedPromo, int page) {
+        List<InlineKeyboardRow> keyboard = new ArrayList<>();
+
+        int pageSize = 5;
+        int totalPages = (int) Math.ceil((double) promos.size() / pageSize);
+        int startIndex = (page - 1) * pageSize;
+        int endIndex = Math.min(startIndex + pageSize, promos.size());
+
+        if (page <= 0 || page > totalPages) {
+            log.error("Неверный номер страницы для клавиатуры: {}", page);
+            throw new RuntimeException("Неверный номер страницы для клавиатуры: " + page);
+        }
+
+        promos.subList(startIndex, endIndex).forEach(promo -> {
+            InlineKeyboardRow row = new InlineKeyboardRow();
+            row.add(InlineKeyboardButton.builder()
+                    .text((selectedPromo == promo ? "✅ " : "") + promo.getPromoSteps().stream()
+                            .map(promoStep -> String.format(Message.PROMO, promoStep.getDiscount(), promoStep.getPriceFrom()))
+                            .collect(Collectors.joining("; ")))
+                    .callbackData(Button.MY_PRODUCTS + DELIMITER + productId + DELIMITER
+                            + Button.MY_PROMOS + DELIMITER + promo.getId())
+                    .build());
+            keyboard.add(row);
+        });
+
+        InlineKeyboardRow bottomRow = new InlineKeyboardRow();
+
+        if (page == 1) {
+            bottomRow.add(InlineKeyboardButton.builder()
+                    .text(Button.EMPTY)
+                    .callbackData(Button.EMPTY)
+                    .build());
+        } else {
+            bottomRow.add(InlineKeyboardButton.builder()
+                    .text(Button.PREVIOUS_PAGE)
+                    .callbackData(Button.PAGE + DELIMITER + (page - 1))
+                    .build());
+        }
+        bottomRow.add(InlineKeyboardButton.builder()
+                .text(Button.BACK)
+                .callbackData(Button.BACK + DELIMITER + productId)
+                .build());
+        if (page == totalPages) {
+            bottomRow.add(InlineKeyboardButton.builder()
+                    .text(Button.EMPTY)
+                    .callbackData(Button.EMPTY)
+                    .build());
+        } else {
+            bottomRow.add(InlineKeyboardButton.builder()
+                    .text(Button.NEXT_PAGE)
+                    .callbackData(Button.PAGE + DELIMITER + (page + 1))
+                    .build());
+        }
+        keyboard.add(bottomRow);
+
+        return new InlineKeyboardMarkup(keyboard);
+    }
 }

@@ -26,7 +26,7 @@ public class ProductSettingsState extends BaseState {
         Long chatId = getChatId(update);
         switch (update.getMessage().getText()) {
             case (Constant.Button.NOTIFICATIONS_SETTINGS) -> context.putState(chatId, BotState.NOTIFICATIONS_SETTINGS);
-            case (Constant.Button.APPLY_PROMO) -> context.putState(chatId, BotState.APPLY_PROMO_SETTINGS);
+            case (Constant.Button.APPLY_PROMO) -> context.putState(chatId, BotState.APPLY_PROMO);
             case (Constant.Button.DELETE_PRODUCT) -> context.putState(chatId, BotState.DELETE_PRODUCT);
             case (Constant.Button.BACK) -> context.putState(chatId, BotState.WATCH_PRODUCTS);
             default -> context.putState(chatId, BotState.UNEXPECTED);

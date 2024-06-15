@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.LinkPreviewOptions;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -40,24 +41,32 @@ public class WatchProductsState extends BaseState {
                 context.putState(chatId, BotState.APPLY_PROMO);
             else if (callbackData.startsWith(Constant.Button.DELETE_PRODUCT))
                 context.putState(chatId, BotState.DELETE_PRODUCT);
+            else if (callbackData.startsWith(Constant.Button.BACK))
+                context.putState(chatId, BotState.WATCH_PRODUCTS);
             else
                 context.putState(chatId, BotState.UNEXPECTED);
-        } else {
+        } else
             switch (update.getMessage().getText()) {
                 case (Constant.Button.ADD_PRODUCT) -> context.putState(chatId, BotState.SUGGESTION_TO_INPUT_LINK);
                 case (Constant.Button.MY_PRODUCTS) -> context.putState(chatId, BotState.WATCH_PRODUCTS);
                 case (Constant.Button.SETTINGS) -> context.putState(chatId, BotState.SETTINGS);
                 default -> context.putState(chatId, BotState.UNEXPECTED);
             }
-        }
     }
 
     @Override
     public void reply(Update update) {
-        if (update.hasCallbackQuery())
-            return;
-
         Long chatId = getChatId(update);
+
+        if (update.hasCallbackQuery() && update.getCallbackQuery().getData().startsWith(Constant.Button.BACK)) {
+            bot.getSilent().execute(EditMessageReplyMarkup.builder()
+                    .chatId(chatId)
+                    .messageId(update.getCallbackQuery().getMessage().getMessageId())
+                    .replyMarkup(Keyboard.withProductSettings(Long.parseLong(update.getCallbackQuery().getData().split(Constant.DELIMITER)[1])))
+                    .build());
+            return;
+        }
+
         List<Product> products = productService.findAllByChatIdAndIsActive(chatId, true);
 
         if (products.isEmpty()) {
@@ -80,12 +89,6 @@ public class WatchProductsState extends BaseState {
                                     .isDisabled(true)
                                     .build())
                             .build()));
-
-//            bot.getSilent().execute(SendMessage.builder()
-//                    .chatId(getChatId(update))
-//                    .text(Constant.Message.CHOOSE_ACTION)
-//                    .replyMarkup(Keyboard.withMainPageActions())
-//                    .build());
         }
     }
 
