@@ -25,11 +25,13 @@ import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateC
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.description.SetMyDescription;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static org.telegram.telegrambots.abilitybots.api.objects.Locality.ALL;
 import static org.telegram.telegrambots.abilitybots.api.objects.Privacy.PUBLIC;
@@ -112,9 +114,13 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                     context.peekPage(getChatId(upd)).afterUpdateReceive(upd);
                     context.peekPage(getChatId(upd)).beforeUpdateReceive(upd);
                 },
-                Flag.TEXT.or(Flag.CALLBACK_QUERY),
+                Flag.TEXT.and(Predicate.not(hasMessageWith("/stop"))).or(Flag.CALLBACK_QUERY),
                 update -> context.isActiveUser(getChatId(update))/*,
                 update -> (!update.getMessage().getText().startsWith("/stop"))*/); // todo если включить, то работает /stop, но не работают callback кнопок
+    }
+
+    private Predicate<Update> hasMessageWith(String text) {
+        return update -> update.getMessage().getText().startsWith(text);
     }
 
     private void sendNotifies(List<Offer> offers, Long chatId) {
