@@ -90,7 +90,7 @@ public interface Constant {
         String NOTIFICATIONS_SETTINGS = "notification-settings";
         String BACK = "back";
         String EMPTY = "empty";
-        String BACK_TO_PRODUCT_SETTINGS = "back-to-product-settings";
+        String BACK_TO_PRODUCT_SETTINGS = "to-product-settings";
         String PRODUCT_NOTIFICATIONS = "product-notifications";
         String PRODUCT_SETTINGS = "product-settings";
         String PRODUCT_DELETE = "product-delete";
