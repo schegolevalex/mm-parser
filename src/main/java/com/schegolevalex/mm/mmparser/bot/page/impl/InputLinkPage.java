@@ -1,8 +1,9 @@
-package com.schegolevalex.mm.mmparser.bot.state;
+package com.schegolevalex.mm.mmparser.bot.page.impl;
 
-import com.schegolevalex.mm.mmparser.bot.Constant;
 import com.schegolevalex.mm.mmparser.bot.Keyboard;
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
+import com.schegolevalex.mm.mmparser.bot.page.base.BasePage;
+import com.schegolevalex.mm.mmparser.bot.page.base.Page;
 import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.service.ProductService;
 import com.schegolevalex.mm.mmparser.service.UserService;
@@ -16,39 +17,28 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.schegolevalex.mm.mmparser.bot.Constant.Button;
+import static com.schegolevalex.mm.mmparser.bot.Constant.Message;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
-public class InputLinkState extends BaseState {
+@Transactional
+public class InputLinkPage extends BasePage {
     private static final String MESSAGE_WITH_URL_REGEXP = ".*(http(s)?://)?(www\\.)?megamarket\\.ru\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
     private static final String URL_REGEXP = "(http(s)?://)?(www\\.)?megamarket\\.ru\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
     private final ProductService productService;
     private final UserService userService;
 
-    public InputLinkState(@Lazy ParserBot bot, ProductService productService, UserService userService) {
+    public InputLinkPage(@Lazy ParserBot bot, ProductService productService, UserService userService) {
         super(bot);
         this.productService = productService;
         this.userService = userService;
     }
 
     @Override
-    public void route(Update update) {
-        Long chatId = getChatId(update);
-        String userText = update.getMessage().getText();
-
-        if (userText.equalsIgnoreCase(Constant.Button.MAIN_PAGE)) {
-            context.putState(chatId, BotState.MAIN_PAGE_ACTION);
-        } else if (userText.matches(MESSAGE_WITH_URL_REGEXP)) {
-            context.putState(chatId, BotState.INPUT_LINK);
-        } else
-            context.putState(chatId, BotState.UNEXPECTED);
-    }
-
-    @Override
-    @Transactional
-    public void reply(Update update) {
-        Long chatId = AbilityUtils.getChatId(update);
-        String userText = update.getMessage().getText();
+    public void beforeUpdateReceive(Update prevUpdate) {
+        Long chatId = AbilityUtils.getChatId(prevUpdate);
+        String userText = prevUpdate.getMessage().getText();
 
         Pattern pattern = Pattern.compile(URL_REGEXP);
         Matcher matcher = pattern.matcher(userText);
@@ -67,13 +57,26 @@ public class InputLinkState extends BaseState {
             bot.getSilent().execute(SendMessage.builder()
                     .chatId(chatId)
                     .replyMarkup(Keyboard.withMainPageButton())
-                    .text(Constant.Message.LINK_IS_ACCEPTED)
+                    .text(Message.LINK_IS_ACCEPTED)
                     .build());
         }
     }
 
     @Override
-    public BotState getType() {
-        return BotState.INPUT_LINK;
+    public void afterUpdateReceive(Update nextUpdate) {
+        Long chatId = getChatId(nextUpdate);
+        String userText = nextUpdate.getMessage().getText();
+
+        if (userText.equalsIgnoreCase(Button.MAIN_PAGE)) {
+            context.putPage(chatId, Page.MAIN);
+        } else if (userText.matches(MESSAGE_WITH_URL_REGEXP)) {
+            context.putPage(chatId, Page.INPUT_LINK);
+        } else
+            context.putPage(chatId, Page.UNEXPECTED);
+    }
+
+    @Override
+    public Page getPage() {
+        return Page.INPUT_LINK;
     }
 }

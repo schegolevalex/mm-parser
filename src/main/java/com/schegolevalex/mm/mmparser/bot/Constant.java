@@ -24,7 +24,7 @@ public interface Constant {
                 - количество бонусов: %d\n
                 - ссылка: %s""";
         String CHOOSE_SETTINGS = "Что настроим? 🔧";
-        String PROMOS_IS_EMPTY = "Вы еще не добавили ни один промокод 😦";
+        String PROMOS_IS_EMPTY = "нет промокодов 😦";
         String CHOOSE_YOUR_CASHBACK_LEVEL = """
                 Выберите Ваш уровень 🟢 Сберпрайм на текущий месяц\\.\
 
@@ -47,8 +47,6 @@ public interface Constant {
                 ||обычно промокод содержит несколько скидок в зависимости от суммы покупки, например, \
                 __*"500 от 2000 рублей, 800 от 3000 рублей, 1500 от 10000 рублей"*__\\. Всё это один промокод\\!||""";
         String PROMO = "%d/%d";
-
-        String PRODUCT_IS_DELETED = "Товар \"%s\" удален";
     }
 
     interface Button {
@@ -66,18 +64,30 @@ public interface Constant {
         String YES_ADD_MORE_PROMO_STEPS = "⏭ да, добавить еще скидку в промокод";
         String NO_SAVE_PROMO = "💾 нет, сохранить промокод";
         String DELETE_PROMO = "🗑 удалить промокод";
-        String DELETE_PRODUCT = "🗑 удалить товар";
         String APPLY_PROMO = "🔵 применить промокод";
         String NOTIFICATIONS_SETTINGS = "🔔 настроить уведомления";
-        String BACK_TO_PRODUCTS_LIST = "⬅ назад к списку товаров";
-        String CHOOSE_PROMO = "выбрать промокод";
         String PREVIOUS_PAGE = "<<";
         String NEXT_PAGE = ">>";
-        String PAGE = "page";
         String EMPTY = " ";
         String PRODUCT_URL = "🔗";
         String PRODUCT_NOTIFICATIONS = "🔔";
         String PRODUCT_SETTINGS = "🛠";
         String PRODUCT_DELETE = "🗑";
+        String BACK_TO_PRODUCT_SETTINGS = "⬅ 🛠";
+    }
+
+    interface Callback {
+        String MY_PRODUCTS = "products";
+        String MY_PROMOS = "promos";
+        String APPLY_PROMO = "apply-promo";
+        String DELETE_PROMO = "delete-promo";
+        String KEYBOARD_PAGES = "pages";
+        String NOTIFICATIONS_SETTINGS = "notification-settings";
+        String BACK = "back";
+        String EMPTY = "empty";
+        String BACK_TO_PRODUCT_SETTINGS = "back-to-product-settings";
+        String PRODUCT_NOTIFICATIONS = "product-notifications";
+        String PRODUCT_SETTINGS = "product-settings";
+        String PRODUCT_DELETE = "product-delete";
     }
 }

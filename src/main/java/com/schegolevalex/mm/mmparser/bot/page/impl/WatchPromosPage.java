@@ -1,8 +1,9 @@
-package com.schegolevalex.mm.mmparser.bot.state;
+package com.schegolevalex.mm.mmparser.bot.page.impl;
 
-import com.schegolevalex.mm.mmparser.bot.Constant;
 import com.schegolevalex.mm.mmparser.bot.Keyboard;
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
+import com.schegolevalex.mm.mmparser.bot.page.base.BasePage;
+import com.schegolevalex.mm.mmparser.bot.page.base.Page;
 import com.schegolevalex.mm.mmparser.entity.Promo;
 import com.schegolevalex.mm.mmparser.service.PromoService;
 import org.springframework.context.annotation.Lazy;
@@ -17,52 +18,31 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static com.schegolevalex.mm.mmparser.bot.Constant.*;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
 @Transactional
-public class WatchPromosState extends BaseState {
+public class WatchPromosPage extends BasePage {
     private final PromoService promoService;
 
-    public WatchPromosState(@Lazy ParserBot bot, PromoService promoService) {
+    public WatchPromosPage(@Lazy ParserBot bot, PromoService promoService) {
         super(bot);
         this.promoService = promoService;
     }
 
     @Override
-    public void route(Update update) {
-        Long chatId = getChatId(update);
-        if (update.hasCallbackQuery() && update.getCallbackQuery().getData().startsWith(Constant.Button.DELETE_PROMO)) {
-            promoService.deleteById(Long.parseLong(update.getCallbackQuery().getData().split(Constant.DELIMITER)[1]));
-            bot.getSilent().execute(DeleteMessage.builder()
-                    .chatId(chatId)
-                    .messageId(update.getCallbackQuery().getMessage().getMessageId())
-                    .build());
-        } else {
-            switch (update.getMessage().getText()) {
-                case (Constant.Button.ADD_PROMO) -> {
-                    context.putPromo(chatId, new Promo());
-                    context.putState(chatId, BotState.ADD_PROMO_STEP_DISCOUNT);
-                }
-                case (Constant.Button.MY_PROMOS) -> context.putState(chatId, BotState.WATCH_PROMOS);
-                case (Constant.Button.BACK) -> context.putState(chatId, BotState.SETTINGS);
-                default -> context.putState(chatId, BotState.UNEXPECTED);
-            }
-        }
-    }
-
-    @Override
-    public void reply(Update update) {
-        if (update.hasCallbackQuery())
+    public void beforeUpdateReceive(Update prevUpdate) {
+        if (prevUpdate.hasCallbackQuery())
             return;
 
-        Long chatId = getChatId(update);
+        Long chatId = getChatId(prevUpdate);
         List<Promo> promos = promoService.findAllByChatId(chatId);
 
         if (promos.isEmpty()) {
             bot.getSilent().execute(SendMessage.builder()
                     .chatId(chatId)
-                    .text(Constant.Message.PROMOS_IS_EMPTY)
+                    .text(Message.PROMOS_IS_EMPTY)
                     .build());
         } else {
             AtomicInteger num = new AtomicInteger(1);
@@ -72,7 +52,7 @@ public class WatchPromosState extends BaseState {
                             .chatId(chatId)
                             .text(num.getAndIncrement() + ". " +
                                     promo.getPromoSteps().stream()
-                                            .map(promoStep -> String.format(Constant.Message.PROMO, promoStep.getDiscount(), promoStep.getPriceFrom()))
+                                            .map(promoStep -> String.format(Message.PROMO, promoStep.getDiscount(), promoStep.getPriceFrom()))
                                             .collect(Collectors.joining("; ")))
                             .replyMarkup(Keyboard.withDeletePromoButton(promo.getId()))
                             .build()));
@@ -80,7 +60,29 @@ public class WatchPromosState extends BaseState {
     }
 
     @Override
-    public BotState getType() {
-        return BotState.WATCH_PROMOS;
+    public void afterUpdateReceive(Update nextUpdate) {
+        Long chatId = getChatId(nextUpdate);
+        if (nextUpdate.hasCallbackQuery() && nextUpdate.getCallbackQuery().getData().startsWith(Callback.DELETE_PROMO)) {
+            promoService.deleteById(Long.parseLong(nextUpdate.getCallbackQuery().getData().split(DELIMITER)[1]));
+            bot.getSilent().execute(DeleteMessage.builder()
+                    .chatId(chatId)
+                    .messageId(nextUpdate.getCallbackQuery().getMessage().getMessageId())
+                    .build());
+        } else {
+            switch (nextUpdate.getMessage().getText()) {
+                case (Button.ADD_PROMO) -> {
+                    context.putPromo(chatId, new Promo());
+                    context.putPage(chatId, Page.ADD_PROMO_STEP_DISCOUNT);
+                }
+                case (Button.MY_PROMOS) -> context.putPage(chatId, Page.WATCH_PROMOS);
+                case (Button.BACK) -> context.putPage(chatId, Page.COMMON_SETTINGS);
+                default -> context.putPage(chatId, Page.UNEXPECTED);
+            }
+        }
+    }
+
+    @Override
+    public Page getPage() {
+        return Page.WATCH_PROMOS;
     }
 }

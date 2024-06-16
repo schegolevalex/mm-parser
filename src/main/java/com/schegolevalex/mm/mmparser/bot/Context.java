@@ -1,7 +1,7 @@
 package com.schegolevalex.mm.mmparser.bot;
 
-import com.schegolevalex.mm.mmparser.bot.state.BaseState;
-import com.schegolevalex.mm.mmparser.bot.state.BotState;
+import com.schegolevalex.mm.mmparser.bot.page.base.BasePage;
+import com.schegolevalex.mm.mmparser.bot.page.base.Page;
 import com.schegolevalex.mm.mmparser.entity.Promo;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -13,54 +13,54 @@ import java.util.Stack;
 
 @Component
 public class Context {
-    private final List<BaseState> possibleStates;
-    private final Map<Long, Stack<BaseState>> chatStates = new HashMap<>();
+    private final List<BasePage> allPossiblePages;
+    private final Map<Long, Stack<BasePage>> chatPages = new HashMap<>();
     private final Map<Long, Promo> tempPromo = new HashMap<>();
     private final Map<Long, Long> configurableProductIds = new HashMap<>();
 
-    public Context(@Lazy List<BaseState> possibleStates) {
-        this.possibleStates = possibleStates;
+    public Context(@Lazy List<BasePage> allPossiblePages) {
+        this.allPossiblePages = allPossiblePages;
     }
 
-    public void putState(Long chatId, BotState botState) {
-        Stack<BaseState> stack = getStateStack(chatId);
-        if (stack.peek().getType() != botState)
-            stack.push(findState(botState));
+    public void putPage(Long chatId, Page page) {
+        Stack<BasePage> pageStack = getPageStack(chatId);
+        if (pageStack.peek().getPage() != page)
+            pageStack.push(findPage(page));
     }
 
-    public BaseState peekState(Long chatId) {
-        return getStateStack(chatId).peek();
+    public BasePage peekPage(Long chatId) {
+        return getPageStack(chatId).peek();
     }
 
-    public BaseState popState(Long chatId) {
-        return getStateStack(chatId).pop();
+    public BasePage popPage(Long chatId) {
+        return getPageStack(chatId).pop();
     }
 
     public boolean isActiveUser(Long chatId) {
-        return chatStates.containsKey(chatId);
+        return chatPages.containsKey(chatId);
     }
 
-    private BaseState findState(BotState botState) {
-        return possibleStates
+    private BasePage findPage(Page page) {
+        return allPossiblePages
                 .stream()
-                .filter(state -> state.getType().equals(botState))
+                .filter(state -> state.getPage().equals(page))
                 .findFirst()
                 .orElse(null);
     }
 
-    private Stack<BaseState> getStateStack(Long chatId) {
-        Stack<BaseState> stack;
-        if (!chatStates.containsKey(chatId)) {
+    private Stack<BasePage> getPageStack(Long chatId) {
+        Stack<BasePage> stack;
+        if (!chatPages.containsKey(chatId)) {
             stack = new Stack<>();
-            stack.push(findState(BotState.NEW_STATE));
-            chatStates.put(chatId, stack);
+            stack.push(findPage(Page.NEW_CONVERSATION));
+            chatPages.put(chatId, stack);
         } else
-            stack = chatStates.get(chatId);
+            stack = chatPages.get(chatId);
         return stack;
     }
 
-    public void clearState(Long chatId) {
-        chatStates.remove(chatId);
+    public void clearPages(Long chatId) {
+        chatPages.remove(chatId);
     }
 
     public void putPromo(Long chatId, Promo promo) {

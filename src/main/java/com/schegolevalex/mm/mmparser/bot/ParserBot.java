@@ -70,7 +70,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                 .privacy(PUBLIC)
                 .action(ctx -> {
                     Long chatId = getChatId(ctx.update());
-                    this.context.clearState(chatId);
+                    this.context.clearPages(chatId);
                     this.context.clearPromo(chatId);
 
                     if (userService.findByChatId(chatId).isEmpty()) {
@@ -82,8 +82,8 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                                 .isPremium((ctx.user().getIsPremium() != null) ? ctx.user().getIsPremium() : false)
                                 .build());
                     }
-                    this.context.peekState(chatId).route(ctx.update());
-                    this.context.peekState(chatId).reply(ctx.update());
+                    this.context.peekPage(chatId).afterUpdateReceive(ctx.update());
+                    this.context.peekPage(chatId).beforeUpdateReceive(ctx.update());
                 })
                 .build();
     }
@@ -96,7 +96,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                 .privacy(PUBLIC)
                 .action(ctx -> {
                     Long chatId = getChatId(ctx.update());
-                    context.clearState(chatId);
+                    context.clearPages(chatId);
                     context.clearPromo(chatId);
                     silent.execute(SendMessage.builder()
                             .chatId(chatId)
@@ -109,8 +109,8 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
 
     public Reply replyToButtons() {
         return Reply.of((bot, upd) -> {
-                    context.peekState(getChatId(upd)).route(upd);
-                    context.peekState(getChatId(upd)).reply(upd);
+                    context.peekPage(getChatId(upd)).afterUpdateReceive(upd);
+                    context.peekPage(getChatId(upd)).beforeUpdateReceive(upd);
                 },
                 Flag.TEXT.or(Flag.CALLBACK_QUERY),
                 update -> context.isActiveUser(getChatId(update))/*,
@@ -137,7 +137,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
             });
     }
 
-    @Scheduled(cron = "0 */1 * * * *", zone = "Europe/Moscow")
+    @Scheduled(cron = "0 */10 * * * *", zone = "Europe/Moscow")
     protected void parseAndNotify() {
         productService.findAllByIsActive(true).forEach(product -> {
             List<Offer> parsedOffers = parser.parseProduct(product);

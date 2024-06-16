@@ -1,8 +1,9 @@
-package com.schegolevalex.mm.mmparser.bot.state;
+package com.schegolevalex.mm.mmparser.bot.page.impl;
 
-import com.schegolevalex.mm.mmparser.bot.Constant;
 import com.schegolevalex.mm.mmparser.bot.Keyboard;
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
+import com.schegolevalex.mm.mmparser.bot.page.base.MainKeyboardPage;
+import com.schegolevalex.mm.mmparser.bot.page.base.Page;
 import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.service.ProductService;
 import org.springframework.context.annotation.Lazy;
@@ -17,54 +18,30 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.schegolevalex.mm.mmparser.bot.Constant.*;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
 @Transactional
-public class WatchProductsState extends BaseState {
+public class WatchProductsPage extends MainKeyboardPage {
     private final ProductService productService;
 
-    public WatchProductsState(@Lazy ParserBot bot, ProductService productService) {
+    public WatchProductsPage(@Lazy ParserBot bot, ProductService productService) {
         super(bot);
         this.productService = productService;
     }
 
     @Override
-    public void route(Update update) {
-        Long chatId = getChatId(update);
+    public void beforeUpdateReceive(Update prevUpdate) {
+        Long chatId = getChatId(prevUpdate);
 
-        if (update.hasCallbackQuery()) {
-            String callbackData = update.getCallbackQuery().getData();
-            if (callbackData.startsWith(Constant.Button.PRODUCT_NOTIFICATIONS))
-                context.putState(chatId, BotState.PRODUCT_NOTIFICATIONS);
-            else if (callbackData.startsWith(Constant.Button.PRODUCT_SETTINGS))
-                context.putState(chatId, BotState.PRODUCT_SETTINGS);
-            else if (callbackData.startsWith(Constant.Button.PRODUCT_DELETE))
-                context.putState(chatId, BotState.DELETE_PRODUCT);
-            else if (callbackData.startsWith(Constant.Button.BACK))
-                context.putState(chatId, BotState.WATCH_PRODUCTS);
-            else
-                context.putState(chatId, BotState.UNEXPECTED);
-        } else
-            switch (update.getMessage().getText()) {
-                case (Constant.Button.ADD_PRODUCT) -> context.putState(chatId, BotState.SUGGESTION_TO_INPUT_LINK);
-                case (Constant.Button.MY_PRODUCTS) -> context.putState(chatId, BotState.WATCH_PRODUCTS);
-                case (Constant.Button.SETTINGS) -> context.putState(chatId, BotState.SETTINGS);
-                default -> context.putState(chatId, BotState.UNEXPECTED);
-            }
-    }
-
-    @Override
-    public void reply(Update update) {
-        Long chatId = getChatId(update);
-
-        if (update.hasCallbackQuery() && update.getCallbackQuery().getData().startsWith(Constant.Button.BACK)) {
-            long productId = Long.parseLong(update.getCallbackQuery().getData().split(Constant.DELIMITER)[1]);
+        if (prevUpdate.hasCallbackQuery() && prevUpdate.getCallbackQuery().getData().startsWith(Callback.BACK)) {
+            long productId = Long.parseLong(prevUpdate.getCallbackQuery().getData().split(DELIMITER)[1]);
             Product product = productService.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
 
             bot.getSilent().execute(EditMessageReplyMarkup.builder()
                     .chatId(chatId)
-                    .messageId(update.getCallbackQuery().getMessage().getMessageId())
+                    .messageId(prevUpdate.getCallbackQuery().getMessage().getMessageId())
                     .replyMarkup(Keyboard.withProduct(product.getId(), product.getUrl()))
                     .build());
         } else {
@@ -73,7 +50,7 @@ public class WatchProductsState extends BaseState {
             if (products.isEmpty()) {
                 bot.getSilent().execute(SendMessage.builder()
                         .chatId(chatId)
-                        .text(Constant.Message.PRODUCTS_IS_EMPTY)
+                        .text(Message.PRODUCTS_IS_EMPTY)
                         .replyMarkup(Keyboard.withMainPageActions())
                         .build());
             } else {
@@ -93,7 +70,27 @@ public class WatchProductsState extends BaseState {
     }
 
     @Override
-    public BotState getType() {
-        return BotState.WATCH_PRODUCTS;
+    public void afterUpdateReceive(Update nextUpdate) {
+        Long chatId = getChatId(nextUpdate);
+
+        if (nextUpdate.hasCallbackQuery()) {
+            String callbackData = nextUpdate.getCallbackQuery().getData();
+            if (callbackData.startsWith(Callback.PRODUCT_NOTIFICATIONS))
+                context.putPage(chatId, Page.PRODUCT_NOTIFICATIONS);
+            else if (callbackData.startsWith(Callback.PRODUCT_SETTINGS))
+                context.putPage(chatId, Page.PRODUCT_SETTINGS);
+            else if (callbackData.startsWith(Callback.PRODUCT_DELETE))
+                context.putPage(chatId, Page.DELETE_PRODUCT);
+            else if (callbackData.startsWith(Callback.BACK))
+                context.putPage(chatId, Page.WATCH_PRODUCTS);
+            else
+                context.putPage(chatId, Page.UNEXPECTED);
+        } else
+            resolveMainKeyboard(nextUpdate);
+    }
+
+    @Override
+    public Page getPage() {
+        return Page.WATCH_PRODUCTS;
     }
 }
