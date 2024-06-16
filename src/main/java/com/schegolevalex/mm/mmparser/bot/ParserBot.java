@@ -115,8 +115,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                     context.peekPage(getChatId(upd)).beforeUpdateReceive(upd);
                 },
                 Flag.TEXT.and(Predicate.not(hasMessageWith("/stop"))).or(Flag.CALLBACK_QUERY),
-                update -> context.isActiveUser(getChatId(update))/*,
-                update -> (!update.getMessage().getText().startsWith("/stop"))*/); // todo если включить, то работает /stop, но не работают callback кнопок
+                update -> context.isActiveUser(getChatId(update)));
     }
 
     private Predicate<Update> hasMessageWith(String text) {
