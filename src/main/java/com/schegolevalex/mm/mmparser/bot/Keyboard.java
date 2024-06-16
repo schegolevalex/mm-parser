@@ -39,14 +39,14 @@ public class Keyboard {
                 .build();
     }
 
-    public static ReplyKeyboard withOkButton() {
-        KeyboardRow row = new KeyboardRow();
-        row.add(Button.OK);
-        return ReplyKeyboardMarkup.builder()
-                .keyboard(List.of(row))
-                .resizeKeyboard(true)
-                .build();
-    }
+//    public static ReplyKeyboard withOkButton() {
+//        KeyboardRow row = new KeyboardRow();
+//        row.add(Button.OK);
+//        return ReplyKeyboardMarkup.builder()
+//                .keyboard(List.of(row))
+//                .resizeKeyboard(true)
+//                .build();
+//    }
 
     public static ReplyKeyboard withMainPageButton() {
         KeyboardRow row = new KeyboardRow();
@@ -159,15 +159,15 @@ public class Keyboard {
         return new InlineKeyboardMarkup(List.of(row1));
     }
 
-    public static InlineKeyboardMarkup withChoosePromoForProductButton(Long promoId, Long productId) {
-        InlineKeyboardRow row = new InlineKeyboardRow();
-        row.add(InlineKeyboardButton.builder()
-                .text(Button.CHOOSE_PROMO)
-                .callbackData(Button.MY_PRODUCTS + DELIMITER + productId
-                        + DELIMITER + Button.CHOOSE_PROMO + DELIMITER + promoId)
-                .build());
-        return new InlineKeyboardMarkup(List.of(row));
-    }
+//    public static InlineKeyboardMarkup withChoosePromoForProductButton(Long promoId, Long productId) {
+//        InlineKeyboardRow row = new InlineKeyboardRow();
+//        row.add(InlineKeyboardButton.builder()
+//                .text(Button.CHOOSE_PROMO)
+//                .callbackData(Button.MY_PRODUCTS + DELIMITER + productId
+//                        + DELIMITER + Button.CHOOSE_PROMO + DELIMITER + promoId)
+//                .build());
+//        return new InlineKeyboardMarkup(List.of(row));
+//    }
 
     public static InlineKeyboardMarkup withProductSettings(Long productId) {
         InlineKeyboardRow row1 = new InlineKeyboardRow();
@@ -182,35 +182,35 @@ public class Keyboard {
                 .build());
         InlineKeyboardRow row3 = new InlineKeyboardRow();
         row3.add(InlineKeyboardButton.builder()
-                .text(Constant.Button.DELETE_PRODUCT)
-                .callbackData(Constant.Button.DELETE_PRODUCT + Constant.DELIMITER + productId)
+                .text(Button.BACK)
+                .callbackData(Button.BACK + Constant.DELIMITER + productId)
                 .build());
         return new InlineKeyboardMarkup(List.of(row1, row2, row3));
     }
 
-    public static ReplyKeyboard withProductSettingsActions() {
-        KeyboardRow row1 = new KeyboardRow();
-        row1.add(Button.NOTIFICATIONS_SETTINGS);
-        KeyboardRow row2 = new KeyboardRow();
-        row2.add(Button.APPLY_PROMO);
-        KeyboardRow row3 = new KeyboardRow();
-        row3.add(Button.DELETE_PRODUCT);
-        KeyboardRow row4 = new KeyboardRow();
-        row4.add(Button.BACK);
-        return ReplyKeyboardMarkup.builder()
-                .keyboard(List.of(row1, row2, row3, row4))
-                .resizeKeyboard(true)
-                .build();
-    }
+//    public static ReplyKeyboard withProductSettingsActions() {
+//        KeyboardRow row1 = new KeyboardRow();
+//        row1.add(Button.NOTIFICATIONS_SETTINGS);
+//        KeyboardRow row2 = new KeyboardRow();
+//        row2.add(Button.APPLY_PROMO);
+//        KeyboardRow row3 = new KeyboardRow();
+//        row3.add(Button.DELETE_PRODUCT);
+//        KeyboardRow row4 = new KeyboardRow();
+//        row4.add(Button.BACK);
+//        return ReplyKeyboardMarkup.builder()
+//                .keyboard(List.of(row1, row2, row3, row4))
+//                .resizeKeyboard(true)
+//                .build();
+//    }
 
-    public static ReplyKeyboard withBackToProductListButton() {
-        KeyboardRow row = new KeyboardRow();
-        row.add(Button.BACK_TO_PRODUCTS_LIST);
-        return ReplyKeyboardMarkup.builder()
-                .keyboard(List.of(row))
-                .resizeKeyboard(true)
-                .build();
-    }
+//    public static ReplyKeyboard withBackToProductListButton() {
+//        KeyboardRow row = new KeyboardRow();
+//        row.add(Button.BACK_TO_PRODUCTS_LIST);
+//        return ReplyKeyboardMarkup.builder()
+//                .keyboard(List.of(row))
+//                .resizeKeyboard(true)
+//                .build();
+//    }
 
     public static InlineKeyboardMarkup withPromosForProduct(List<Promo> promos, long productId, Promo selectedPromo, int page) {
         List<InlineKeyboardRow> keyboard = new ArrayList<>();
@@ -225,17 +225,26 @@ public class Keyboard {
             throw new RuntimeException("Неверный номер страницы для клавиатуры: " + page);
         }
 
-        promos.subList(startIndex, endIndex).forEach(promo -> {
+        if (promos.isEmpty()) {
             InlineKeyboardRow row = new InlineKeyboardRow();
             row.add(InlineKeyboardButton.builder()
-                    .text((selectedPromo == promo ? "✅ " : "") + promo.getPromoSteps().stream()
-                            .map(promoStep -> String.format(Message.PROMO, promoStep.getDiscount(), promoStep.getPriceFrom()))
-                            .collect(Collectors.joining("; ")))
-                    .callbackData(Button.MY_PRODUCTS + DELIMITER + productId + DELIMITER
-                            + Button.MY_PROMOS + DELIMITER + promo.getId())
+                    .text(Message.PROMOS_IS_EMPTY)
+                    .callbackData(Button.EMPTY)
                     .build());
             keyboard.add(row);
-        });
+        } else {
+            promos.subList(startIndex, endIndex).forEach(promo -> {
+                InlineKeyboardRow row = new InlineKeyboardRow();
+                row.add(InlineKeyboardButton.builder()
+                        .text((selectedPromo == promo ? "✅ " : "") + promo.getPromoSteps().stream()
+                                .map(promoStep -> String.format(Message.PROMO, promoStep.getDiscount(), promoStep.getPriceFrom()))
+                                .collect(Collectors.joining("; ")))
+                        .callbackData(Button.MY_PRODUCTS + DELIMITER + productId + DELIMITER
+                                + Button.MY_PROMOS + DELIMITER + promo.getId())
+                        .build());
+                keyboard.add(row);
+            });
+        }
 
         InlineKeyboardRow bottomRow = new InlineKeyboardRow();
 
@@ -268,5 +277,27 @@ public class Keyboard {
         keyboard.add(bottomRow);
 
         return new InlineKeyboardMarkup(keyboard);
+    }
+
+    public static InlineKeyboardMarkup withProduct(Long productId, String url) {
+        InlineKeyboardRow row = new InlineKeyboardRow();
+        row.add(InlineKeyboardButton.builder()
+                .text(Button.PRODUCT_URL)
+                .url(url)
+                .callbackData(Button.PRODUCT_URL + Constant.DELIMITER + productId)
+                .build());
+        row.add(InlineKeyboardButton.builder()
+                .text(Button.PRODUCT_NOTIFICATIONS)
+                .callbackData(Button.PRODUCT_NOTIFICATIONS + Constant.DELIMITER + productId)
+                .build());
+        row.add(InlineKeyboardButton.builder()
+                .text(Button.PRODUCT_SETTINGS)
+                .callbackData(Button.PRODUCT_SETTINGS + Constant.DELIMITER + productId)
+                .build());
+        row.add(InlineKeyboardButton.builder()
+                .text(Button.PRODUCT_DELETE)
+                .callbackData(Button.PRODUCT_DELETE + Constant.DELIMITER + productId)
+                .build());
+        return new InlineKeyboardMarkup(List.of(row));
     }
 }

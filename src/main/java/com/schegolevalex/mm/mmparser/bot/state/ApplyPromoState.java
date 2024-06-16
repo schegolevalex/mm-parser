@@ -66,16 +66,11 @@ public class ApplyPromoState extends BaseState {
         if (update.hasCallbackQuery() && update.getCallbackQuery().getData().startsWith(Constant.Button.PAGE))
             page = Integer.parseInt(update.getCallbackQuery().getData().split(Constant.DELIMITER)[1]);
 
-
-        if (promos.isEmpty()) {
-            // todo
-        } else {
-            bot.getSilent().execute(EditMessageReplyMarkup.builder()
-                    .chatId(chatId)
-                    .messageId(update.getCallbackQuery().getMessage().getMessageId())
-                    .replyMarkup(Keyboard.withPromosForProduct(promos, productId, product.getPromo(), page))
-                    .build());
-        }
+        bot.getSilent().execute(EditMessageReplyMarkup.builder()
+                .chatId(chatId)
+                .messageId(update.getCallbackQuery().getMessage().getMessageId())
+                .replyMarkup(Keyboard.withPromosForProduct(promos, productId, product.getPromo(), page))
+                .build());
     }
 
     @Override

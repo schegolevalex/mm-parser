@@ -35,11 +35,11 @@ public class WatchProductsState extends BaseState {
 
         if (update.hasCallbackQuery()) {
             String callbackData = update.getCallbackQuery().getData();
-            if (callbackData.startsWith(Constant.Button.NOTIFICATIONS_SETTINGS))
-                context.putState(chatId, BotState.NOTIFICATIONS_SETTINGS);
-            else if (callbackData.startsWith(Constant.Button.APPLY_PROMO))
-                context.putState(chatId, BotState.APPLY_PROMO);
-            else if (callbackData.startsWith(Constant.Button.DELETE_PRODUCT))
+            if (callbackData.startsWith(Constant.Button.PRODUCT_NOTIFICATIONS))
+                context.putState(chatId, BotState.PRODUCT_NOTIFICATIONS);
+            else if (callbackData.startsWith(Constant.Button.PRODUCT_SETTINGS))
+                context.putState(chatId, BotState.PRODUCT_SETTINGS);
+            else if (callbackData.startsWith(Constant.Button.PRODUCT_DELETE))
                 context.putState(chatId, BotState.DELETE_PRODUCT);
             else if (callbackData.startsWith(Constant.Button.BACK))
                 context.putState(chatId, BotState.WATCH_PRODUCTS);
@@ -59,36 +59,36 @@ public class WatchProductsState extends BaseState {
         Long chatId = getChatId(update);
 
         if (update.hasCallbackQuery() && update.getCallbackQuery().getData().startsWith(Constant.Button.BACK)) {
+            long productId = Long.parseLong(update.getCallbackQuery().getData().split(Constant.DELIMITER)[1]);
+            Product product = productService.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
+
             bot.getSilent().execute(EditMessageReplyMarkup.builder()
                     .chatId(chatId)
                     .messageId(update.getCallbackQuery().getMessage().getMessageId())
-                    .replyMarkup(Keyboard.withProductSettings(Long.parseLong(update.getCallbackQuery().getData().split(Constant.DELIMITER)[1])))
-                    .build());
-            return;
-        }
-
-        List<Product> products = productService.findAllByChatIdAndIsActive(chatId, true);
-
-        if (products.isEmpty()) {
-            bot.getSilent().execute(SendMessage.builder()
-                    .chatId(chatId)
-                    .text(Constant.Message.PRODUCTS_IS_EMPTY)
-                    .replyMarkup(Keyboard.withMainPageActions())
+                    .replyMarkup(Keyboard.withProduct(product.getId(), product.getUrl()))
                     .build());
         } else {
-            AtomicInteger num = new AtomicInteger(1);
-            products.stream()
-                    .sorted(Comparator.comparing(Product::getCreatedAt))
-                    .forEach(product -> bot.getSilent().execute(SendMessage.builder()
-                            .chatId(chatId)
-                            .text(num.getAndIncrement() + ". " +
-                                    product.getTitle() + "\n" +
-                                    product.getUrl())
-                            .replyMarkup(Keyboard.withProductSettings(product.getId()))
-                            .linkPreviewOptions(LinkPreviewOptions.builder()
-                                    .isDisabled(true)
-                                    .build())
-                            .build()));
+            List<Product> products = productService.findAllByChatIdAndIsActive(chatId, true);
+
+            if (products.isEmpty()) {
+                bot.getSilent().execute(SendMessage.builder()
+                        .chatId(chatId)
+                        .text(Constant.Message.PRODUCTS_IS_EMPTY)
+                        .replyMarkup(Keyboard.withMainPageActions())
+                        .build());
+            } else {
+                AtomicInteger num = new AtomicInteger(1);
+                products.stream()
+                        .sorted(Comparator.comparing(Product::getCreatedAt))
+                        .forEach(product -> bot.getSilent().execute(SendMessage.builder()
+                                .chatId(chatId)
+                                .text(num.getAndIncrement() + ". " + product.getTitle())
+                                .replyMarkup(Keyboard.withProduct(product.getId(), product.getUrl()))
+                                .linkPreviewOptions(LinkPreviewOptions.builder()
+                                        .isDisabled(true)
+                                        .build())
+                                .build()));
+            }
         }
     }
 

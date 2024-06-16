@@ -69,12 +69,15 @@ public interface Constant {
         String DELETE_PRODUCT = "🗑 удалить товар";
         String APPLY_PROMO = "🔵 применить промокод";
         String NOTIFICATIONS_SETTINGS = "🔔 настроить уведомления";
-        String PRODUCT_SETTINGS = "❗️настройки";
         String BACK_TO_PRODUCTS_LIST = "⬅ назад к списку товаров";
         String CHOOSE_PROMO = "выбрать промокод";
         String PREVIOUS_PAGE = "<<";
         String NEXT_PAGE = ">>";
         String PAGE = "page";
         String EMPTY = " ";
+        String PRODUCT_URL = "🔗";
+        String PRODUCT_NOTIFICATIONS = "🔔";
+        String PRODUCT_SETTINGS = "🛠";
+        String PRODUCT_DELETE = "🗑";
     }
 }
