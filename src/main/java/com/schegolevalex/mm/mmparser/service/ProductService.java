@@ -23,19 +23,11 @@ public class ProductService {
         return productRepository.findAllByChatIdAndActive(chatId, isActive);
     }
 
-    public Product saveAndFlush(Product product) {
-        return productRepository.saveAndFlush(product);
-    }
-
-    public List<Product> findAllByIsActive(boolean b) {
-        return productRepository.findAllByIsActive(b);
+    public List<Product> findAllByIsActive(boolean isActive) {
+        return productRepository.findAllByIsActive(isActive);
     }
 
     public Product save(Product product) {
         return productRepository.save(product);
-    }
-
-    public void deleteById(long id) {
-        productRepository.deleteById(id);
     }
 }

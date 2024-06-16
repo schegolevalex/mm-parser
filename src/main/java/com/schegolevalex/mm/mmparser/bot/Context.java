@@ -16,7 +16,6 @@ public class Context {
     private final List<BasePage> allPossiblePages;
     private final Map<Long, Stack<BasePage>> chatPages = new HashMap<>();
     private final Map<Long, Promo> tempPromo = new HashMap<>();
-    private final Map<Long, Long> configurableProductIds = new HashMap<>();
 
     public Context(@Lazy List<BasePage> allPossiblePages) {
         this.allPossiblePages = allPossiblePages;
@@ -73,17 +72,5 @@ public class Context {
 
     public void clearPromo(Long chatId) {
         tempPromo.remove(chatId);
-    }
-
-    public void putConfigurableProductId(Long chatId, Long productId) {
-        configurableProductIds.put(chatId, productId);
-    }
-
-    public Long getConfigurableProductId(Long chatId) {
-        return configurableProductIds.get(chatId);
-    }
-
-    public void clearConfigurableProductId(Long chatId) {
-        configurableProductIds.remove(chatId);
     }
 }

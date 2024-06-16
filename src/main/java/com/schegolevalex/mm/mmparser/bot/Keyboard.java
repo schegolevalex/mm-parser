@@ -48,14 +48,14 @@ public class Keyboard {
                 .build();
     }
 
-    public static ReplyKeyboard withBeginConversationButton() {
-        KeyboardRow row = new KeyboardRow();
-        row.add(Button.START_CONVERSATION);
-        return ReplyKeyboardMarkup.builder()
-                .keyboard(List.of(row))
-                .resizeKeyboard(true)
-                .build();
-    }
+//    public static ReplyKeyboard withBeginConversationButton() {
+//        KeyboardRow row = new KeyboardRow();
+//        row.add(Button.START_CONVERSATION);
+//        return ReplyKeyboardMarkup.builder()
+//                .keyboard(List.of(row))
+//                .resizeKeyboard(true)
+//                .build();
+//    }
 
     public static ReplyKeyboard withSettings() {
         KeyboardRow row1 = new KeyboardRow();
