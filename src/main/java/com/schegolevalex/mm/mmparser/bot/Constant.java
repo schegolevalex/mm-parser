@@ -63,7 +63,9 @@ public interface Constant {
         String MY_PROMOS = "📘 мои промокоды";
         String YES_ADD_MORE_PROMO_STEPS = "⏭ да, добавить еще скидку в промокод";
         String NO_SAVE_PROMO = "💾 нет, сохранить промокод";
-        String DELETE_PROMO = "🗑 удалить промокод";
+        String DELETE_PROMO = "🗑";
+        String CONFIRM = "✅";
+        String DECLINE = "⛔️";
         String APPLY_PROMO = "🔵 применить промокод";
         String NOTIFICATIONS_SETTINGS = "🔔 настроить уведомления";
         String PREVIOUS_PAGE = "<<";
@@ -89,5 +91,7 @@ public interface Constant {
         String PRODUCT_NOTIFICATIONS = "product-notifications";
         String PRODUCT_SETTINGS = "product-settings";
         String PRODUCT_DELETE = "product-delete";
+        String CONFIRM_DELETE = "confirm";
+        String DECLINE_DELETE = "decline";
     }
 }

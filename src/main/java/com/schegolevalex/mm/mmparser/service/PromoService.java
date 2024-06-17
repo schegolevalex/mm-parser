@@ -14,12 +14,14 @@ import java.util.Optional;
 @Transactional
 public class PromoService {
     private final PromoRepository promoRepository;
+    private final ProductService productService;
 
     public List<Promo> findAllByChatId(Long chatId) {
         return promoRepository.findAllByChatId(chatId);
     }
 
     public void deleteById(long id) {
+        productService.findByPromoId(id).forEach(product -> product.setPromo(null));
         promoRepository.deleteById(id);
     }
 

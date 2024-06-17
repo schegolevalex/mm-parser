@@ -48,15 +48,6 @@ public class Keyboard {
                 .build();
     }
 
-//    public static ReplyKeyboard withBeginConversationButton() {
-//        KeyboardRow row = new KeyboardRow();
-//        row.add(Button.START_CONVERSATION);
-//        return ReplyKeyboardMarkup.builder()
-//                .keyboard(List.of(row))
-//                .resizeKeyboard(true)
-//                .build();
-//    }
-
     public static ReplyKeyboard withSettings() {
         KeyboardRow row1 = new KeyboardRow();
         row1.add(Button.PROMOS_SETTINGS);
@@ -255,6 +246,19 @@ public class Keyboard {
         row.add(InlineKeyboardButton.builder()
                 .text(Button.PRODUCT_DELETE)
                 .callbackData(Callback.PRODUCT_DELETE + DELIMITER + productId)
+                .build());
+        return new InlineKeyboardMarkup(List.of(row));
+    }
+
+    public static InlineKeyboardMarkup withYesNoButtons(long promoId) {
+        InlineKeyboardRow row = new InlineKeyboardRow();
+        row.add(InlineKeyboardButton.builder()
+                .text(Button.CONFIRM)
+                .callbackData(Callback.CONFIRM_DELETE + DELIMITER + promoId)
+                .build());
+        row.add(InlineKeyboardButton.builder()
+                .text(Button.DECLINE)
+                .callbackData(Callback.DECLINE_DELETE + DELIMITER + promoId)
                 .build());
         return new InlineKeyboardMarkup(List.of(row));
     }

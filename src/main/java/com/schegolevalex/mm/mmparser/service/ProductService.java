@@ -30,4 +30,8 @@ public class ProductService {
     public Product save(Product product) {
         return productRepository.save(product);
     }
+
+    public List<Product> findByPromoId(long promoId) {
+        return productRepository.findByPromoId(promoId);
+    }
 }

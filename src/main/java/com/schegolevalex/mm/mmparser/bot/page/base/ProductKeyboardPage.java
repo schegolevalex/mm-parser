@@ -47,7 +47,7 @@ public abstract class ProductKeyboardPage extends MainKeyboardPage {
                 long promoId = Long.parseLong(callbackData.split(DELIMITER)[3]);
                 Product product = productService.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
                 Promo promo = promoService.findById(promoId).orElseThrow(() -> new RuntimeException("Promo not found"));
-                promo.addProduct(product);
+                product.setPromo(promo);
                 context.putPage(chatId, Page.APPLY_PROMO);
             } else if (callbackData.startsWith(Constant.Callback.APPLY_PROMO))
                 context.putPage(chatId, Page.APPLY_PROMO);

@@ -12,4 +12,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findAllByChatIdAndActive(Long chatId, Boolean isActive);
 
     List<Product> findAllByIsActive(Boolean isActive);
+
+    List<Product> findByPromoId(long promoId);
 }
