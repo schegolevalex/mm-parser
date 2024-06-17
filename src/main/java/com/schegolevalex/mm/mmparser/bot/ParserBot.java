@@ -147,9 +147,9 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
         productService.findAllByIsActive(true).forEach(product -> {
             List<Offer> parsedOffers = parser.parseProduct(product);
             List<Offer> newOffers = parsedOffers.stream()
-                    .filter(offer -> !offerService.isPresent(product, offer))
+                    .filter(offer -> !offerService.isPresent(offer))
                     .toList();
-            newOffers.forEach(offer -> offer.setProduct(product));
+            offerService.saveAll(newOffers);
             List<Offer> filteredOffers = offerService.filterOffersWithDefaultParameters(newOffers);
             if (!filteredOffers.isEmpty())
                 sendNotifies(filteredOffers, product.getUser().getChatId());

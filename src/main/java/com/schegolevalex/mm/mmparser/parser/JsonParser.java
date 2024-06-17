@@ -91,6 +91,7 @@ public class JsonParser extends Parser {
                         log.info("Создан новый продавец: {}", seller);
                     }
                     seller.addProduct(product);
+                    offer.setProduct(product);
 
                     Delivery delivery = modelMapper.map(objectMapper.convertValue(offerNode.path("delivery"), DeliveryDto.class), Delivery.class);
 

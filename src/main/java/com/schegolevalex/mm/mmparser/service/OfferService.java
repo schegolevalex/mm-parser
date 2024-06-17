@@ -17,10 +17,6 @@ import java.util.Optional;
 public class OfferService {
     private final OfferRepository offerRepository;
 
-    public List<Offer> saveAllAndFlush(List<Offer> offers) {
-        return offerRepository.saveAllAndFlush(offers);
-    }
-
     public List<Offer> filterOffersWithDefaultParameters(List<Offer> offers) {
         return offers.stream().filter(offer -> {
             Integer priceBefore = offer.getPrice();
@@ -35,7 +31,7 @@ public class OfferService {
         }).toList();
     }
 
-    public boolean isPresent(Product product, Offer offer) {
+    public boolean isPresent(Offer offer) {
         Delivery delivery = offer.getDelivery();
         String marketId = offer.getSeller().getMarketId();
         String clickCourierDate = delivery.getClickCourierDate();
@@ -49,7 +45,7 @@ public class OfferService {
         Optional<Offer> exist = offerRepository.findExist(offer.getPrice(),
                 offer.getBonusPercent(),
                 offer.getBonus(),
-                product.getUrl(),
+                offer.getProduct().getUrl(),
                 marketId,
                 clickCourierDate,
                 clickCourierPrice,

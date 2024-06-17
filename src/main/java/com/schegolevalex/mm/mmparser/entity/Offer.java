@@ -46,7 +46,7 @@ public class Offer {
     @EqualsAndHashCode.Exclude
     Product product;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL) // todo хрень, удаляя предложение, удаляются все продавцы
+    @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     Seller seller;
