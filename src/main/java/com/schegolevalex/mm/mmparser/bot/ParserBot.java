@@ -149,7 +149,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
             List<Offer> newOffers = parsedOffers.stream()
                     .filter(offer -> !offerService.isPresent(product, offer))
                     .toList();
-            newOffers.forEach(product::addOffer);
+            newOffers.forEach(offer -> offer.setProduct(product));
             List<Offer> filteredOffers = offerService.filterOffersWithDefaultParameters(newOffers);
             if (!filteredOffers.isEmpty())
                 sendNotifies(filteredOffers, product.getUser().getChatId());

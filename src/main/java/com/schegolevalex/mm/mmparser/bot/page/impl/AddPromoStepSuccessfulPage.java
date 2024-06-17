@@ -6,6 +6,7 @@ import com.schegolevalex.mm.mmparser.bot.page.base.BasePage;
 import com.schegolevalex.mm.mmparser.bot.page.base.Page;
 import com.schegolevalex.mm.mmparser.entity.Promo;
 import com.schegolevalex.mm.mmparser.entity.PromoStep;
+import com.schegolevalex.mm.mmparser.entity.User;
 import com.schegolevalex.mm.mmparser.service.UserService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -51,8 +52,8 @@ public class AddPromoStepSuccessfulPage extends BasePage {
             case Button.NO_SAVE_PROMO -> {
                 Promo promo = context.getPromo(chatId);
                 promo.getPromoSteps().sort(Comparator.comparing(PromoStep::getPriceFrom));
-                userService.findByChatId(chatId).orElseThrow(() -> new RuntimeException("User not found"))
-                        .addPromo(promo);
+                User user = userService.findByChatId(chatId).orElseThrow(() -> new RuntimeException("User not found"));
+                promo.setUser(user);
                 context.clearPromo(chatId);
                 context.putPage(chatId, Page.PROMOS_SETTINGS);
             }

@@ -7,9 +7,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -50,31 +48,9 @@ public class Product {
     @EqualsAndHashCode.Exclude
     Set<Seller> sellers = new HashSet<>();
 
-    @OneToMany(mappedBy = "product"
-            , cascade = CascadeType.ALL
-            , fetch = FetchType.LAZY
-            , orphanRemoval = true)
-    @Builder.Default
-    @EqualsAndHashCode.Exclude
-    List<Offer> offers = new ArrayList<>();
-
     @ManyToOne(fetch = FetchType.LAZY)
     @EqualsAndHashCode.Exclude
     User user;
-
-    public void addOffer(Offer offer) {
-        offers.add(offer);
-        offer.setProduct(this);
-    }
-
-    public void addOffers(List<Offer> offersList) {
-        offersList.forEach(this::addOffer);
-    }
-
-    public void removeOffer(Offer offer) {
-        offers.remove(offer);
-        offer.setProduct(null);
-    }
 
     @Override
     public String toString() {
