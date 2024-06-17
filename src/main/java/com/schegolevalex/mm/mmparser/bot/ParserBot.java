@@ -142,7 +142,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
             });
     }
 
-    @Scheduled(cron = "0 */10 * * * *", zone = "Europe/Moscow")
+    @Scheduled(cron = "0 */1 * * * *", zone = "Europe/Moscow")
     protected void parseAndNotify() {
         productService.findAllByIsActive(true).forEach(product -> {
             List<Offer> parsedOffers = parser.parseProduct(product);

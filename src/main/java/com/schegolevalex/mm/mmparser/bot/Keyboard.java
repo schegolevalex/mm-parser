@@ -250,15 +250,15 @@ public class Keyboard {
         return new InlineKeyboardMarkup(List.of(row));
     }
 
-    public static InlineKeyboardMarkup withYesNoButtons(long promoId) {
+    public static InlineKeyboardMarkup withYesNoButtons(long entityId) {
         InlineKeyboardRow row = new InlineKeyboardRow();
         row.add(InlineKeyboardButton.builder()
                 .text(Button.CONFIRM)
-                .callbackData(Callback.CONFIRM_DELETE + DELIMITER + promoId)
+                .callbackData(Callback.CONFIRM_DELETE + DELIMITER + entityId)
                 .build());
         row.add(InlineKeyboardButton.builder()
                 .text(Button.DECLINE)
-                .callbackData(Callback.DECLINE_DELETE + DELIMITER + promoId)
+                .callbackData(Callback.DECLINE_DELETE + DELIMITER + entityId)
                 .build());
         return new InlineKeyboardMarkup(List.of(row));
     }

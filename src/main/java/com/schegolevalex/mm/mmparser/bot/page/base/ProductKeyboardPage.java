@@ -27,30 +27,34 @@ public abstract class ProductKeyboardPage extends MainKeyboardPage {
         Long chatId = getChatId(nextUpdate);
 
         if (nextUpdate.hasCallbackQuery()) {
-            String callbackData = nextUpdate.getCallbackQuery().getData();
-            if (callbackData.startsWith(Constant.Callback.PRODUCT_NOTIFICATIONS))
+            String callback = nextUpdate.getCallbackQuery().getData();
+            if (callback.startsWith(Constant.Callback.PRODUCT_NOTIFICATIONS))
                 context.putPage(chatId, Page.PRODUCT_NOTIFICATIONS);
-            else if (callbackData.startsWith(Constant.Callback.PRODUCT_SETTINGS))
+            else if (callback.startsWith(Constant.Callback.PRODUCT_SETTINGS))
                 context.putPage(chatId, Page.PRODUCT_SETTINGS);
-            else if (callbackData.startsWith(Constant.Callback.PRODUCT_DELETE))
-                context.putPage(chatId, Page.DELETE_PRODUCT);
-            else if (callbackData.startsWith(Constant.Callback.NOTIFICATIONS_SETTINGS))
+            else if (callback.startsWith(Constant.Callback.PRODUCT_DELETE))
+                context.putPage(chatId, Page.CONFIRM_DELETE_PRODUCT);
+            else if (callback.startsWith(Constant.Callback.NOTIFICATIONS_SETTINGS))
                 context.putPage(chatId, Page.NOTIFICATIONS_SETTINGS);
-            else if (callbackData.startsWith(Constant.Callback.BACK))
+            else if (callback.startsWith(Constant.Callback.BACK))
                 context.putPage(chatId, Page.WATCH_PRODUCTS);
-            else if (callbackData.startsWith(Constant.Callback.BACK_TO_PRODUCT_SETTINGS))
+            else if (callback.startsWith(Constant.Callback.BACK_TO_PRODUCT_SETTINGS))
                 context.putPage(chatId, Page.PRODUCT_SETTINGS);
-            else if (callbackData.startsWith(Constant.Callback.MY_PRODUCTS) && callbackData.contains(Constant.Callback.KEYBOARD_PAGES))
+            else if (callback.startsWith(Constant.Callback.MY_PRODUCTS) && callback.contains(Constant.Callback.KEYBOARD_PAGES))
                 context.putPage(chatId, Page.APPLY_PROMO);
-            else if (callbackData.startsWith(Constant.Callback.APPLY_PROMO) && callbackData.contains(Constant.Callback.MY_PROMOS)) {
-                long productId = Long.parseLong(callbackData.split(DELIMITER)[1]);
-                long promoId = Long.parseLong(callbackData.split(DELIMITER)[3]);
+            else if (callback.startsWith(Constant.Callback.APPLY_PROMO) && callback.contains(Constant.Callback.MY_PROMOS)) {
+                long productId = Long.parseLong(callback.split(DELIMITER)[1]);
+                long promoId = Long.parseLong(callback.split(DELIMITER)[3]);
                 Product product = productService.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
                 Promo promo = promoService.findById(promoId).orElseThrow(() -> new RuntimeException("Promo not found"));
                 product.setPromo(promo);
                 context.putPage(chatId, Page.APPLY_PROMO);
-            } else if (callbackData.startsWith(Constant.Callback.APPLY_PROMO))
+            } else if (callback.startsWith(Constant.Callback.APPLY_PROMO))
                 context.putPage(chatId, Page.APPLY_PROMO);
+            else if (callback.startsWith(Constant.Callback.CONFIRM_DELETE))
+                context.putPage(chatId, Page.DELETE_PRODUCT);
+            else if (callback.startsWith(Constant.Callback.DECLINE_DELETE))
+                context.putPage(chatId, Page.WATCH_PRODUCTS);
         } else
             resolveMainKeyboard(nextUpdate);
     }
