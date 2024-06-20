@@ -50,12 +50,15 @@ public class Keyboard {
 
     public static ReplyKeyboard withSettings() {
         KeyboardRow row1 = new KeyboardRow();
-        row1.add(Button.PROMOS_SETTINGS);
         row1.add(Button.CASHBACK_SETTINGS);
         KeyboardRow row2 = new KeyboardRow();
-        row2.add(Button.BACK);
+        row2.add(Button.PROMOS_SETTINGS);
+        KeyboardRow row3 = new KeyboardRow();
+        row3.add(Button.FILTERS_SETTINGS);
+        KeyboardRow row4 = new KeyboardRow();
+        row4.add(Button.BACK);
         return ReplyKeyboardMarkup.builder()
-                .keyboard(List.of(row1, row2))
+                .keyboard(List.of(row1, row2, row3, row4))
                 .resizeKeyboard(true)
                 .build();
     }
@@ -140,6 +143,16 @@ public class Keyboard {
                 .build());
         return new InlineKeyboardMarkup(List.of(row1));
     }
+
+    public static InlineKeyboardMarkup withDeleteFilterButton(Long filterId) {
+        InlineKeyboardRow row1 = new InlineKeyboardRow();
+        row1.add(InlineKeyboardButton.builder()
+                .text(Button.DELETE_FILTER)
+                .callbackData(Callback.DELETE_FILTER + DELIMITER + filterId)
+                .build());
+        return new InlineKeyboardMarkup(List.of(row1));
+    }
+
 
     public static InlineKeyboardMarkup withProductSettings(Long productId) {
         InlineKeyboardRow row1 = new InlineKeyboardRow();
@@ -244,8 +257,8 @@ public class Keyboard {
                 .callbackData(Callback.PRODUCT_SETTINGS + DELIMITER + productId)
                 .build());
         row.add(InlineKeyboardButton.builder()
-                .text(Button.PRODUCT_DELETE)
-                .callbackData(Callback.PRODUCT_DELETE + DELIMITER + productId)
+                .text(Button.DELETE_PRODUCT)
+                .callbackData(Callback.DELETE_PRODUCT + DELIMITER + productId)
                 .build());
         return new InlineKeyboardMarkup(List.of(row));
     }
@@ -261,5 +274,17 @@ public class Keyboard {
                 .callbackData(Callback.DECLINE_DELETE + DELIMITER + entityId)
                 .build());
         return new InlineKeyboardMarkup(List.of(row));
+    }
+
+    public static ReplyKeyboard withFiltersSettingsActions() {
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(Button.ADD_FILTER);
+        row1.add(Button.MY_FILTERS);
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(Button.BACK);
+        return ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row1, row2))
+                .resizeKeyboard(true)
+                .build();
     }
 }

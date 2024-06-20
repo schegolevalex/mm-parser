@@ -32,7 +32,7 @@ public abstract class ProductKeyboardPage extends MainKeyboardPage {
                 context.putPage(chatId, Page.PRODUCT_NOTIFICATIONS);
             else if (callback.startsWith(Constant.Callback.PRODUCT_SETTINGS))
                 context.putPage(chatId, Page.PRODUCT_SETTINGS);
-            else if (callback.startsWith(Constant.Callback.PRODUCT_DELETE))
+            else if (callback.startsWith(Constant.Callback.DELETE_PRODUCT))
                 context.putPage(chatId, Page.CONFIRM_DELETE_PRODUCT);
             else if (callback.startsWith(Constant.Callback.NOTIFICATIONS_SETTINGS))
                 context.putPage(chatId, Page.NOTIFICATIONS_SETTINGS);

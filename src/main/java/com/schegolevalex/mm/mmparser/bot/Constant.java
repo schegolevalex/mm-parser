@@ -47,6 +47,7 @@ public interface Constant {
                 ||обычно промокод содержит несколько скидок в зависимости от суммы покупки, например, \
                 __*"500 от 2000 рублей, 800 от 3000 рублей, 1500 от 10000 рублей"*__\\. Всё это один промокод\\!||""";
         String PROMO = "%d/%d";
+        String FILTERS_IS_EMPTY = "нет фильтров 😦";
     }
 
     interface Button {
@@ -72,10 +73,14 @@ public interface Constant {
         String NEXT_PAGE = ">>";
         String EMPTY = " ";
         String PRODUCT_URL = "🔗";
-        String PRODUCT_NOTIFICATIONS = "🔔";
+        String PRODUCT_NOTIFICATIONS = "⭐️";
         String PRODUCT_SETTINGS = "🛠";
-        String PRODUCT_DELETE = "🗑";
+        String DELETE_PRODUCT = "🗑";
         String BACK_TO_PRODUCT_SETTINGS = "⬅ 🛠";
+        String FILTERS_SETTINGS = "🔴 фильтры уведомлений";
+        String ADD_FILTER = "➕ добавить фильтр";
+        String MY_FILTERS = "📘 мои фильтры";
+        String DELETE_FILTER = "🗑";
     }
 
     interface Callback {
@@ -90,7 +95,8 @@ public interface Constant {
         String BACK_TO_PRODUCT_SETTINGS = "to-product-settings";
         String PRODUCT_NOTIFICATIONS = "product-notifications";
         String PRODUCT_SETTINGS = "product-settings";
-        String PRODUCT_DELETE = "product-delete";
+        String DELETE_PRODUCT = "delete-product";
+        String DELETE_FILTER = "delete-filter";
         String CONFIRM_DELETE = "confirm";
         String DECLINE_DELETE = "decline";
     }

@@ -2,7 +2,6 @@ package com.schegolevalex.mm.mmparser.service;
 
 import com.schegolevalex.mm.mmparser.entity.Delivery;
 import com.schegolevalex.mm.mmparser.entity.Offer;
-import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.repository.OfferRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -119,7 +119,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
     }
 
     private Predicate<Update> hasMessageWith(String text) {
-        return update -> update.getMessage().getText().startsWith(text);
+        return update -> update.getMessage().getText().contains(text);
     }
 
     private void sendNotifies(List<Offer> offers, Long chatId) {
