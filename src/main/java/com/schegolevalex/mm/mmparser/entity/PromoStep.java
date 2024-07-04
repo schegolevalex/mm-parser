@@ -26,6 +26,7 @@ public class PromoStep {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     Promo promo;
 
     public void setPriceFrom(Integer priceFrom) throws IllegalArgumentException {

@@ -39,7 +39,7 @@ public class AddPromoStepDiscountPage extends MainKeyboardPage {
 
         try {
             int discount = Integer.parseInt(text);
-            Promo promo = context.getPromo(chatId); // todo возможно, стоит создавать промо здесь, а не в PromoKeyboardPage
+            Promo promo = context.getPromo(chatId);
             PromoStep promoStep = new PromoStep();
             promoStep.setDiscount(discount);
             promo.addPromoStep(promoStep);

@@ -23,13 +23,13 @@ import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getCha
 
 @Component
 @Transactional
-public class InputLinkPage extends BasePage {
+public class AddProductPage extends BasePage {
     private static final String MESSAGE_WITH_URL_REGEXP = ".*(http(s)?://)?(www\\.)?megamarket\\.ru\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
     private static final String URL_REGEXP = "(http(s)?://)?(www\\.)?megamarket\\.ru\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
     private final ProductService productService;
     private final UserService userService;
 
-    public InputLinkPage(@Lazy ParserBot bot, ProductService productService, UserService userService) {
+    public AddProductPage(@Lazy ParserBot bot, ProductService productService, UserService userService) {
         super(bot);
         this.productService = productService;
         this.userService = userService;
@@ -70,13 +70,13 @@ public class InputLinkPage extends BasePage {
         if (userText.equalsIgnoreCase(Button.MAIN_PAGE)) {
             context.putPage(chatId, Page.MAIN);
         } else if (userText.matches(MESSAGE_WITH_URL_REGEXP)) {
-            context.putPage(chatId, Page.INPUT_LINK);
+            context.putPage(chatId, Page.ADD_PRODUCT);
         } else
             context.putPage(chatId, Page.UNEXPECTED);
     }
 
     @Override
     public Page getPage() {
-        return Page.INPUT_LINK;
+        return Page.ADD_PRODUCT;
     }
 }

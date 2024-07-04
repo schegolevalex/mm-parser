@@ -13,8 +13,8 @@ import static com.schegolevalex.mm.mmparser.bot.Constant.Message;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
-public class PromoSettingPage extends PromoKeyboardPage {
-    public PromoSettingPage(@Lazy ParserBot bot) {
+public class PromoSettingsPage extends PromoKeyboardPage {
+    public PromoSettingsPage(@Lazy ParserBot bot) {
         super(bot);
     }
 

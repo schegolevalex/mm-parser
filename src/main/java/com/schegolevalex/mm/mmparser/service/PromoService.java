@@ -28,4 +28,8 @@ public class PromoService {
     public Optional<Promo> findById(long promoId) {
         return promoRepository.findById(promoId);
     }
+
+    public void save(Promo promo) {
+        promoRepository.save(promo);
+    }
 }

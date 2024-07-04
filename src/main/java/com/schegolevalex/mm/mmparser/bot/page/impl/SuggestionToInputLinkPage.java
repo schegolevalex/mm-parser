@@ -39,7 +39,8 @@ public class SuggestionToInputLinkPage extends BasePage {
         if (userText.equalsIgnoreCase(Button.BACK)) {
             context.putPage(chatId, Page.MAIN);
         } else if (userText.matches(MESSAGE_WITH_URL_REGEXP)) {
-            context.putPage(chatId, Page.INPUT_LINK);
+            // todo можно объединить SuggestionToInputLinkPage и AddProductPage в один класс, чтобы было аналогично другому коду
+            context.putPage(chatId, Page.ADD_PRODUCT);
         } else
             context.putPage(chatId, Page.UNEXPECTED);
     }

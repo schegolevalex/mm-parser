@@ -7,6 +7,7 @@ import com.schegolevalex.mm.mmparser.bot.page.base.Page;
 import com.schegolevalex.mm.mmparser.entity.Promo;
 import com.schegolevalex.mm.mmparser.entity.PromoStep;
 import com.schegolevalex.mm.mmparser.entity.User;
+import com.schegolevalex.mm.mmparser.service.PromoService;
 import com.schegolevalex.mm.mmparser.service.UserService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -24,10 +25,12 @@ import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getCha
 @Transactional
 public class AddPromoStepSuccessfulPage extends BasePage {
     private final UserService userService;
+    private final PromoService promoService;
 
-    public AddPromoStepSuccessfulPage(@Lazy ParserBot bot, UserService userService) {
+    public AddPromoStepSuccessfulPage(@Lazy ParserBot bot, UserService userService, PromoService promoService) {
         super(bot);
         this.userService = userService;
+        this.promoService = promoService;
     }
 
     @Override
@@ -54,6 +57,7 @@ public class AddPromoStepSuccessfulPage extends BasePage {
                 promo.getPromoSteps().sort(Comparator.comparing(PromoStep::getPriceFrom));
                 User user = userService.findByChatId(chatId).orElseThrow(() -> new RuntimeException("User not found"));
                 promo.setUser(user);
+                promoService.save(promo);
                 context.clearPromo(chatId);
                 context.putPage(chatId, Page.PROMOS_SETTINGS);
             }
