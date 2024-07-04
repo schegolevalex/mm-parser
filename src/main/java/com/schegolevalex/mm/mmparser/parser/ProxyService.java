@@ -1,9 +1,11 @@
 package com.schegolevalex.mm.mmparser.parser;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -22,9 +24,18 @@ public class ProxyService {
     private List<File> extensions = new ArrayList<>();
 
     public void setProxy(ChromeOptions options) {
-        int extNumber = new Random().nextInt(extensions.size());
-        log.info("Выбран прокси-сервер №{}", extNumber + 1);
-        options.addExtensions(extensions.get(extNumber));
+        if (!extensions.isEmpty()) {
+            int extNumber = new Random().nextInt(extensions.size());
+            options.addExtensions(extensions.get(extNumber));
+            log.info("Выбран прокси-сервер №{} ({}:{}@{}:{})",
+                    extNumber + 1,
+                    proxies.get(extNumber).getUsername(),
+                    proxies.get(extNumber).getPassword(),
+                    proxies.get(extNumber).getHost(),
+                    proxies.get(extNumber).getPort());
+        } else {
+            log.info("Прокси-серверов нет");
+        }
     }
 
     @PostConstruct
@@ -114,30 +125,27 @@ public class ProxyService {
     }
 
     private void populateProxies() {
-//        proxies.add(Proxy.builder()
-//                .username("vAGrAD")
-//                .password("zyAUGsyJATFA")
-//                .host("37.139.34.51")
-//                .port("10789")
-//                .build());
-//        proxies.add(Proxy.builder()
-//                .username("heZAgY")
-//                .password("As4Heu6kAgNe")
-//                .host("37.139.34.51")
-//                .port("11346")
-//                .build());
-//        proxies.add(Proxy.builder()
-//                .username("kAB3Se")
-//                .password("AtEKakUz9yhY")
-//                .host("37.139.34.51")
-//                .port("11777")
-//                .build());
-        proxies.add(Proxy.builder()
-                .username("BAy5Ty")
-                .password("Ep3megaBaT6Z")
-                .host("37.139.34.51")
-                .port("11780")
-                .build());
+        ClassPathResource proxyResource = new ClassPathResource("proxy/proxy_list");
+        if (!proxyResource.exists()) {
+            log.error("Файл с прокси-серверами не найден");
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(proxyResource.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("#") || line.isEmpty()) continue;
+                String[] strings = line.split("@");
+                proxies.add(Proxy.builder()
+                        .username(strings[0].split(":")[0])
+                        .password(strings[0].split(":")[1])
+                        .host(strings[1].split(":")[0])
+                        .port(strings[1].split(":")[1])
+                        .build());
+            }
+        } catch (IOException e) {
+            log.error("Не удалось прочитать файл с прокси-серверами", e);
+        }
     }
 
     private static void writeToZipFile(String path, ZipOutputStream zipStream) throws IOException {
@@ -161,5 +169,18 @@ public class ProxyService {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @PreDestroy
+    private void deleteExtensions() {
+        extensions.forEach(file -> {
+            if (file.exists()) {
+                if (file.delete())
+                    log.info("Файл удален: {}", file.getAbsolutePath());
+                else
+                    log.error("Не удалось удалить файл: {}", file.getAbsolutePath());
+            } else
+                log.info("Файл не существует: {}", file.getAbsolutePath());
+        });
     }
 }
