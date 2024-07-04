@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -52,8 +53,29 @@ public class Product {
     @EqualsAndHashCode.Exclude
     User user;
 
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "filter_product",
+            joinColumns = @JoinColumn(name = "filter_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id"))
+    @ToString.Exclude
+    Set<Filter> filters = new HashSet<>();
+
     @Override
     public String toString() {
         return "url = " + url;
+    }
+
+    public void addFilter(Filter filter) {
+        filters.add(filter);
+        filter.getProducts().add(this);
+    }
+
+    public void addFilters(List<Filter> filterList) {
+        filterList.forEach(this::addFilter);
+    }
+
+    public void removeFilter(Filter filter) {
+        filters.remove(filter);
+        filter.getProducts().remove(this);
     }
 }
