@@ -41,5 +41,5 @@ public class User {
     Instant updatedAt;
 
     @Builder.Default
-    Long cashbackLevel = 0L;
+    Integer cashbackLevel = 0;
 }

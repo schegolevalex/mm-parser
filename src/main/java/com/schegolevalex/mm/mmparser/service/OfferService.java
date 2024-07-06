@@ -1,5 +1,6 @@
 package com.schegolevalex.mm.mmparser.service;
 
+import com.schegolevalex.mm.mmparser.bot.util.PredicateConstructor;
 import com.schegolevalex.mm.mmparser.entity.Delivery;
 import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.repository.OfferRepository;
@@ -15,19 +16,29 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OfferService {
     private final OfferRepository offerRepository;
+    private final PredicateConstructor predicateConstructor;
 
     public List<Offer> filterOffersWithDefaultParameters(List<Offer> offers) {
-        return offers.stream().filter(offer -> {
-            Integer priceBefore = offer.getPrice();
-            double bonusPercent = offer.getBonusPercent() / 100.0;
-            int promo = priceBefore > 110_000 ? 20_000 : 10_000;
+        return offers.stream()
+                .filter(offer -> {
+                    Integer priceBefore = offer.getPrice();
+                    double bonusPercent = offer.getBonusPercent() / 100.0;
+                    int promo = priceBefore > 110_000 ? 20_000 : 10_000;
 
-            double sberprime = priceBefore * bonusPercent > 2_000 ? 2_000 : (priceBefore * bonusPercent);
+                    double sberprime = priceBefore * bonusPercent > 2_000 ? 2_000 : (priceBefore * bonusPercent);
 
-            boolean totalPrice = (priceBefore - promo - (priceBefore - promo) * bonusPercent - sberprime) < 79_000;
-            boolean scam = priceBefore > 100_000;
-            return totalPrice && scam;
-        }).toList();
+                    boolean totalPrice = (priceBefore - promo - (priceBefore - promo) * bonusPercent - sberprime) < 79_000;
+                    boolean scam = priceBefore > 100_000;
+                    return totalPrice && scam;
+                })
+                .toList();
+    }
+
+    public List<Offer> filterOffers(List<Offer> offers) {
+        return offers.stream()
+                .filter(offer -> offer.getProduct().getFilters().stream()
+                        .allMatch(filter -> predicateConstructor.createFromFilter(filter).test(offer)))
+                .toList();
     }
 
     public boolean isPresent(Offer offer) {

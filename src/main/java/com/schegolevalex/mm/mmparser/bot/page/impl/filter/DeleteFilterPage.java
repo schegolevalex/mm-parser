@@ -1,8 +1,8 @@
 package com.schegolevalex.mm.mmparser.bot.page.impl.filter;
 
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
+import com.schegolevalex.mm.mmparser.bot.page.base.FilterKeyboardPage;
 import com.schegolevalex.mm.mmparser.bot.page.base.Page;
-import com.schegolevalex.mm.mmparser.bot.page.base.PromoKeyboardPage;
 import com.schegolevalex.mm.mmparser.service.FilterService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,7 @@ import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getCha
 
 @Component
 @Transactional
-public class DeleteFilterPage extends PromoKeyboardPage {
+public class DeleteFilterPage extends FilterKeyboardPage {
 
     private final FilterService filterService;
 
@@ -37,7 +37,7 @@ public class DeleteFilterPage extends PromoKeyboardPage {
 
     @Override
     public void afterUpdateReceive(Update nextUpdate) {
-        resolvePromoKeyboard(nextUpdate);
+        resolveFiltersKeyboard(nextUpdate);
     }
 
     @Override

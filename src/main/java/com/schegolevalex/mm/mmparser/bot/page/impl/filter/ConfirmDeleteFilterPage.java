@@ -2,8 +2,8 @@ package com.schegolevalex.mm.mmparser.bot.page.impl.filter;
 
 import com.schegolevalex.mm.mmparser.bot.Keyboard;
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
+import com.schegolevalex.mm.mmparser.bot.page.base.FilterKeyboardPage;
 import com.schegolevalex.mm.mmparser.bot.page.base.Page;
-import com.schegolevalex.mm.mmparser.bot.page.base.PromoKeyboardPage;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
@@ -13,7 +13,7 @@ import static com.schegolevalex.mm.mmparser.bot.Constant.DELIMITER;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
-public class ConfirmDeleteFilterPage extends PromoKeyboardPage {
+public class ConfirmDeleteFilterPage extends FilterKeyboardPage {
 
     public ConfirmDeleteFilterPage(@Lazy ParserBot bot) {
         super(bot);
@@ -31,7 +31,7 @@ public class ConfirmDeleteFilterPage extends PromoKeyboardPage {
 
     @Override
     public void afterUpdateReceive(Update nextUpdate) {
-        resolvePromoKeyboard(nextUpdate);
+        resolveFiltersKeyboard(nextUpdate);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.schegolevalex.mm.mmparser.bot.page.impl.product;
 
+import com.schegolevalex.mm.mmparser.bot.Constant;
 import com.schegolevalex.mm.mmparser.bot.Keyboard;
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
 import com.schegolevalex.mm.mmparser.bot.page.base.Page;
@@ -63,7 +64,7 @@ public class WatchProductsPage extends ProductKeyboardPage {
                         .sorted(Comparator.comparing(Product::getCreatedAt))
                         .forEach(product -> bot.getSilent().execute(SendMessage.builder()
                                 .chatId(chatId)
-                                .text(num.getAndIncrement() + ". " + product.getTitle())
+                                .text(num.getAndIncrement() + ". " + (product.getTitle() != null ? product.getTitle() : Constant.Message.NO_TITLE))
                                 .replyMarkup(Keyboard.withProduct(product.getId(), product.getUrl()))
                                 .linkPreviewOptions(LinkPreviewOptions.builder()
                                         .isDisabled(true)

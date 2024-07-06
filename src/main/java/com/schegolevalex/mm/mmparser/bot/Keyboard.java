@@ -77,22 +77,21 @@ public class Keyboard {
                 .build();
     }
 
-    public static InlineKeyboardMarkup withCashbackLevels(Long cashbackLevel) {
-        String zero = "0";
-        String two = "2";
-        String five = "5";
-        String seven = "7";
-        String nine = "9";
-        String twelve = "12";
+    public static InlineKeyboardMarkup withCashbackLevels(int cashbackLevel) {
+        String zero = "0%";
+        String two = "2%";
+        String five = "5%";
+        String seven = "7%";
+        String nine = "9%";
+        String twelve = "12%";
 
-        String s = String.valueOf(cashbackLevel);
-        switch (s) {
-            case "0" -> zero = "✅ " + zero + "%";
-            case "2" -> two = "✅ " + two + "%";
-            case "5" -> five = "✅ " + five + "%";
-            case "7" -> seven = "✅ " + seven + "%";
-            case "9" -> nine = "✅ " + nine + "%";
-            case "12" -> twelve = "✅ " + twelve + "%";
+        switch (String.valueOf(cashbackLevel)) {
+            case "0" -> zero = "✅ " + zero;
+            case "2" -> two = "✅ " + two;
+            case "5" -> five = "✅ " + five;
+            case "7" -> seven = "✅ " + seven;
+            case "9" -> nine = "✅ " + nine;
+            case "12" -> twelve = "✅ " + twelve;
         }
 
         InlineKeyboardRow row1 = new InlineKeyboardRow();
@@ -297,14 +296,16 @@ public class Keyboard {
         KeyboardRow row1 = new KeyboardRow();
         row1.add(Button.PRICE);
         KeyboardRow row2 = new KeyboardRow();
-        row2.add(Button.BONUS);
+        row2.add(Button.PRICE_WITH_PROMO);
+        row2.add(Button.PRICE_TOTAL);
         KeyboardRow row3 = new KeyboardRow();
+        row3.add(Button.BONUS);
         row3.add(Button.BONUS_PERCENT);
         KeyboardRow row4 = new KeyboardRow();
         row4.add(Button.BACK);
         return ReplyKeyboardMarkup.builder()
                 .keyboard(List.of(row1, row2, row3, row4))
-                .resizeKeyboard(true)
+//                .resizeKeyboard(true)
                 .build();
     }
 

@@ -51,6 +51,7 @@ public interface Constant {
         String ADD_FILTER_OPERATION = "Выберите условие фильтрации:";
         String ADD_FILTER_VALUE = "Введите значение фильтра:";
         String FILTER_ADDED = "Фильтр успешно добавлен";
+        String NO_TITLE = "Название товара появится позже";
     }
 
     interface Button {
@@ -83,6 +84,8 @@ public interface Constant {
         String MY_FILTERS = "📕 мои фильтры";
         String DELETE_FILTER = "🗑";
         String PRICE = "цена";
+        String PRICE_WITH_PROMO = "цена с промо";
+        String PRICE_TOTAL = "цена с промо и бонусами";
         String BONUS = "количество бонусов";
         String BONUS_PERCENT = "процент бонусов";
         String LESS_OR_EQUALS = "≤";

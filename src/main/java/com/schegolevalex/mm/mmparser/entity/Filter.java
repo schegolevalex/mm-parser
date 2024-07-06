@@ -1,5 +1,6 @@
 package com.schegolevalex.mm.mmparser.entity;
 
+import com.schegolevalex.mm.mmparser.bot.Constant;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -55,9 +56,11 @@ public class Filter {
         String fieldName;
         String operationName;
         switch (field) {
-            case FilterField.PRICE -> fieldName = "цена";
-            case FilterField.BONUS -> fieldName = "количество бонусов";
-            case FilterField.BONUS_PERCENT -> fieldName = "процент бонусов";
+            case FilterField.PRICE -> fieldName = Constant.Button.PRICE;
+            case FilterField.PRICE_WITH_PROMO -> fieldName = Constant.Button.PRICE_WITH_PROMO;
+            case FilterField.PRICE_TOTAL -> fieldName = Constant.Button.PRICE_TOTAL;
+            case FilterField.BONUS -> fieldName = Constant.Button.BONUS;
+            case FilterField.BONUS_PERCENT -> fieldName = Constant.Button.BONUS_PERCENT;
             default -> fieldName = "error";
         }
 

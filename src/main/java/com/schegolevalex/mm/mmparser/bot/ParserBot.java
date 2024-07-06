@@ -2,6 +2,8 @@ package com.schegolevalex.mm.mmparser.bot;
 
 import com.schegolevalex.mm.mmparser.config.BotConfiguration;
 import com.schegolevalex.mm.mmparser.entity.Offer;
+import com.schegolevalex.mm.mmparser.entity.Promo;
+import com.schegolevalex.mm.mmparser.entity.PromoStep;
 import com.schegolevalex.mm.mmparser.entity.User;
 import com.schegolevalex.mm.mmparser.parser.Parser;
 import com.schegolevalex.mm.mmparser.service.OfferService;
@@ -25,12 +27,15 @@ import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateC
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.description.SetMyDescription;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.LinkPreviewOptions;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 import static org.telegram.telegrambots.abilitybots.api.objects.Locality.ALL;
@@ -127,18 +132,36 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
             offers.forEach(offer -> {
                 Integer priceBefore = offer.getPrice();
                 double bonusPercent = offer.getBonusPercent() / 100.0;
-                int promo = priceBefore > 110_000 ? 20_000 : 10_000;
-                double sberprime = priceBefore * bonusPercent > 2_000 ? 2_000 : (priceBefore * bonusPercent);
-                int totalPrice = (int) Math.round(priceBefore - promo - (priceBefore - promo) * bonusPercent - sberprime);
+                AtomicInteger promoDiscount = new AtomicInteger();
+                Promo promo = offer.getProduct().getPromo();
+                if (promo != null) {
+                    List<PromoStep> promoSteps = promo.getPromoSteps();
+                    promoSteps.stream()
+                            .sorted(Comparator.comparing(PromoStep::getPriceFrom))
+                            .filter(promoStep -> priceBefore >= promoStep.getPriceFrom())
+                            .reduce((first, second) -> second)
+                            .ifPresent(step -> promoDiscount.set(step.getDiscount()));
+                }
+                AtomicInteger cashbackLevel = new AtomicInteger();
+                userService.findByChatId(offer.getProduct().getUser().getChatId())
+                        .ifPresent(user -> cashbackLevel.set(user.getCashbackLevel()));
+                // todo сберпрайм скорее всего высчитывается тоже неправильно, так как считается от цены до применения промо
+                double sberprime = priceBefore * cashbackLevel.get() / 100.0 > 2_000 ? 2_000 : (priceBefore * cashbackLevel.get() / 100.0);
+                int totalPrice = (int) Math.round(priceBefore - promoDiscount.get() - (priceBefore - promoDiscount.get()) * bonusPercent - sberprime);
 
-                String message = String.format(Constant.Message.OFFER,
-                        totalPrice,
-                        offer.getSeller().getName(),
-                        offer.getPrice(),
-                        offer.getBonusPercent() + 2,
-                        offer.getBonus(),
-                        offer.getProduct().getUrl());
-                silent.send(message, chatId);
+                silent.execute(SendMessage.builder()
+                        .chatId(chatId)
+                        .text(String.format(Constant.Message.OFFER,
+                                totalPrice,
+                                offer.getSeller().getName(),
+                                offer.getPrice(),
+                                offer.getBonusPercent(),
+                                offer.getBonus(),
+                                offer.getProduct().getUrl()))
+                        .linkPreviewOptions(LinkPreviewOptions.builder()
+                                .isDisabled(true)
+                                .build())
+                        .build());
             });
     }
 
@@ -152,7 +175,8 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                     // либо создаваться новый элемент, если offer нет
                     .toList();
             offerService.saveAll(newOffers);
-            List<Offer> filteredOffers = offerService.filterOffersWithDefaultParameters(newOffers);
+//            List<Offer> filteredOffers = offerService.filterOffersWithDefaultParameters(newOffers);
+            List<Offer> filteredOffers = offerService.filterOffers(newOffers);
             if (!filteredOffers.isEmpty())
                 sendNotifies(filteredOffers, product.getUser().getChatId());
         });

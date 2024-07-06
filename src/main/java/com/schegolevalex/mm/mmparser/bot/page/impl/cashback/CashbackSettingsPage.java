@@ -29,7 +29,7 @@ public class CashbackSettingsPage extends BasePage {
 
     @Override
     public void beforeUpdateReceive(Update prevUpdate) {
-        Long cashbackLevel = userService.findByChatId(getChatId(prevUpdate))
+        Integer cashbackLevel = userService.findByChatId(getChatId(prevUpdate))
                 .orElseThrow(() -> new RuntimeException("User not found"))
                 .getCashbackLevel();
 
@@ -54,11 +54,12 @@ public class CashbackSettingsPage extends BasePage {
 
         if (nextUpdate.hasCallbackQuery()) {
             User user = userService.findByChatId(chatId).orElseThrow(() -> new RuntimeException("User not found"));
-            user.setCashbackLevel(Long.parseLong(nextUpdate.getCallbackQuery().getData()));
+            user.setCashbackLevel(Integer.parseInt(nextUpdate.getCallbackQuery().getData()));
         } else {
             switch (nextUpdate.getMessage().getText()) {
                 case (Button.PROMOS_SETTINGS) -> context.putPage(chatId, Page.PROMOS_SETTINGS);
                 case (Button.CASHBACK_SETTINGS) -> context.putPage(chatId, Page.CASHBACK_SETTINGS);
+                case (Button.FILTERS_SETTINGS) -> context.putPage(chatId, Page.FILTERS_SETTINGS);
                 case (Button.BACK) -> context.putPage(chatId, Page.COMMON_SETTINGS);
                 default -> context.putPage(chatId, Page.UNEXPECTED);
             }
