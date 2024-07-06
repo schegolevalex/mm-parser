@@ -1,4 +1,4 @@
-package com.schegolevalex.mm.mmparser.bot.page.impl;
+package com.schegolevalex.mm.mmparser.bot.page.impl.promo;
 
 import com.schegolevalex.mm.mmparser.bot.Keyboard;
 import com.schegolevalex.mm.mmparser.bot.ParserBot;

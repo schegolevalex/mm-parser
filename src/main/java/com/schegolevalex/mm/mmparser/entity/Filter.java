@@ -19,7 +19,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @EqualsAndHashCode
 public class Filter {
     @Id
@@ -50,4 +49,25 @@ public class Filter {
     @Builder.Default
     @EqualsAndHashCode.Exclude
     Set<Product> products = new HashSet<>();
+
+    @Override
+    public String toString() {
+        String fieldName;
+        String operationName;
+        switch (field) {
+            case FilterField.PRICE -> fieldName = "цена";
+            case FilterField.BONUS -> fieldName = "количество бонусов";
+            case FilterField.BONUS_PERCENT -> fieldName = "процент бонусов";
+            default -> fieldName = "error";
+        }
+
+        switch (operation) {
+            case EQUALS -> operationName = "=";
+            case GREATER_OR_EQUALS -> operationName = "≥";
+            case LESS_OR_EQUALS -> operationName = "≤";
+            default -> operationName = "error";
+        }
+
+        return fieldName + " " + operationName + " " + value;
+    }
 }

@@ -1,11 +1,10 @@
-package com.schegolevalex.mm.mmparser.bot.page.impl;
+package com.schegolevalex.mm.mmparser.bot.page.impl.promo;
 
 import com.schegolevalex.mm.mmparser.bot.Keyboard;
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
-import com.schegolevalex.mm.mmparser.bot.page.base.MainKeyboardPage;
+import com.schegolevalex.mm.mmparser.bot.page.base.BasePage;
 import com.schegolevalex.mm.mmparser.bot.page.base.Page;
 import com.schegolevalex.mm.mmparser.entity.Promo;
-import com.schegolevalex.mm.mmparser.entity.PromoStep;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -16,9 +15,9 @@ import static com.schegolevalex.mm.mmparser.bot.Constant.Message;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
-public class AddPromoStepDiscountPage extends MainKeyboardPage {
+public class AddPromoStepPricePage extends BasePage {
 
-    public AddPromoStepDiscountPage(@Lazy ParserBot bot) {
+    public AddPromoStepPricePage(@Lazy ParserBot bot) {
         super(bot);
     }
 
@@ -26,7 +25,7 @@ public class AddPromoStepDiscountPage extends MainKeyboardPage {
     public void beforeUpdateReceive(Update prevUpdate) {
         bot.getSilent().execute(SendMessage.builder()
                 .chatId(getChatId(prevUpdate))
-                .text(Message.ADD_PROMO_STEP_DISCOUNT)
+                .text(Message.ADD_PROMO_STEP_PRICE)
                 .replyMarkup(Keyboard.withPromoSettingsActions())
                 .parseMode("MarkdownV2")
                 .build());
@@ -38,17 +37,15 @@ public class AddPromoStepDiscountPage extends MainKeyboardPage {
         String text = nextUpdate.getMessage().getText();
 
         try {
-            int discount = Integer.parseInt(text);
+            int priceFrom = Integer.parseInt(text);
             Promo promo = context.getPromo(chatId);
-            PromoStep promoStep = new PromoStep();
-            promoStep.setDiscount(discount);
-            promo.addPromoStep(promoStep);
-            context.putPage(chatId, Page.ADD_PROMO_STEP_PRICE);
+            promo.getPromoSteps().getLast().setPriceFrom(priceFrom);
+            context.putPage(chatId, Page.ADD_PROMO_STEP_SUCCESSFUL);
         } catch (NumberFormatException e) {
             switch (text) {
                 case Button.ADD_PROMO -> context.putPage(chatId, Page.ADD_PROMO_STEP_PRICE);
                 case Button.MY_PROMOS -> context.putPage(chatId, Page.WATCH_PROMOS);
-                case Button.BACK -> context.putPage(chatId, Page.COMMON_SETTINGS);
+                case Button.BACK -> context.popPage(chatId);
                 default -> context.putPage(chatId, Page.UNEXPECTED);
             }
         } catch (IllegalArgumentException e) {
@@ -61,6 +58,6 @@ public class AddPromoStepDiscountPage extends MainKeyboardPage {
 
     @Override
     public Page getPage() {
-        return Page.ADD_PROMO_STEP_DISCOUNT;
+        return Page.ADD_PROMO_STEP_PRICE;
     }
 }

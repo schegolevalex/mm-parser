@@ -29,7 +29,7 @@ public class PromoService {
         return promoRepository.findById(promoId);
     }
 
-    public void save(Promo promo) {
-        promoRepository.save(promo);
+    public Promo save(Promo promo) {
+        return promoRepository.save(promo);
     }
 }

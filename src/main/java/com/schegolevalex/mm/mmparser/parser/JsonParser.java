@@ -102,7 +102,7 @@ public class JsonParser extends Parser {
             }
         } catch (JsonProcessingException e) {
             log.error("Не удалось распарсить JSON", e);
-            throw new RuntimeException(e);
+            throw new RuntimeException(e); // todo ???????
         }
         return offers;
     }

@@ -31,6 +31,7 @@ public class OfferService {
     }
 
     public boolean isPresent(Offer offer) {
+        // todo стоит исключить отсюда даты доставки, чтобы не создавался новый элемент только из-за изменения даты доставки
         Delivery delivery = offer.getDelivery();
         String marketId = offer.getSeller().getMarketId();
         String clickCourierDate = delivery.getClickCourierDate();

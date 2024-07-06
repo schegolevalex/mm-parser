@@ -1,5 +1,6 @@
 package com.schegolevalex.mm.mmparser.bot;
 
+import com.schegolevalex.mm.mmparser.entity.Filter;
 import com.schegolevalex.mm.mmparser.entity.Promo;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -11,6 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.schegolevalex.mm.mmparser.bot.Constant.*;
@@ -157,8 +159,8 @@ public class Keyboard {
     public static InlineKeyboardMarkup withProductSettings(Long productId) {
         InlineKeyboardRow row1 = new InlineKeyboardRow();
         row1.add(InlineKeyboardButton.builder()
-                .text(Button.NOTIFICATIONS_SETTINGS)
-                .callbackData(Callback.NOTIFICATIONS_SETTINGS + DELIMITER + productId)
+                .text(Button.APPLY_FILTER)
+                .callbackData(Callback.APPLY_FILTER + DELIMITER + productId)
                 .build());
         InlineKeyboardRow row2 = new InlineKeyboardRow();
         row2.add(InlineKeyboardButton.builder()
@@ -173,7 +175,10 @@ public class Keyboard {
         return new InlineKeyboardMarkup(List.of(row1, row2, row3));
     }
 
-    public static InlineKeyboardMarkup withPromosForProduct(List<Promo> promos, long productId, Promo selectedPromo, int page) {
+    public static InlineKeyboardMarkup withPromosForProduct(List<Promo> promos,
+                                                            Promo selectedPromo,
+                                                            long productId,
+                                                            int page) {
         List<InlineKeyboardRow> keyboard = new ArrayList<>();
 
         int pageSize = 5;
@@ -286,5 +291,103 @@ public class Keyboard {
                 .keyboard(List.of(row1, row2))
                 .resizeKeyboard(true)
                 .build();
+    }
+
+    public static ReplyKeyboard withFilterFields() {
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(Button.PRICE);
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(Button.BONUS);
+        KeyboardRow row3 = new KeyboardRow();
+        row3.add(Button.BONUS_PERCENT);
+        KeyboardRow row4 = new KeyboardRow();
+        row4.add(Button.BACK);
+        return ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row1, row2, row3, row4))
+                .resizeKeyboard(true)
+                .build();
+    }
+
+    public static ReplyKeyboard withFilterOperations() {
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(Button.LESS_OR_EQUALS);
+        row1.add(Button.EQUALS);
+        row1.add(Button.GREATER_OR_EQUALS);
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(Button.BACK);
+        return ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row1, row2))
+                .resizeKeyboard(true)
+                .build();
+    }
+
+    public static InlineKeyboardMarkup withFiltersForProduct(List<Filter> allUserFilters,
+                                                             Set<Filter> selectedFilters,
+                                                             long productId,
+                                                             int page) {
+        List<InlineKeyboardRow> keyboard = new ArrayList<>();
+
+        int pageSize = 5;
+        int totalPages = (int) Math.ceil((double) allUserFilters.size() / pageSize);
+        int startIndex = (page - 1) * pageSize;
+        int endIndex = Math.min(startIndex + pageSize, allUserFilters.size());
+
+        if (page <= 0 || page > totalPages) {
+            log.error("Неверный номер страницы для клавиатуры: {}", page);
+            throw new RuntimeException("Неверный номер страницы для клавиатуры: " + page);
+        }
+
+        if (allUserFilters.isEmpty()) {
+            InlineKeyboardRow row = new InlineKeyboardRow();
+            row.add(InlineKeyboardButton.builder()
+                    .text(Message.FILTERS_IS_EMPTY)
+                    .callbackData(Callback.EMPTY)
+                    .build());
+            keyboard.add(row);
+        } else {
+            allUserFilters.subList(startIndex, endIndex).forEach(filter -> {
+                InlineKeyboardRow row = new InlineKeyboardRow();
+                row.add(InlineKeyboardButton.builder()
+                        .text((selectedFilters.contains(filter) ? "✅ " : "") + filter)
+                        .callbackData(Callback.APPLY_FILTER + DELIMITER + productId + DELIMITER
+                                + Callback.MY_FILTERS + DELIMITER + filter.getId() + DELIMITER +
+                                Callback.KEYBOARD_PAGES + DELIMITER + page)
+                        .build());
+                keyboard.add(row);
+            });
+        }
+
+        InlineKeyboardRow bottomRow = new InlineKeyboardRow();
+        if (page == 1) {
+            bottomRow.add(InlineKeyboardButton.builder()
+                    .text(Button.EMPTY)
+                    .callbackData(Callback.EMPTY)
+                    .build());
+        } else {
+            bottomRow.add(InlineKeyboardButton.builder()
+                    .text(Button.PREVIOUS_PAGE)
+                    .callbackData(Callback.APPLY_FILTER + DELIMITER + productId + DELIMITER
+                            + Callback.KEYBOARD_PAGES + DELIMITER + (page - 1))
+                    .build());
+        }
+        bottomRow.add(InlineKeyboardButton.builder()
+                .text(Button.BACK_TO_PRODUCT_SETTINGS)
+                .callbackData(Callback.BACK_TO_PRODUCT_SETTINGS + DELIMITER + productId)
+                .build());
+        if (page == totalPages) {
+            bottomRow.add(InlineKeyboardButton.builder()
+                    .text(Button.EMPTY)
+                    .callbackData(Callback.EMPTY)
+                    .build());
+        } else {
+            bottomRow.add(InlineKeyboardButton.builder()
+                    .text(Button.NEXT_PAGE)
+                    .callbackData(Callback.APPLY_FILTER + DELIMITER + productId + DELIMITER
+                            + Callback.KEYBOARD_PAGES + DELIMITER + (page + 1))
+                    .build());
+        }
+        keyboard.add(bottomRow);
+
+        return new InlineKeyboardMarkup(keyboard);
     }
 }

@@ -2,6 +2,7 @@ package com.schegolevalex.mm.mmparser.bot;
 
 import com.schegolevalex.mm.mmparser.bot.page.base.BasePage;
 import com.schegolevalex.mm.mmparser.bot.page.base.Page;
+import com.schegolevalex.mm.mmparser.entity.Filter;
 import com.schegolevalex.mm.mmparser.entity.Promo;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ public class Context {
     private final List<BasePage> allPossiblePages;
     private final Map<Long, Stack<BasePage>> chatPages = new HashMap<>();
     private final Map<Long, Promo> tempPromo = new HashMap<>();
+    private final Map<Long, Filter> tempFilter = new HashMap<>();
 
     public Context(@Lazy List<BasePage> allPossiblePages) {
         this.allPossiblePages = allPossiblePages;
@@ -72,5 +74,17 @@ public class Context {
 
     public void clearPromo(Long chatId) {
         tempPromo.remove(chatId);
+    }
+
+    public void putFilter(Long chatId, Filter filter) {
+        tempFilter.put(chatId, filter);
+    }
+
+    public Filter getFilter(Long chatId) {
+        return tempFilter.get(chatId);
+    }
+
+    public void clearFilter(Long chatId) {
+        tempFilter.remove(chatId);
     }
 }

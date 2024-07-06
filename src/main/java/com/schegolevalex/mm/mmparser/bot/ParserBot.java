@@ -147,7 +147,9 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
         productService.findAllByIsActive(true).forEach(product -> {
             List<Offer> parsedOffers = parser.parseProduct(product);
             List<Offer> newOffers = parsedOffers.stream()
-                    .filter(offer -> !offerService.isPresent(offer))
+                    .filter(offer -> !offerService.isPresent(offer)) // todo надо не фильтровать, а искать существующий offer и мапить
+                    // спарсенный объект в существующий offer, тем самым будет обновляться поле updatedAt,
+                    // либо создаваться новый элемент, если offer нет
                     .toList();
             offerService.saveAll(newOffers);
             List<Offer> filteredOffers = offerService.filterOffersWithDefaultParameters(newOffers);

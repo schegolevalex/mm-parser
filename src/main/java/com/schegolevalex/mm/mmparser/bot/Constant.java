@@ -14,7 +14,6 @@ public interface Constant {
         String SUGGESTION_TO_LINK_INPUT = "Введите ссылку на товар 🔗";
         String PRODUCTS_IS_EMPTY = "Вы еще не добавили ни один товар 😦";
         String LINK_IS_ACCEPTED = "Ссылка принята☺️\nМожете добавить еще одну или вернуться на главную🏠";
-        //        String UNEXPECTED_INPUT = "не понимаю, повторите еще раз 🤔";
         String BYE = "👋";
         String OFFER = """
                 Предложение (~%d рублей):
@@ -48,6 +47,10 @@ public interface Constant {
                 __*"500 от 2000 рублей, 800 от 3000 рублей, 1500 от 10000 рублей"*__\\. Всё это один промокод\\!||""";
         String PROMO = "%d/%d";
         String FILTERS_IS_EMPTY = "нет фильтров 😦";
+        String ADD_FILTER_FIELD = "По чему будем фильтровать?";
+        String ADD_FILTER_OPERATION = "Выберите условие фильтрации:";
+        String ADD_FILTER_VALUE = "Введите значение фильтра:";
+        String FILTER_ADDED = "Фильтр успешно добавлен";
     }
 
     interface Button {
@@ -55,8 +58,6 @@ public interface Constant {
         String ADD_PRODUCT = "➕ добавить товар";
         String BACK = "⬅ назад";
         String MAIN_PAGE = "🏠 на главную";
-        //        String OK = "👌 OK";
-//        String START_CONVERSATION = "🏃 начинаем";
         String SETTINGS = "⚙️ настройки";
         String PROMOS_SETTINGS = "🔵 промокоды";
         String CASHBACK_SETTINGS = "🟢 кэшбэк Сберпрайм";
@@ -68,7 +69,7 @@ public interface Constant {
         String CONFIRM = "✅";
         String DECLINE = "⛔️";
         String APPLY_PROMO = "🔵 применить промокод";
-        String NOTIFICATIONS_SETTINGS = "🔔 настроить уведомления";
+        String APPLY_FILTER = "🔴 применить фильтр";
         String PREVIOUS_PAGE = "<<";
         String NEXT_PAGE = ">>";
         String EMPTY = " ";
@@ -77,10 +78,16 @@ public interface Constant {
         String PRODUCT_SETTINGS = "🛠";
         String DELETE_PRODUCT = "🗑";
         String BACK_TO_PRODUCT_SETTINGS = "⬅ 🛠";
-        String FILTERS_SETTINGS = "🔴 фильтры уведомлений";
+        String FILTERS_SETTINGS = "🔴 фильтр товаров";
         String ADD_FILTER = "➕ добавить фильтр";
-        String MY_FILTERS = "📘 мои фильтры";
+        String MY_FILTERS = "📕 мои фильтры";
         String DELETE_FILTER = "🗑";
+        String PRICE = "цена";
+        String BONUS = "количество бонусов";
+        String BONUS_PERCENT = "процент бонусов";
+        String LESS_OR_EQUALS = "≤";
+        String EQUALS = "=";
+        String GREATER_OR_EQUALS = "≥";
     }
 
     interface Callback {
@@ -89,7 +96,7 @@ public interface Constant {
         String APPLY_PROMO = "apply-promo";
         String DELETE_PROMO = "delete-promo";
         String KEYBOARD_PAGES = "pages";
-        String NOTIFICATIONS_SETTINGS = "notification-settings";
+        String APPLY_FILTER = "apply-filter";
         String BACK = "back";
         String EMPTY = "empty";
         String BACK_TO_PRODUCT_SETTINGS = "to-product-settings";
@@ -99,5 +106,6 @@ public interface Constant {
         String DELETE_FILTER = "delete-filter";
         String CONFIRM_DELETE = "confirm";
         String DECLINE_DELETE = "decline";
+        String MY_FILTERS = "filters";
     }
 }

@@ -1,10 +1,9 @@
-package com.schegolevalex.mm.mmparser.bot.page.impl;
+package com.schegolevalex.mm.mmparser.bot.page.impl.filter;
 
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
-import com.schegolevalex.mm.mmparser.bot.page.base.BasePage;
 import com.schegolevalex.mm.mmparser.bot.page.base.Page;
-import com.schegolevalex.mm.mmparser.entity.Product;
-import com.schegolevalex.mm.mmparser.service.ProductService;
+import com.schegolevalex.mm.mmparser.bot.page.base.PromoKeyboardPage;
+import com.schegolevalex.mm.mmparser.service.FilterService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,32 +15,33 @@ import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getCha
 
 @Component
 @Transactional
-public class DeleteProductPage extends BasePage {
-    private final ProductService productService;
+public class DeleteFilterPage extends PromoKeyboardPage {
 
-    public DeleteProductPage(@Lazy ParserBot bot, ProductService productService) {
+    private final FilterService filterService;
+
+    public DeleteFilterPage(@Lazy ParserBot bot, FilterService filterService) {
         super(bot);
-        this.productService = productService;
+        this.filterService = filterService;
     }
 
     @Override
     public void beforeUpdateReceive(Update prevUpdate) {
-        long productId = Long.parseLong(prevUpdate.getCallbackQuery().getData().split(DELIMITER)[1]);
-        Product product = productService.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
-        product.setActive(false);
+        Long chatId = getChatId(prevUpdate);
+        long filterId = Long.parseLong(prevUpdate.getCallbackQuery().getData().split(DELIMITER)[1]);
+        filterService.deleteById(filterId);
         bot.getSilent().execute(DeleteMessage.builder()
-                .chatId(getChatId(prevUpdate))
+                .chatId(chatId)
                 .messageId(prevUpdate.getCallbackQuery().getMessage().getMessageId())
                 .build());
     }
 
     @Override
     public void afterUpdateReceive(Update nextUpdate) {
-        context.popPage(getChatId(nextUpdate));
+        resolvePromoKeyboard(nextUpdate);
     }
 
     @Override
     public Page getPage() {
-        return Page.DELETE_PRODUCT;
+        return Page.DELETE_FILTER;
     }
 }

@@ -1,11 +1,9 @@
-package com.schegolevalex.mm.mmparser.bot.page.impl;
+package com.schegolevalex.mm.mmparser.bot.page.impl.filter;
 
 import com.schegolevalex.mm.mmparser.bot.Keyboard;
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
 import com.schegolevalex.mm.mmparser.bot.page.base.Page;
-import com.schegolevalex.mm.mmparser.bot.page.base.ProductKeyboardPage;
-import com.schegolevalex.mm.mmparser.service.ProductService;
-import com.schegolevalex.mm.mmparser.service.PromoService;
+import com.schegolevalex.mm.mmparser.bot.page.base.PromoKeyboardPage;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
@@ -15,28 +13,29 @@ import static com.schegolevalex.mm.mmparser.bot.Constant.DELIMITER;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
-public class ProductSettingsPage extends ProductKeyboardPage {
+public class ConfirmDeleteFilterPage extends PromoKeyboardPage {
 
-    public ProductSettingsPage(@Lazy ParserBot bot, ProductService productService, PromoService promoService) {
-        super(bot, productService, promoService);
+    public ConfirmDeleteFilterPage(@Lazy ParserBot bot) {
+        super(bot);
     }
 
     @Override
     public void beforeUpdateReceive(Update prevUpdate) {
+        long filterId = Long.parseLong(prevUpdate.getCallbackQuery().getData().split(DELIMITER)[1]);
         bot.getSilent().execute(EditMessageReplyMarkup.builder()
                 .chatId(getChatId(prevUpdate))
                 .messageId(prevUpdate.getCallbackQuery().getMessage().getMessageId())
-                .replyMarkup(Keyboard.withProductSettings(Long.parseLong(prevUpdate.getCallbackQuery().getData().split(DELIMITER)[1])))
+                .replyMarkup(Keyboard.withYesNoButtons(filterId))
                 .build());
     }
 
     @Override
     public void afterUpdateReceive(Update nextUpdate) {
-        resolveProductKeyboardAction(nextUpdate);
+        resolvePromoKeyboard(nextUpdate);
     }
 
     @Override
     public Page getPage() {
-        return Page.PRODUCT_SETTINGS;
+        return Page.CONFIRM_DELETE_FILTER;
     }
 }

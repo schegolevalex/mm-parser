@@ -1,4 +1,4 @@
-package com.schegolevalex.mm.mmparser.bot.page.impl;
+package com.schegolevalex.mm.mmparser.bot.page.impl.common;
 
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
 import com.schegolevalex.mm.mmparser.bot.page.base.BasePage;

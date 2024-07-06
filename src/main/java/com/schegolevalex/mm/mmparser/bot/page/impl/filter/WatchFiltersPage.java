@@ -1,10 +1,11 @@
-package com.schegolevalex.mm.mmparser.bot.page.impl;
+package com.schegolevalex.mm.mmparser.bot.page.impl.filter;
 
 import com.schegolevalex.mm.mmparser.bot.Keyboard;
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
+import com.schegolevalex.mm.mmparser.bot.page.base.FilterKeyboardPage;
 import com.schegolevalex.mm.mmparser.bot.page.base.Page;
-import com.schegolevalex.mm.mmparser.bot.page.base.PromoKeyboardPage;
-import com.schegolevalex.mm.mmparser.service.PromoService;
+import com.schegolevalex.mm.mmparser.entity.Filter;
+import com.schegolevalex.mm.mmparser.service.FilterService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,10 +23,10 @@ import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getCha
 
 @Component
 @Transactional
-public class WatchFiltersPage extends PromoKeyboardPage {
+public class WatchFiltersPage extends FilterKeyboardPage {
     private final FilterService filterService;
 
-    public WatchFiltersPage(@Lazy ParserBot bot, PromoService filterService) {
+    public WatchFiltersPage(@Lazy ParserBot bot, FilterService filterService) {
         super(bot);
         this.filterService = filterService;
     }
@@ -55,11 +56,7 @@ public class WatchFiltersPage extends PromoKeyboardPage {
                         .sorted(Comparator.comparing(Filter::getCreatedAt))
                         .forEach(filter -> bot.getSilent().execute(SendMessage.builder()
                                 .chatId(chatId)
-                                // todo
-//                                .text(num.getAndIncrement() + ". " +
-//                                        filter.getPromoSteps().stream()
-//                                                .map(promoStep -> String.format(Message.PROMO, promoStep.getDiscount(), promoStep.getPriceFrom()))
-//                                                .collect(Collectors.joining("; ")))
+                                .text(num.getAndIncrement() + ". " + filter)
                                 .replyMarkup(Keyboard.withDeleteFilterButton(filter.getId()))
                                 .build()));
             }
@@ -68,7 +65,7 @@ public class WatchFiltersPage extends PromoKeyboardPage {
 
     @Override
     public void afterUpdateReceive(Update nextUpdate) {
-        resolvePromoKeyboard(nextUpdate);
+        resolveFiltersKeyboard(nextUpdate);
     }
 
     @Override

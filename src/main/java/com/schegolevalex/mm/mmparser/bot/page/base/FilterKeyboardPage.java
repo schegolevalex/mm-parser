@@ -1,6 +1,7 @@
 package com.schegolevalex.mm.mmparser.bot.page.base;
 
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
+import com.schegolevalex.mm.mmparser.entity.Filter;
 import org.springframework.context.annotation.Lazy;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -8,8 +9,8 @@ import static com.schegolevalex.mm.mmparser.bot.Constant.Button;
 import static com.schegolevalex.mm.mmparser.bot.Constant.Callback;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
-public abstract class FiltersKeyboardPage extends BasePage {
-    public FiltersKeyboardPage(@Lazy ParserBot bot) {
+public abstract class FilterKeyboardPage extends BasePage {
+    public FilterKeyboardPage(@Lazy ParserBot bot) {
         super(bot);
     }
 
@@ -26,9 +27,8 @@ public abstract class FiltersKeyboardPage extends BasePage {
         } else {
             switch (nextUpdate.getMessage().getText()) {
                 case (Button.ADD_FILTER) -> {
-                    // todo
-//                    context.putPromo(chatId, new Promo());
-//                    context.putPage(chatId, Page.ADD_PROMO_STEP_DISCOUNT);
+                    context.putFilter(chatId, new Filter());
+                    context.putPage(chatId, Page.ADD_FILTER_FIELD);
                 }
                 case (Button.MY_FILTERS) -> context.putPage(chatId, Page.WATCH_FILTERS);
                 case (Button.BACK) -> context.putPage(chatId, Page.COMMON_SETTINGS);
