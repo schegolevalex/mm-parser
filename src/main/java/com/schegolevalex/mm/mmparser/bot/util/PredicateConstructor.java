@@ -41,25 +41,25 @@ public class PredicateConstructor {
         };
     }
 
-    private double calculatePrice(Offer offer, boolean withPromo) {
+    double calculatePrice(Offer offer, boolean withPromo) {
         Integer priceBefore = offer.getPrice();
         double bonusPercent = offer.getBonusPercent() / 100.0;
 
         AtomicInteger promoDiscount = new AtomicInteger();
-        if (withPromo) {
+        if (withPromo && offer.getProduct().getPromo() != null) {
             List<PromoStep> promoSteps = offer.getProduct().getPromo().getPromoSteps();
+
             promoSteps.stream()
-                    .sorted(Comparator.comparing(PromoStep::getPriceFrom))
                     .filter(promoStep -> priceBefore >= promoStep.getPriceFrom())
-                    .reduce((first, second) -> second)
-                    .ifPresent(step -> promoDiscount.set(step.getDiscount()));
+                    .max(Comparator.comparing(PromoStep::getDiscount))
+                    .ifPresent(promoStep -> promoDiscount.set(promoStep.getDiscount()));
         }
 
         AtomicInteger cashbackLevel = new AtomicInteger();
         userService.findByChatId(offer.getProduct().getUser().getChatId())
                 .ifPresent(user -> cashbackLevel.set(user.getCashbackLevel()));
-        double sberprime = priceBefore * cashbackLevel.get() / 100.0 > 2_000 ? 2_000 : (priceBefore * cashbackLevel.get() / 100.0);
-        return priceBefore - promoDiscount.get() - (priceBefore - promoDiscount.get()) * bonusPercent - sberprime;
+        double sberprime = (priceBefore - promoDiscount.get()) * cashbackLevel.get() / 100.0 > 2_000 ? 2_000 : ((priceBefore - promoDiscount.get()) * cashbackLevel.get() / 100.0);
+        return (1 - bonusPercent) * (priceBefore - promoDiscount.get()) - sberprime;
     }
 
     private static Predicate<Offer> createPredicate(Filter filter, Function<Offer, Integer> getter) {

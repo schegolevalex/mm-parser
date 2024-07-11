@@ -15,6 +15,7 @@ import java.util.Set;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -37,6 +38,7 @@ public class Seller {
     Instant updatedAt;
 
     @Column(columnDefinition = "boolean default true")
+    @Builder.Default
     boolean isActive = true;
 
     String ogrn;
@@ -51,6 +53,7 @@ public class Seller {
             joinColumns = @JoinColumn(name = "seller_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id"))
     @ToString.Exclude
+    @Builder.Default
     Set<Product> products = new HashSet<>();
 
     public void addProduct(Product product) {

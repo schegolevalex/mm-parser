@@ -16,7 +16,7 @@ public abstract class MainKeyboardPage extends BasePage {
     protected void resolveMainKeyboard(Update nextUpdate) {
         Long chatId = getChatId(nextUpdate);
         switch (nextUpdate.getMessage().getText()) {
-            case (Button.ADD_PRODUCT) -> context.putPage(chatId, Page.SUGGESTION_TO_INPUT_LINK);
+            case (Button.ADD_PRODUCT) -> context.putPage(chatId, Page.ADD_PRODUCT);
             case (Button.MY_PRODUCTS) -> context.putPage(chatId, Page.WATCH_PRODUCTS);
             case (Button.SETTINGS) -> context.putPage(chatId, Page.COMMON_SETTINGS);
             default -> context.putPage(chatId, Page.UNEXPECTED);

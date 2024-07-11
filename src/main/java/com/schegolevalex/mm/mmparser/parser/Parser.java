@@ -43,8 +43,8 @@ public abstract class Parser {
         driver = new ChromeDriver(options);
         driver.manage().window().maximize();
         String baseUrl = "https://megamarket.ru/";
-        log.info("Открываем главную страницу: {}", baseUrl);
         driver.get(baseUrl);
+        log.info("Открываем главную страницу: {}", baseUrl);
     }
 
     @PreDestroy
@@ -54,7 +54,7 @@ public abstract class Parser {
 
     protected void openProductUrl(String url) {
         proxyService.setProxy(options);
-        log.info("Открываем страницу товара: {}", url);
         driver.get(url + "#?details_block=prices");
+        log.info("Открываем страницу товара: {}", url);
     }
 }

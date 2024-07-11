@@ -205,8 +205,8 @@ public class Keyboard {
                                 .map(promoStep -> String.format(Message.PROMO, promoStep.getDiscount(), promoStep.getPriceFrom()))
                                 .collect(Collectors.joining("; ")))
                         .callbackData(Callback.APPLY_PROMO + DELIMITER + productId + DELIMITER
-                                + Callback.MY_PROMOS + DELIMITER + promo.getId() + DELIMITER +
-                                Callback.KEYBOARD_PAGES + DELIMITER + page)
+                                      + Callback.MY_PROMOS + DELIMITER + promo.getId() + DELIMITER +
+                                      Callback.KEYBOARD_PAGES + DELIMITER + page)
                         .build());
                 keyboard.add(row);
             });
@@ -222,7 +222,7 @@ public class Keyboard {
             bottomRow.add(InlineKeyboardButton.builder()
                     .text(Button.PREVIOUS_PAGE)
                     .callbackData(Callback.APPLY_PROMO + DELIMITER + productId + DELIMITER
-                            + Callback.KEYBOARD_PAGES + DELIMITER + (page - 1))
+                                  + Callback.KEYBOARD_PAGES + DELIMITER + (page - 1))
                     .build());
         }
         bottomRow.add(InlineKeyboardButton.builder()
@@ -238,7 +238,7 @@ public class Keyboard {
             bottomRow.add(InlineKeyboardButton.builder()
                     .text(Button.NEXT_PAGE)
                     .callbackData(Callback.APPLY_PROMO + DELIMITER + productId + DELIMITER
-                            + Callback.KEYBOARD_PAGES + DELIMITER + (page + 1))
+                                  + Callback.KEYBOARD_PAGES + DELIMITER + (page + 1))
                     .build());
         }
         keyboard.add(bottomRow);
@@ -351,8 +351,8 @@ public class Keyboard {
                 row.add(InlineKeyboardButton.builder()
                         .text((selectedFilters.contains(filter) ? "✅ " : "") + filter)
                         .callbackData(Callback.APPLY_FILTER + DELIMITER + productId + DELIMITER
-                                + Callback.MY_FILTERS + DELIMITER + filter.getId() + DELIMITER +
-                                Callback.KEYBOARD_PAGES + DELIMITER + page)
+                                      + Callback.MY_FILTERS + DELIMITER + filter.getId() + DELIMITER +
+                                      Callback.KEYBOARD_PAGES + DELIMITER + page)
                         .build());
                 keyboard.add(row);
             });
@@ -368,7 +368,7 @@ public class Keyboard {
             bottomRow.add(InlineKeyboardButton.builder()
                     .text(Button.PREVIOUS_PAGE)
                     .callbackData(Callback.APPLY_FILTER + DELIMITER + productId + DELIMITER
-                            + Callback.KEYBOARD_PAGES + DELIMITER + (page - 1))
+                                  + Callback.KEYBOARD_PAGES + DELIMITER + (page - 1))
                     .build());
         }
         bottomRow.add(InlineKeyboardButton.builder()
@@ -384,7 +384,7 @@ public class Keyboard {
             bottomRow.add(InlineKeyboardButton.builder()
                     .text(Button.NEXT_PAGE)
                     .callbackData(Callback.APPLY_FILTER + DELIMITER + productId + DELIMITER
-                            + Callback.KEYBOARD_PAGES + DELIMITER + (page + 1))
+                                  + Callback.KEYBOARD_PAGES + DELIMITER + (page + 1))
                     .build());
         }
         keyboard.add(bottomRow);

@@ -29,10 +29,13 @@ public class OfferDtoDeserializer extends StdDeserializer<OfferDto> {
 
         if (bonusInfoGroupsNode.isArray()) {
             for (JsonNode groupNode : bonusInfoGroupsNode) {
-                if ("ITEMS_BONUS".equals(groupNode.get("type").asText())) {
+                if ("PAYMENT_TYPE_BONUS".equals(groupNode.get("type").asText())) {
                     bonusPercent = (groupNode.get("percent").isNull()) ? 0 : groupNode.get("percent").asInt();
                     bonus = (groupNode.get("totalAmount").isNull()) ? 0 : groupNode.get("totalAmount").asInt();
                     break;
+                } else if ("ITEMS_BONUS".equals(groupNode.get("type").asText())) {
+                    bonusPercent = (groupNode.get("percent").isNull()) ? 0 : groupNode.get("percent").asInt();
+                    bonus = (groupNode.get("totalAmount").isNull()) ? 0 : groupNode.get("totalAmount").asInt();
                 }
             }
         }

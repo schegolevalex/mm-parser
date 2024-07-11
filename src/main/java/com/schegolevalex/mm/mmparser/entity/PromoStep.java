@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -30,14 +31,14 @@ public class PromoStep {
     Promo promo;
 
     public void setPriceFrom(Integer priceFrom) throws IllegalArgumentException {
-        if (this.discount != null && this.discount > priceFrom) {
+        if (this.discount != null && this.discount >= priceFrom) {
             throw new IllegalArgumentException("Цена должна быть больше скидки");
         }
         this.priceFrom = priceFrom;
     }
 
     public void setDiscount(Integer discount) throws IllegalArgumentException {
-        if (this.priceFrom != null && this.priceFrom < discount) {
+        if (this.priceFrom != null && this.priceFrom <= discount) {
             throw new IllegalArgumentException("Скидка должна быть меньше цены, от которой она действует");
         }
         this.discount = discount;

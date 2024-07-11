@@ -57,6 +57,7 @@ public class Product {
     @JoinTable(name = "filter_product",
             joinColumns = @JoinColumn(name = "filter_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id"))
+    @Builder.Default
     @ToString.Exclude
     Set<Filter> filters = new HashSet<>();
 

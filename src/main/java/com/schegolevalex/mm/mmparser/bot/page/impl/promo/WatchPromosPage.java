@@ -58,9 +58,9 @@ public class WatchPromosPage extends PromoKeyboardPage {
                         .forEach(promo -> bot.getSilent().execute(SendMessage.builder()
                                 .chatId(chatId)
                                 .text(num.getAndIncrement() + ". " +
-                                        promo.getPromoSteps().stream()
-                                                .map(promoStep -> String.format(Message.PROMO, promoStep.getDiscount(), promoStep.getPriceFrom()))
-                                                .collect(Collectors.joining("; ")))
+                                      promo.getPromoSteps().stream()
+                                              .map(promoStep -> String.format(Message.PROMO, promoStep.getDiscount(), promoStep.getPriceFrom()))
+                                              .collect(Collectors.joining("; ")))
                                 .replyMarkup(Keyboard.withDeletePromoButton(promo.getId()))
                                 .build()));
             }

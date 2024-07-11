@@ -34,7 +34,7 @@ public class ProxyService {
                     proxies.get(extNumber).getHost(),
                     proxies.get(extNumber).getPort());
         } else {
-            log.info("Прокси-серверов нет");
+            log.warn("Прокси-серверы не определены, прокси не используется");
         }
     }
 

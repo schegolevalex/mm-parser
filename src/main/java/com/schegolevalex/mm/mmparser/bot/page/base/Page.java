@@ -3,7 +3,6 @@ package com.schegolevalex.mm.mmparser.bot.page.base;
 public enum Page {
     NEW_CONVERSATION,
     MAIN,
-    SUGGESTION_TO_INPUT_LINK,
     ADD_PRODUCT,
     WATCH_PRODUCTS,
     WATCH_PROMOS,

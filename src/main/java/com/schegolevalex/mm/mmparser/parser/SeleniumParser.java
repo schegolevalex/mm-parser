@@ -65,7 +65,7 @@ public class SeleniumParser extends Parser {
         String ogrn = ogrnMatcher.find() ? ogrnMatcher.group().substring(6) : null;
         String email = emailMatcher.find() ? emailMatcher.group().substring(8) : null;
 
-        Optional<Seller> maybeSeller = sellerService.findByNameAndRating(sellerName, rating, ogrn);
+        Optional<Seller> maybeSeller = sellerService.findByNameAndRatingAndOgrn(sellerName, rating, ogrn);
         Seller seller;
         if (maybeSeller.isPresent()) {
             seller = maybeSeller.get();

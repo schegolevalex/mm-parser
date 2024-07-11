@@ -17,7 +17,7 @@ public class SellerService {
         return sellerRepository.findByName(sellerName);
     }
 
-    public Optional<Seller> findByNameAndRating(String sellerName, Double rating, String ogrn) {
+    public Optional<Seller> findByNameAndRatingAndOgrn(String sellerName, Double rating, String ogrn) {
         return sellerRepository.findByNameAndRatingAndOgrn(sellerName, rating, ogrn);
     }
 
