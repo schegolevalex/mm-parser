@@ -14,6 +14,7 @@ import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -183,8 +184,10 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
             });
     }
 
+    @Async
     @Scheduled(cron = "0 */1 * * * *", zone = "Europe/Moscow")
     protected void parseAndNotify() {
+        long start = System.currentTimeMillis();
         productService.findAllByIsActive(true).forEach(product -> {
             List<Offer> parsedOffers = parser.parseProduct(product);
             List<Offer> newOffers = parsedOffers.stream()
@@ -197,6 +200,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
             if (!filteredOffers.isEmpty())
                 sendNotifies(filteredOffers, product.getUser().getChatId());
         });
+        log.info("Парсинг завершен за {} сек", (System.currentTimeMillis() - start)/1000.0);
     }
 
     @Override
