@@ -59,13 +59,13 @@ public class JsonParser extends Parser {
             JsonPointer productTitlePointer = JsonPointer.compile("/hydratorState/PrefetchStore/componentsInitialState/catalog.details/mainInfo/name");
             String productTitle = jsonRoot.at(productTitlePointer).asText();
             product.setTitle(productTitle);
-            log.info("Товару установлено название: {}", productTitle);
+            log.trace("Товару установлено название: {}", productTitle);
         }
         if (product.getSku() == null || product.getSku().isEmpty()) {
             JsonPointer skuPointer = JsonPointer.compile("/hydratorState/PrefetchStore/componentsInitialState/catalog.details/mainInfo/sku");
             String sku = jsonRoot.at(skuPointer).asText();
             product.setSku(sku);
-            log.info("Товару установлен SKU: {}", sku);
+            log.trace("Товару установлен SKU: {}", sku);
         }
 
         List<Offer> offers = new ArrayList<>();
@@ -81,10 +81,10 @@ public class JsonParser extends Parser {
                 if (maybeExistSeller.isPresent()) {
                     seller = maybeExistSeller.get();
                     offer.setSeller(seller);
-                    log.info("Найден существующий продавец: {}", seller);
+                    log.trace("Найден существующий продавец: {}", seller);
                 } else {
                     seller = sellerService.save(seller);
-                    log.info("Создан новый продавец: {}", seller);
+                    log.trace("Создан новый продавец: {}", seller);
                 }
                 seller.addProduct(product);
                 offer.setProduct(product);
@@ -128,9 +128,9 @@ public class JsonParser extends Parser {
     private static void saveJsonData(JsonNode jsonRoot, String title) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("product_data_" + title + ".json"))) {
             writer.write(jsonRoot.toPrettyString());
-            log.info("Json сохранен в файл {}", "product_data_" + title + ".json");
+            log.debug("Json сохранен в файл {}", "product_data_" + title + ".json");
         } catch (IOException e) {
-            log.info("Ошибка при сохранении Json файла: {}", e.getMessage());
+            log.debug("Ошибка при сохранении Json файла: {}", e.getMessage());
         }
     }
 }

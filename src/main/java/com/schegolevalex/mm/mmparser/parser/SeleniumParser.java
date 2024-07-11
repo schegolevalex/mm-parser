@@ -69,14 +69,14 @@ public class SeleniumParser extends Parser {
         Seller seller;
         if (maybeSeller.isPresent()) {
             seller = maybeSeller.get();
-            log.info("Найден существующий продавец: {}", seller);
+            log.trace("Найден существующий продавец: {}", seller);
         } else {
             seller = new Seller();
             seller.setName(sellerName);
             seller.setRating(rating);
             seller.setOgrn(ogrn);
             seller.setEmail(email);
-            log.info("Создан новый продавец: {}", seller);
+            log.trace("Создан новый продавец: {}", seller);
         }
         seller.addProduct(product);
 
@@ -95,9 +95,9 @@ public class SeleniumParser extends Parser {
         } catch (NoSuchElementException e) {
             offer.setBonusPercent(0);
             offer.setBonus(0);
-            log.info("Элементы с информацией о бонусах не найден");
+            log.trace("Элементы с информацией о бонусах не найден");
         } catch (NumberFormatException e) {
-            log.info("Не удалось преобразовать информацию в число: ", e);
+            log.trace("Не удалось преобразовать информацию в число: ", e);
         }
 
         String tempPrice = webElement.findElement(By.className("product-offer-price__amount")).getText();
