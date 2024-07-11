@@ -49,8 +49,7 @@ public class JsonParser extends Parser {
 
     @Override
     public List<Offer> parseProduct(Product product) {
-        openProductUrl(product.getUrl());
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfElementLocated(By.tagName("html")));
+        openUrl(product.getUrl() + "#?details_block=prices");
 
         String page = driver.getPageSource();
         Document html = Jsoup.parse(page);
@@ -122,7 +121,7 @@ public class JsonParser extends Parser {
             return objectMapper.readTree(json);
         } catch (JsonProcessingException e) {
             log.error("Не удалось распарсить JSON", e);
-            throw new RuntimeException(e); // todo ???????
+            throw new RuntimeException(e);
         }
     }
 
