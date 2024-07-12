@@ -15,6 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static com.schegolevalex.mm.mmparser.bot.Constant.Button;
 import static com.schegolevalex.mm.mmparser.bot.Constant.Message;
+import static com.schegolevalex.mm.mmparser.bot.util.MessageUtil.prepareToMarkdownV2;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
@@ -42,7 +43,7 @@ public class CashbackSettingsPage extends BasePage {
         else
             bot.getSilent().execute(SendMessage.builder()
                     .chatId(getChatId(prevUpdate))
-                    .text(Message.CHOOSE_YOUR_CASHBACK_LEVEL)
+                    .text(prepareToMarkdownV2(Message.CHOOSE_YOUR_CASHBACK_LEVEL))
                     .replyMarkup(Keyboard.withCashbackLevels(cashbackLevel))
                     .parseMode("MarkdownV2")
                     .build());

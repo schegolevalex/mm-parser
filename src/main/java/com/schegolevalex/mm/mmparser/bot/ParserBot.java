@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
+import static com.schegolevalex.mm.mmparser.bot.util.MessageUtil.prepareToMarkdownV2;
 import static org.telegram.telegrambots.abilitybots.api.objects.Locality.ALL;
 import static org.telegram.telegrambots.abilitybots.api.objects.Privacy.PUBLIC;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
@@ -152,30 +153,14 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
 
                 silent.execute(SendMessage.builder()
                         .chatId(chatId)
-                        .text(String.format(Constant.Message.OFFER,
-                                offer.getProduct().getTitle()
-                                        .replace("!", "\\!")
-                                        .replace("(", "\\(")
-                                        .replace(")", "\\)")
-                                        .replace("-", "\\-")
-                                        .replace(".", "\\.")
-                                        .replace("+", "\\+"),
-                                offer.getProduct().getUrl()
-                                        .replace("!", "\\!")
-                                        .replace("(", "\\(")
-                                        .replace(")", "\\)").replace("-", "\\-")
-                                        .replace(".", "\\.")
-                                        .replace("+", "\\+"),
+                        .text(prepareToMarkdownV2(String.format(Constant.Message.OFFER,
+                                offer.getProduct().getTitle(),
+                                offer.getProduct().getUrl(),
                                 totalPrice,
-                                offer.getSeller().getName()
-                                        .replace("!", "\\!")
-                                        .replace("(", "\\(")
-                                        .replace(")", "\\)").replace("-", "\\-")
-                                        .replace(".", "\\.")
-                                        .replace("+", "\\+"),
+                                offer.getSeller().getName(),
                                 offer.getPrice(),
                                 offer.getBonusPercent(),
-                                offer.getBonus()))
+                                offer.getBonus())))
                         .linkPreviewOptions(LinkPreviewOptions.builder()
                                 .isDisabled(false)
                                 .build())
@@ -200,7 +185,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
             if (!filteredOffers.isEmpty())
                 sendNotifies(filteredOffers, product.getUser().getChatId());
         });
-        log.info("Парсинг завершен за {} сек", (System.currentTimeMillis() - start)/1000.0);
+        log.info("Парсинг завершен за {} сек", (System.currentTimeMillis() - start) / 1000.0);
     }
 
     @Override

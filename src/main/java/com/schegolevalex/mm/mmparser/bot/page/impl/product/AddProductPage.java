@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 
 import static com.schegolevalex.mm.mmparser.bot.Constant.Button;
 import static com.schegolevalex.mm.mmparser.bot.Constant.Message;
+import static com.schegolevalex.mm.mmparser.bot.util.MessageUtil.prepareToMarkdownV2;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
@@ -70,7 +71,7 @@ public class AddProductPage extends BasePage {
                     bot.getSilent().execute(SendMessage.builder()
                             .chatId(chatId)
                             .replyMarkup(Keyboard.withMainPageButton())
-                            .text(Message.LINK_IS_NOT_VALID)
+                            .text(prepareToMarkdownV2(Message.LINK_IS_NOT_VALID))
                             .parseMode("MarkdownV2")
                             .linkPreviewOptions(LinkPreviewOptions.builder()
                                     .isDisabled(true)

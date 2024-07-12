@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static com.schegolevalex.mm.mmparser.bot.Constant.Button;
 import static com.schegolevalex.mm.mmparser.bot.Constant.Message;
+import static com.schegolevalex.mm.mmparser.bot.util.MessageUtil.prepareToMarkdownV2;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
@@ -26,7 +27,7 @@ public class AddPromoStepDiscountPage extends MainKeyboardPage {
     public void beforeUpdateReceive(Update prevUpdate) {
         bot.getSilent().execute(SendMessage.builder()
                 .chatId(getChatId(prevUpdate))
-                .text(Message.ADD_PROMO_STEP_DISCOUNT)
+                .text(prepareToMarkdownV2(Message.ADD_PROMO_STEP_DISCOUNT))
                 .replyMarkup(Keyboard.withPromoSettingsActions())
                 .parseMode("MarkdownV2")
                 .build());

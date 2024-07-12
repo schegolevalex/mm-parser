@@ -19,6 +19,7 @@ import java.util.Comparator;
 
 import static com.schegolevalex.mm.mmparser.bot.Constant.Button;
 import static com.schegolevalex.mm.mmparser.bot.Constant.Message;
+import static com.schegolevalex.mm.mmparser.bot.util.MessageUtil.prepareToMarkdownV2;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
@@ -40,7 +41,7 @@ public class AddPromoStepSuccessfulPage extends BasePage {
         Integer priceFrom = promo.getPromoSteps().getLast().getPriceFrom();
         bot.getSilent().execute(SendMessage.builder()
                 .chatId(getChatId(prevUpdate))
-                .text(String.format(Message.ADD_PROMO_STEP_SUCCESSFUL, discount, priceFrom))
+                .text(prepareToMarkdownV2(String.format(Message.ADD_PROMO_STEP_SUCCESSFUL, discount, priceFrom)))
                 .replyMarkup(Keyboard.continueAddOrSavePromoSteps())
                 .parseMode("MarkdownV2")
                 .build());
