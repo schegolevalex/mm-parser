@@ -87,4 +87,10 @@ public class Context {
     public void clearFilter(Long chatId) {
         tempFilter.remove(chatId);
     }
+
+    public void clear(Long chatId) {
+        clearPages(chatId);
+        clearPromo(chatId);
+        clearFilter(chatId);
+    }
 }

@@ -107,8 +107,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                 .privacy(PUBLIC)
                 .action(ctx -> {
                     Long chatId = getChatId(ctx.update());
-                    context.clearPages(chatId);
-                    context.clearPromo(chatId);
+                    context.clear(chatId);
                     silent.execute(SendMessage.builder()
                             .chatId(chatId)
                             .text(Constant.Message.BYE)
