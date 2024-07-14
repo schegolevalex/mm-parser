@@ -108,6 +108,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                 .action(ctx -> {
                     Long chatId = getChatId(ctx.update());
                     context.clear(chatId);
+                    // todo отключать парсинг ссылок
                     silent.execute(SendMessage.builder()
                             .chatId(chatId)
                             .text(Constant.Message.BYE)

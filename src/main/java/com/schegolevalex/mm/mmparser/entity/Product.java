@@ -55,8 +55,8 @@ public class Product {
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "filter_product",
-            joinColumns = @JoinColumn(name = "filter_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_id"))
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "filter_id"))
     @Builder.Default
     @ToString.Exclude
     Set<Filter> filters = new HashSet<>();
