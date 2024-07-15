@@ -51,6 +51,11 @@ public class Filter {
     @EqualsAndHashCode.Exclude
     Set<Product> products = new HashSet<>();
 
+    @ManyToMany(mappedBy = "filters", fetch = FetchType.LAZY)
+    @Builder.Default
+    @EqualsAndHashCode.Exclude
+    Set<Notify> notifies = new HashSet<>();
+
     @Override
     public String toString() {
         String fieldName;
