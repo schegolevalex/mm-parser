@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
 public interface FilterRepository extends JpaRepository<Filter, Long> {
 
     @Query("SELECT f FROM Filter f WHERE f.user.chatId = :chatId")

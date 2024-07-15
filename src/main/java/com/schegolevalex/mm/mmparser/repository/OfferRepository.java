@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-@Repository
 public interface OfferRepository extends JpaRepository<Offer, Long> {
     @Query(
             "SELECT o FROM Offer o " +
