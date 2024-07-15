@@ -7,6 +7,7 @@ public class MessageUtil {
                 .replace("(", "\\(")
                 .replace(")", "\\)")
                 .replace("-", "\\-")
+                .replace("_", "\\_")
                 .replace(".", "\\.")
                 .replace("+", "\\+");
     }

@@ -1,11 +1,13 @@
 package com.schegolevalex.mm.mmparser.repository;
 
 import com.schegolevalex.mm.mmparser.entity.Offer;
+import com.schegolevalex.mm.mmparser.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 public interface OfferRepository extends JpaRepository<Offer, Long> {
@@ -30,4 +32,6 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
                               String pickupDate, Integer pickupPrice,
                               String storeDate, Integer storePrice,
                               String courierDate, Integer courierPrice);
+
+    List<Offer> findAllByProductAndUpdatedAtGreaterThanEqual(Product product, Instant updatedAt);
 }

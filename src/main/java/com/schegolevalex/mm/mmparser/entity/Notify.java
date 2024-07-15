@@ -9,7 +9,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -65,7 +64,7 @@ public class Notify {
         filter.getNotifies().add(this);
     }
 
-    public void addFilters(List<Filter> filterList) {
+    public void addFilters(Set<Filter> filterList) {
         filterList.forEach(this::addFilter);
     }
 
