@@ -246,16 +246,8 @@ public class Keyboard {
         return new InlineKeyboardMarkup(keyboard);
     }
 
-    public static InlineKeyboardMarkup withProduct(Long productId, String url) {
+    public static InlineKeyboardMarkup withProduct(Long productId) {
         InlineKeyboardRow row = new InlineKeyboardRow();
-        row.add(InlineKeyboardButton.builder()
-                .text(Button.PRODUCT_URL)
-                .url(url)
-                .build());
-        row.add(InlineKeyboardButton.builder()
-                .text(Button.PRODUCT_NOTIFICATIONS)
-                .callbackData(Callback.PRODUCT_NOTIFICATIONS + DELIMITER + productId)
-                .build());
         row.add(InlineKeyboardButton.builder()
                 .text(Button.PRODUCT_SETTINGS)
                 .callbackData(Callback.PRODUCT_SETTINGS + DELIMITER + productId)

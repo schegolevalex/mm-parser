@@ -80,13 +80,15 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                     this.context.clearPromo(chatId);
 
                     if (userService.findByChatId(chatId).isEmpty()) {
-                        userService.save(User.builder()
+                        User user = User.builder()
                                 .chatId(chatId)
                                 .nickname((ctx.user().getUserName() != null) ? ctx.user().getUserName() : null)
                                 .firstName(ctx.user().getFirstName())
                                 .lastName((ctx.user().getLastName() != null) ? ctx.user().getLastName() : null)
                                 .isPremium((ctx.user().getIsPremium() != null) ? ctx.user().getIsPremium() : false)
-                                .build());
+                                .build();
+                        userService.save(user);
+                        log.info("Присоединился новый пользователь: {}", user);
                     }
                     productService.findAllByChatIdAndActiveAndDeleted(chatId, true, false)
                             .forEach(product -> product.setActive(true));

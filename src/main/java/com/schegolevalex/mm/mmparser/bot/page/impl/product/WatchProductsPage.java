@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.schegolevalex.mm.mmparser.bot.Constant.DELIMITER;
 import static com.schegolevalex.mm.mmparser.bot.Constant.Message;
+import static com.schegolevalex.mm.mmparser.bot.util.MessageUtil.prepareToMarkdownV2;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
@@ -47,7 +48,7 @@ public class WatchProductsPage extends ProductKeyboardPage {
             bot.getSilent().execute(EditMessageReplyMarkup.builder()
                     .chatId(chatId)
                     .messageId(prevUpdate.getCallbackQuery().getMessage().getMessageId())
-                    .replyMarkup(Keyboard.withProduct(product.getId(), product.getUrl()))
+                    .replyMarkup(Keyboard.withProduct(product.getId()))
                     .build());
         } else {
             List<Product> products = productService.findAllByChatIdAndActiveAndDeleted(chatId, true, false);
@@ -64,10 +65,16 @@ public class WatchProductsPage extends ProductKeyboardPage {
                         .sorted(Comparator.comparing(Product::getCreatedAt))
                         .forEach(product -> bot.getSilent().execute(SendMessage.builder()
                                 .chatId(chatId)
-                                .text(num.getAndIncrement() + ". " + (product.getTitle() != null ? product.getTitle() : Constant.Message.NO_TITLE))
-                                .replyMarkup(Keyboard.withProduct(product.getId(), product.getUrl()))
+                                .text(num.getAndIncrement() + "\\. " + (product.getTitle() != null ?
+                                        String.format(Message.PRODUCT_TITLE_WITH_LINK,
+                                                prepareToMarkdownV2(product.getTitle()),
+                                                prepareToMarkdownV2(product.getUrl()))
+                                        : Constant.Message.NO_TITLE))
+                                .replyMarkup(Keyboard.withProduct(product.getId()))
+                                .parseMode("MarkdownV2")
                                 .linkPreviewOptions(LinkPreviewOptions.builder()
-                                        .isDisabled(true)
+                                        .showAboveText(true)
+                                        .isDisabled(false)
                                         .build())
                                 .build()));
             }

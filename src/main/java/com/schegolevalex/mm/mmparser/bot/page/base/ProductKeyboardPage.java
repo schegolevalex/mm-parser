@@ -39,9 +39,7 @@ public abstract class ProductKeyboardPage extends MainKeyboardPage {
 
         if (nextUpdate.hasCallbackQuery()) {
             String callback = nextUpdate.getCallbackQuery().getData();
-            if (callback.startsWith(Callback.PRODUCT_NOTIFICATIONS))
-                context.putPage(chatId, Page.PRODUCT_NOTIFICATIONS);
-            else if (callback.startsWith(Callback.PRODUCT_SETTINGS))
+            if (callback.startsWith(Callback.PRODUCT_SETTINGS))
                 context.putPage(chatId, Page.PRODUCT_SETTINGS);
             else if (callback.startsWith(Callback.DELETE_PRODUCT))
                 context.putPage(chatId, Page.CONFIRM_DELETE_PRODUCT);
