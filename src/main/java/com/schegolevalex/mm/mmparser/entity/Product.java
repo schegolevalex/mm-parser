@@ -42,7 +42,11 @@ public class Product {
 
     @Column(columnDefinition = "boolean default TRUE")
     @Builder.Default
-    boolean isActive = true;
+    boolean active = true;
+
+    @Column(columnDefinition = "boolean default FALSE")
+    @Builder.Default
+    boolean deleted = false;
 
     @ManyToMany(mappedBy = "products", fetch = FetchType.LAZY)
     @Builder.Default

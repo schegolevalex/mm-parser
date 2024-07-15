@@ -88,6 +88,8 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                                 .isPremium((ctx.user().getIsPremium() != null) ? ctx.user().getIsPremium() : false)
                                 .build());
                     }
+                    productService.findAllByChatIdAndActiveAndDeleted(chatId, true, false)
+                            .forEach(product -> product.setActive(true));
                     this.context.peekPage(chatId).afterUpdateReceive(ctx.update());
                     this.context.peekPage(chatId).beforeUpdateReceive(ctx.update());
                 })
@@ -103,7 +105,8 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                 .action(ctx -> {
                     Long chatId = getChatId(ctx.update());
                     context.clear(chatId);
-                    // todo отключать парсинг ссылок
+                    productService.findAllByChatIdAndActiveAndDeleted(chatId, true, false)
+                            .forEach(product -> product.setActive(false));
                     silent.execute(SendMessage.builder()
                             .chatId(chatId)
                             .text(Constant.Message.BYE)
@@ -140,7 +143,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
     @Scheduled(cron = "*/30 * * * * *", zone = "Europe/Moscow")
     protected void notifyJob() {
         log.info("Запуск процесса уведомления пользователей");
-        productService.findAllByIsActive(true).forEach(product -> {
+        productService.findAllByActiveAndDeleted(true, false).forEach(product -> {
             List<Offer> parsedOffers = offerService.findAllForSpecifiedTime(product, 1, ChronoUnit.MINUTES);
             List<Offer> filteredOffers = offerService.filterOffers(parsedOffers);
             List<Notify> notifies = filteredOffers.stream()

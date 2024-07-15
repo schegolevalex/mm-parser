@@ -19,12 +19,12 @@ public class ProductService {
         return productRepository.findById(id);
     }
 
-    public List<Product> findAllByChatIdAndIsActive(Long chatId, boolean isActive) {
-        return productRepository.findAllByChatIdAndActive(chatId, isActive);
+    public List<Product> findAllByChatIdAndActiveAndDeleted(Long chatId, boolean isActive, boolean isDeleted) {
+        return productRepository.findAllByChatIdAndActiveAndDeleted(chatId, isActive, isDeleted);
     }
 
-    public List<Product> findAllByIsActive(boolean isActive) {
-        return productRepository.findAllByIsActive(isActive);
+    public List<Product> findAllByActiveAndDeleted(boolean isActive, boolean isDeleted) {
+        return productRepository.findAllByActiveAndDeleted(isActive, isDeleted);
     }
 
     public Product save(Product product) {

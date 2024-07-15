@@ -28,7 +28,7 @@ public class ParserService {
     public void parseJob() {
         log.info("Запуск процесса парсинга");
         long start = System.currentTimeMillis();
-        productService.findAllByIsActive(true).forEach(product -> {
+        productService.findAllByActiveAndDeleted(true, false).forEach(product -> {
             List<Offer> parsedOffers = parser.parseProduct(product).stream()
                     .map(offer -> {
                         Optional<Offer> maybeExist = offerService.findExist(offer);

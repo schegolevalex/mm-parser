@@ -28,7 +28,7 @@ public class DeleteProductPage extends BasePage {
     public void beforeUpdateReceive(Update prevUpdate) {
         long productId = Long.parseLong(prevUpdate.getCallbackQuery().getData().split(DELIMITER)[1]);
         Product product = productService.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
-        product.setActive(false);
+        product.setDeleted(true);
         bot.getSilent().execute(DeleteMessage.builder()
                 .chatId(getChatId(prevUpdate))
                 .messageId(prevUpdate.getCallbackQuery().getMessage().getMessageId())
