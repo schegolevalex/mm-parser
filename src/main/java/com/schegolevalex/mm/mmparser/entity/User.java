@@ -42,4 +42,8 @@ public class User {
 
     @Builder.Default
     Integer cashbackLevel = 0;
+
+    @Column(columnDefinition = "boolean default TRUE")
+    @Builder.Default
+    boolean active = true;
 }

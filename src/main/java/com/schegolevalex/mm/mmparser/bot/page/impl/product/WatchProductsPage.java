@@ -51,7 +51,7 @@ public class WatchProductsPage extends ProductKeyboardPage {
                     .replyMarkup(Keyboard.withProduct(product.getId()))
                     .build());
         } else {
-            List<Product> products = productService.findAllByChatIdAndActiveAndDeleted(chatId, true, false);
+            List<Product> products = productService.findAllByChatIdNotDeletedAndUserIsActive(chatId);
 
             if (products.isEmpty()) {
                 bot.getSilent().execute(SendMessage.builder()

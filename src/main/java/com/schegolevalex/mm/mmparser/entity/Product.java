@@ -40,10 +40,6 @@ public class Product {
     @Column(updatable = false)
     Instant createdAt;
 
-    @Column(columnDefinition = "boolean default TRUE")
-    @Builder.Default
-    boolean active = true;
-
     @Column(columnDefinition = "boolean default FALSE")
     @Builder.Default
     boolean deleted = false;

@@ -8,10 +8,11 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @Query("SELECT p FROM Product p WHERE p.user.chatId = :chatId and p.active = :active and p.deleted = :deleted")
-    List<Product> findAllByChatIdAndActiveAndDeleted(Long chatId, Boolean active, Boolean deleted);
+    @Query("SELECT p FROM Product p WHERE p.user.chatId = :chatId and p.user.active = true and p.deleted = false")
+    List<Product> findAllByChatIdNotDeletedAndUserIsActive(Long chatId);
 
-    List<Product> findAllByActiveAndDeleted(Boolean active, Boolean deleted);
+    @Query("select p from Product p where p.user.active = true and p.deleted = false")
+    List<Product> findAllNotDeletedAndUserIsActive();
 
     List<Product> findByPromoId(long promoId);
 }

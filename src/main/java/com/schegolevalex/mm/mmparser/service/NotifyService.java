@@ -26,4 +26,8 @@ public class NotifyService {
     public List<Notify> saveAll(List<Notify> notifies) {
         return notifyRepository.saveAll(notifies);
     }
+
+    public Notify save(Notify notify) {
+        return notifyRepository.save(notify);
+    }
 }

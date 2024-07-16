@@ -35,6 +35,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static org.telegram.telegrambots.abilitybots.api.objects.Locality.ALL;
@@ -79,7 +80,8 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                     this.context.clearPages(chatId);
                     this.context.clearPromo(chatId);
 
-                    if (userService.findByChatId(chatId).isEmpty()) {
+                    Optional<User> maybeUser = userService.findByChatId(chatId);
+                    if (maybeUser.isEmpty()) {
                         User user = User.builder()
                                 .chatId(chatId)
                                 .nickname((ctx.user().getUserName() != null) ? ctx.user().getUserName() : null)
@@ -89,9 +91,8 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                                 .build();
                         userService.save(user);
                         log.info("Присоединился новый пользователь: {}", user);
-                    }
-                    productService.findAllByChatIdAndActiveAndDeleted(chatId, true, false)
-                            .forEach(product -> product.setActive(true));
+                    } else
+                        maybeUser.get().setActive(true);
                     this.context.peekPage(chatId).afterUpdateReceive(ctx.update());
                     this.context.peekPage(chatId).beforeUpdateReceive(ctx.update());
                 })
@@ -107,8 +108,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                 .action(ctx -> {
                     Long chatId = getChatId(ctx.update());
                     context.clear(chatId);
-                    productService.findAllByChatIdAndActiveAndDeleted(chatId, true, false)
-                            .forEach(product -> product.setActive(false));
+                    userService.findByChatId(chatId).ifPresent(user -> user.setActive(false));
                     silent.execute(SendMessage.builder()
                             .chatId(chatId)
                             .text(Constant.Message.BYE)
@@ -145,7 +145,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
     @Scheduled(cron = "*/30 * * * * *", zone = "Europe/Moscow")
     protected void notifyJob() {
         log.info("Запуск процесса уведомления пользователей");
-        productService.findAllByActiveAndDeleted(true, false).forEach(product -> {
+        productService.findAllNotDeletedAndUserIsActive().forEach(product -> {
             List<Offer> parsedOffers = offerService.findAllForSpecifiedTime(product, 1, ChronoUnit.MINUTES);
             List<Offer> filteredOffers = offerService.filterOffers(parsedOffers);
             List<Notify> notifies = filteredOffers.stream()
