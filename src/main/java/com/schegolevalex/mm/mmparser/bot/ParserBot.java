@@ -185,6 +185,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                 sendNotifies(notifies);
             }
         });
+        log.info("Завершение процесса уведомления пользователей");
     }
 
     @Override

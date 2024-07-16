@@ -48,7 +48,6 @@ public class AddPromoStepDiscountPage extends MainKeyboardPage {
         } catch (NumberFormatException e) {
             switch (text) {
                 case Button.ADD_PROMO -> context.putPage(chatId, Page.ADD_PROMO_STEP_PRICE);
-                case Button.MY_PROMOS -> context.putPage(chatId, Page.WATCH_PROMOS);
                 case Button.BACK -> context.putPage(chatId, Page.COMMON_SETTINGS);
                 default -> context.putPage(chatId, Page.UNEXPECTED);
             }

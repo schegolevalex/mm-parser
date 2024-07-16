@@ -61,7 +61,7 @@ public class CashbackSettingsPage extends BasePage {
                 case (Button.PROMOS_SETTINGS) -> context.putPage(chatId, Page.PROMOS_SETTINGS);
                 case (Button.CASHBACK_SETTINGS) -> context.putPage(chatId, Page.CASHBACK_SETTINGS);
                 case (Button.FILTERS_SETTINGS) -> context.putPage(chatId, Page.FILTERS_SETTINGS);
-                case (Button.BACK) -> context.putPage(chatId, Page.COMMON_SETTINGS);
+                case (Button.BACK) -> context.putPage(chatId, Page.MAIN);
                 default -> context.putPage(chatId, Page.UNEXPECTED);
             }
         }

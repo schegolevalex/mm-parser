@@ -23,14 +23,13 @@ public abstract class PromoKeyboardPage extends BasePage {
             else if (callback.startsWith(Callback.CONFIRM_DELETE))
                 context.putPage(chatId, Page.DELETE_PROMO);
             else if (callback.startsWith(Callback.DECLINE_DELETE))
-                context.putPage(chatId, Page.WATCH_PROMOS);
+                context.putPage(chatId, Page.PROMOS_SETTINGS);
         } else {
             switch (nextUpdate.getMessage().getText()) {
                 case (Button.ADD_PROMO) -> {
                     context.putPromo(chatId, new Promo());
                     context.putPage(chatId, Page.ADD_PROMO_STEP_DISCOUNT);
                 }
-                case (Button.MY_PROMOS) -> context.putPage(chatId, Page.WATCH_PROMOS);
                 case (Button.BACK) -> context.putPage(chatId, Page.COMMON_SETTINGS);
                 default -> context.putPage(chatId, Page.UNEXPECTED);
             }

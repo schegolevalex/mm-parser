@@ -68,7 +68,6 @@ public class Keyboard {
     public static ReplyKeyboard withPromoSettingsActions() {
         KeyboardRow row1 = new KeyboardRow();
         row1.add(Button.ADD_PROMO);
-        row1.add(Button.MY_PROMOS);
         KeyboardRow row2 = new KeyboardRow();
         row2.add(Button.BACK);
         return ReplyKeyboardMarkup.builder()
@@ -275,7 +274,6 @@ public class Keyboard {
     public static ReplyKeyboard withFiltersSettingsActions() {
         KeyboardRow row1 = new KeyboardRow();
         row1.add(Button.ADD_FILTER);
-        row1.add(Button.MY_FILTERS);
         KeyboardRow row2 = new KeyboardRow();
         row2.add(Button.BACK);
         return ReplyKeyboardMarkup.builder()

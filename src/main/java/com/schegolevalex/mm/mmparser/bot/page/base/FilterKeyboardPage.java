@@ -23,14 +23,13 @@ public abstract class FilterKeyboardPage extends BasePage {
             else if (callback.startsWith(Callback.CONFIRM_DELETE))
                 context.putPage(chatId, Page.DELETE_FILTER);
             else if (callback.startsWith(Callback.DECLINE_DELETE))
-                context.putPage(chatId, Page.WATCH_FILTERS);
+                context.putPage(chatId, Page.FILTERS_SETTINGS);
         } else {
             switch (nextUpdate.getMessage().getText()) {
                 case (Button.ADD_FILTER) -> {
                     context.putFilter(chatId, new Filter());
                     context.putPage(chatId, Page.ADD_FILTER_FIELD);
                 }
-                case (Button.MY_FILTERS) -> context.putPage(chatId, Page.WATCH_FILTERS);
                 case (Button.BACK) -> context.putPage(chatId, Page.COMMON_SETTINGS);
                 default -> context.putPage(chatId, Page.UNEXPECTED);
             }
