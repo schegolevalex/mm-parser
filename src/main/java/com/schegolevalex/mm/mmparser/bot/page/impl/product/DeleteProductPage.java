@@ -5,6 +5,7 @@ import com.schegolevalex.mm.mmparser.bot.page.base.BasePage;
 import com.schegolevalex.mm.mmparser.bot.page.base.Page;
 import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.service.ProductService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getCha
 
 @Component
 @Transactional
+@Slf4j
 public class DeleteProductPage extends BasePage {
     private final ProductService productService;
 
@@ -29,6 +31,7 @@ public class DeleteProductPage extends BasePage {
         long productId = Long.parseLong(prevUpdate.getCallbackQuery().getData().split(DELIMITER)[1]);
         Product product = productService.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
         product.setDeleted(true);
+        log.trace("Удален товар: {}", product);
         bot.getSilent().execute(DeleteMessage.builder()
                 .chatId(getChatId(prevUpdate))
                 .messageId(prevUpdate.getCallbackQuery().getMessage().getMessageId())

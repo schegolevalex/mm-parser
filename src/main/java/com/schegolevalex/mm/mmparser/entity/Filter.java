@@ -51,7 +51,7 @@ public class Filter {
     @EqualsAndHashCode.Exclude
     Set<Product> products = new HashSet<>();
 
-    @ManyToMany(mappedBy = "filters", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "filters", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @Builder.Default
     @EqualsAndHashCode.Exclude
     Set<Notify> notifies = new HashSet<>();

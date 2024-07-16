@@ -1,11 +1,11 @@
 package com.schegolevalex.mm.mmparser.service;
 
 import com.schegolevalex.mm.mmparser.entity.Filter;
-import com.schegolevalex.mm.mmparser.entity.Notify;
 import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.repository.FilterRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +14,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FilterService {
     private final FilterRepository filterRepository;
     private final ProductService productService;
@@ -35,15 +36,10 @@ public class FilterService {
     public void deleteById(long id) {
         Filter filter = filterRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Filter not found with id: " + id));
-        for (Product product : filter.getProducts()) {
+        for (Product product : filter.getProducts())
             product.removeFilter(filter);
-            productService.save(product);
-        }
 
-        for (Notify notify : filter.getNotifies()) {
-            notify.removeFilter(filter);
-            notifyService.save(notify);
-        }
         filterRepository.delete(filter);
+        log.trace("Фильтр удален: {}", filter);
     }
 }

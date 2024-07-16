@@ -19,4 +19,5 @@ public interface NotifyRepository extends JpaRepository<Notify, Long> {
             "AND n.cashbackLevel = :cashbackLevel")
     Optional<Notify> findExist(Offer offer, User user, Set<Filter> filters, Promo promo, Integer cashbackLevel, int size);
 
+    void deleteAllByPromoId(long id);
 }
