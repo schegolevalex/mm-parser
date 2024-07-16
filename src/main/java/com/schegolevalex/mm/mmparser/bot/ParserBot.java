@@ -118,12 +118,31 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                 .build();
     }
 
+    public Ability help() {
+        return Ability.builder()
+                .name("help")
+                .info(Constant.Info.HELP)
+                .locality(ALL)
+                .privacy(PUBLIC)
+                .action(ctx -> {
+                    Long chatId = getChatId(ctx.update());
+                    silent.execute(SendMessage.builder()
+                            .chatId(chatId)
+                            .text(Constant.Message.HELP)
+                            .build());
+                })
+                .build();
+    }
+
     public Reply replyToButtons() {
-        return Reply.of((bot, upd) -> {
+        return Reply.of((_, upd) -> {
                     context.peekPage(getChatId(upd)).afterUpdateReceive(upd);
                     context.peekPage(getChatId(upd)).beforeUpdateReceive(upd);
                 },
-                Flag.TEXT.and(Predicate.not(hasMessageWith("/stop"))).or(Flag.CALLBACK_QUERY),
+                Flag.TEXT
+                        .and(Predicate.not(hasMessageWith("/stop")))
+                        .and(Predicate.not(hasMessageWith("/help")))
+                        .or(Flag.CALLBACK_QUERY),
                 update -> context.isActiveUser(getChatId(update)));
     }
 
@@ -193,6 +212,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
         List<BotCommand> botCommands = new ArrayList<>();
         botCommands.add(new BotCommand("start", Constant.Info.START));
         botCommands.add(new BotCommand("stop", Constant.Info.STOP));
+        botCommands.add(new BotCommand("help", Constant.Info.HELP));
         silent.execute(new SetMyCommands(botCommands));
     }
 
