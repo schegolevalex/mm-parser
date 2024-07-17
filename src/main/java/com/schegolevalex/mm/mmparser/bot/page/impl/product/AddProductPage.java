@@ -24,8 +24,8 @@ import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getCha
 
 @Component
 public class AddProductPage extends BasePage {
-    private static final String MESSAGE_WITH_URL_REGEXP = ".*(http(s)?://)?(www\\.)?.+\\..+\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
-    private static final String MEGAMARKET_URL_REGEXP = "(http(s)?://)?(www\\.)?megamarket\\.ru/catalog/details/\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)";
+    private static final String MESSAGE_WITH_URL_REGEXP = ".*(http(s)?://)?(www\\.)?.+\\.[-a-zA-Z]+.*";
+    private static final String VALID_MEGAMARKET_URL_REGEXP = "(http(s)?://)?(www\\.)?megamarket\\.ru/catalog/details/([-a-zA-Z0-9@:%_+.~#?&=]+)";
     private final ProductService productService;
     private final UserService userService;
 
@@ -48,7 +48,7 @@ public class AddProductPage extends BasePage {
                         .replyMarkup(Keyboard.withBackButton())
                         .build());
             } else if (userText.matches(MESSAGE_WITH_URL_REGEXP)) {
-                Pattern pattern = Pattern.compile(MEGAMARKET_URL_REGEXP);
+                Pattern pattern = Pattern.compile(VALID_MEGAMARKET_URL_REGEXP);
                 Matcher matcher = pattern.matcher(userText);
                 if (matcher.find()) {
                     String productUrl = matcher.group();
