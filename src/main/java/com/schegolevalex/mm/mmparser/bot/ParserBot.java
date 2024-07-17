@@ -151,40 +151,37 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
     }
 
     private void sendNotifies(List<Notify> notifies) {
-        if (!notifies.isEmpty())
-            notifies.forEach(notify ->
-                    silent.execute(SendMessage.builder()
-                            .chatId(notify.getUser().getChatId())
-                            .text(offerService.getOfferMessage(notify.getOffer()))
-                            .parseMode("MarkdownV2")
-                            .build()));
+        notifies.forEach(notify ->
+        {
+            silent.execute(SendMessage.builder()
+                    .chatId(notify.getUser().getChatId())
+                    .text(offerService.getOfferMessage(notify.getOffer()))
+                    .parseMode("MarkdownV2")
+                    .build());
+            notifyService.save(notify);
+        });
     }
 
     @Async
     @Scheduled(cron = "*/30 * * * * *", zone = "Europe/Moscow")
     protected void notifyJob() {
         log.info("Запуск процесса уведомления пользователей");
-        productService.findAllNotDeletedAndUserIsActive().forEach(product -> {
-            List<Offer> parsedOffers = offerService.findAllForSpecifiedTime(product, 1, ChronoUnit.MINUTES);
-            List<Offer> filteredOffers = offerService.filterOffers(parsedOffers);
-            List<Notify> notifies = filteredOffers.stream()
-                    .map(offer -> {
-                        Notify notify = new Notify();
-                        notify.setOffer(offer);
-                        notify.setUser(product.getUser());
-                        notify.addFilters(product.getFilters());
-                        notify.setPromo(product.getPromo());
-                        notify.setCashbackLevel(product.getUser().getCashbackLevel());
-                        return notify;
-                    })
-                    .filter(Predicate.not(notifyService::isPresent))
-                    .toList();
-
-            if (!notifies.isEmpty()) {
-                notifyService.saveAll(notifies);
-                sendNotifies(notifies);
-            }
-        });
+        productService.findAllNotDeletedAndUserIsActive()
+                .forEach(product -> {
+                    List<Offer> parsedOffers = offerService.findAllForSpecifiedTime(product, 1, ChronoUnit.MINUTES);
+                    sendNotifies(offerService.filterOffers(parsedOffers).stream()
+                            .map(offer -> {
+                                Notify notify = new Notify();
+                                notify.setOffer(offer);
+                                notify.setUser(product.getUser());
+                                notify.addFilters(product.getFilters());
+                                notify.setPromo(product.getPromo());
+                                notify.setCashbackLevel(product.getUser().getCashbackLevel());
+                                return notify;
+                            })
+                            .filter(Predicate.not(notifyService::isPresent))
+                            .toList());
+                });
         log.info("Завершение процесса уведомления пользователей");
     }
 
