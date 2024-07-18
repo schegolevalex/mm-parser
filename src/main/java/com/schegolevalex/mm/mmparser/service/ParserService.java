@@ -4,7 +4,6 @@ import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.parser.Parser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +22,7 @@ public class ParserService {
     private final OfferService offerService;
 
 
-    @Async
+    //    @Async
     @Scheduled(cron = "0 */1 * * * *", zone = "Europe/Moscow")
     public void parseJob() {
         log.info("Запуск процесса парсинга");

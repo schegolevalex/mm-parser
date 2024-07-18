@@ -1,5 +1,6 @@
-package com.schegolevalex.mm.mmparser.parser;
+package com.schegolevalex.mm.mmparser.service;
 
+import com.schegolevalex.mm.mmparser.parser.Proxy;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;

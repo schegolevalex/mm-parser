@@ -87,7 +87,7 @@ public class OfferService {
     }
 
     public List<Offer> saveAll(List<Offer> offers) {
-        return offerRepository.saveAll(offers);
+        return offerRepository.saveAllAndFlush(offers);
     }
 
     public List<Offer> findAllForSpecifiedTime(Product product, Integer timeAgo, ChronoUnit unit) {

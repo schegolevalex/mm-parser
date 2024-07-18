@@ -11,6 +11,7 @@ import com.schegolevalex.mm.mmparser.entity.Delivery;
 import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.entity.Seller;
+import com.schegolevalex.mm.mmparser.service.ProxyService;
 import com.schegolevalex.mm.mmparser.service.SellerService;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -45,7 +46,7 @@ public class JsonParser extends Parser {
 
     @Override
     public List<Offer> parseProduct(Product product) {
-        openUrl(product.getUrl() + "#?details_block=prices");
+        openUrl(product.getUrl() + "#?details_block=prices", 3);
 
         String page = driver.getPageSource();
         Document html = Jsoup.parse(page);

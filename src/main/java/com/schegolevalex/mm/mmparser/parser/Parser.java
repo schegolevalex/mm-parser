@@ -2,12 +2,11 @@ package com.schegolevalex.mm.mmparser.parser;
 
 import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.entity.Product;
+import com.schegolevalex.mm.mmparser.service.ProxyService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.By;
-import org.openqa.selenium.PageLoadStrategy;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -26,6 +25,7 @@ public abstract class Parser {
     protected WebDriver driver;
     @Value("${mm.baseUrl}")
     private String baseUrl;
+    private boolean baseUrlOpened = false;
 
     protected Parser(ProxyService proxyService) {
         this.proxyService = proxyService;
@@ -44,43 +44,53 @@ public abstract class Parser {
         options.addArguments("--headless=new");
     }
 
-    @PostConstruct
-    private void openBaseUrl() {
-        openUrl(baseUrl);
-    }
-
     @PreDestroy
-    private void closeDriver() {
-        driver.quit();
+    private void quitWebDriver() {
+        if (driver != null) {
+            driver.quit();
+            driver = null;
+        }
     }
 
-    protected void openUrl(String url) {
-        int maxAttempts = 3;
+    protected void openUrl(String url, int maxAttempts) {
         int currentAttempt = 0;
-        boolean success = false;
+        boolean openUrlSuccess = false;
 
-        if (driver == null)
-            driver = new ChromeDriver(options);
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-
-        while (currentAttempt < maxAttempts && !success) {
+        while (currentAttempt < maxAttempts && !openUrlSuccess) {
             try {
-                log.info("Попытка №{} открыть страницу: {}", currentAttempt + 1, url);
+                // Создаем новый драйвер и открываем baseUrl
+                if (!baseUrlOpened && driver == null) {
+                    driver = new ChromeDriver(options);
+                    log.info("Создан новый экземпляр WebDriver");
+                    proxyService.setProxy(options);
+                    log.info("Попытка открыть страницу {}", baseUrl);
+                    driver.get(baseUrl);
+                    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+                    wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("html")));
+                    log.info("Успешно открыта страница {}", baseUrl);
+                }
+
+                log.info("{} попытка открыть страницу {}", currentAttempt + 1, url);
                 proxyService.setProxy(options);
                 driver.get(url);
-                driver.manage().window().maximize();
+                WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("html")));
-                success = true;
-                log.info("Открыли страницу: {}", url);
-            } catch (Exception e) {
-                log.warn("Попытка №{} открыть страницу не удалась: {}", currentAttempt + 1, url);
+                openUrlSuccess = true;
+                log.info("Успешно открыта страница {} после {} попыток", url, currentAttempt + 1);
+            } catch (TimeoutException e) {
+                log.warn("Не удалась {} попытка открыть страницу {}: таймаут", currentAttempt + 1, url);
                 currentAttempt++;
+            } catch (WebDriverException e) {
+                log.error("При попытке открыть страницу {} произошла ошибка WebDriver: {}", url, e.getMessage());
+                quitWebDriver();
+                currentAttempt++;
+                baseUrlOpened = false;
+            } catch (Exception e) {
+                log.error("При попытке открыть страницу {} произошла неизвестная ошибка: {}", url, e.getMessage());
+                quitWebDriver();
+                currentAttempt++;
+                baseUrlOpened = false;
             }
-        }
-
-        if (!success) {
-            log.error("Не удалось открыть страницу: {}", url);
         }
     }
 }

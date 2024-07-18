@@ -3,6 +3,7 @@ package com.schegolevalex.mm.mmparser.parser;
 import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.entity.Seller;
+import com.schegolevalex.mm.mmparser.service.ProxyService;
 import com.schegolevalex.mm.mmparser.service.SellerService;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
@@ -31,7 +32,7 @@ public class SeleniumParser extends Parser {
 
     @Override
     public List<Offer> parseProduct(Product product) {
-        openUrl(product.getUrl() + "#?details_block=prices");
+        openUrl(product.getUrl() + "#?details_block=prices", 3);
 
         WebDriverWait wait10sec = new WebDriverWait(driver, Duration.ofSeconds(10));
         if (product.getTitle() == null) {

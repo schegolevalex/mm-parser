@@ -2,19 +2,14 @@ package com.schegolevalex.mm.mmparser.bot;
 
 import com.schegolevalex.mm.mmparser.config.BotConfiguration;
 import com.schegolevalex.mm.mmparser.entity.Notify;
-import com.schegolevalex.mm.mmparser.entity.Offer;
 import com.schegolevalex.mm.mmparser.entity.User;
-import com.schegolevalex.mm.mmparser.service.NotifyService;
 import com.schegolevalex.mm.mmparser.service.OfferService;
-import com.schegolevalex.mm.mmparser.service.ProductService;
 import com.schegolevalex.mm.mmparser.service.UserService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.abilitybots.api.bot.AbilityBot;
@@ -32,7 +27,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -50,23 +44,19 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
     private final BotConfiguration botConfiguration;
     @Getter
     private final Context context;
-    private final ProductService productService;
     private final OfferService offerService;
     private final UserService userService;
-    private final NotifyService notifyService;
 
     @Autowired
     public ParserBot(BotConfiguration botConfiguration,
                      Context context,
-                     ProductService productService,
-                     OfferService offerService, UserService userService, NotifyService notifyService) {
+                     OfferService offerService,
+                     UserService userService) {
         super(new OkHttpTelegramClient(botConfiguration.getBotToken()), botConfiguration.getBotUsername());
         this.botConfiguration = botConfiguration;
         this.context = context;
-        this.productService = productService;
         this.offerService = offerService;
         this.userService = userService;
-        this.notifyService = notifyService;
     }
 
     public Ability start() {
@@ -150,40 +140,14 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
         return update -> update.getMessage().getText().contains(text);
     }
 
-    private void sendNotifies(List<Notify> notifies) {
-        notifies.forEach(notify ->
-        {
-            silent.execute(SendMessage.builder()
-                    .chatId(notify.getUser().getChatId())
-                    .text(offerService.getOfferMessage(notify.getOffer()))
-                    .parseMode("MarkdownV2")
-                    .build());
-            notifyService.save(notify);
-        });
+    public void sendNotifies(Notify notify) {
+        silent.execute(SendMessage.builder()
+                .chatId(notify.getUser().getChatId())
+                .text(offerService.getOfferMessage(notify.getOffer()))
+                .parseMode("MarkdownV2")
+                .build());
     }
 
-    @Async
-    @Scheduled(cron = "*/30 * * * * *", zone = "Europe/Moscow")
-    protected void notifyJob() {
-        log.info("Запуск процесса уведомления пользователей");
-        productService.findAllNotDeletedAndUserIsActive()
-                .forEach(product -> {
-                    List<Offer> parsedOffers = offerService.findAllForSpecifiedTime(product, 1, ChronoUnit.MINUTES);
-                    sendNotifies(offerService.filterOffers(parsedOffers).stream()
-                            .map(offer -> {
-                                Notify notify = new Notify();
-                                notify.setOffer(offer);
-                                notify.setUser(product.getUser());
-                                notify.addFilters(product.getFilters());
-                                notify.setPromo(product.getPromo());
-                                notify.setCashbackLevel(product.getUser().getCashbackLevel());
-                                return notify;
-                            })
-                            .filter(Predicate.not(notifyService::isPresent))
-                            .toList());
-                });
-        log.info("Завершение процесса уведомления пользователей");
-    }
 
     @Override
     public long creatorId() {
