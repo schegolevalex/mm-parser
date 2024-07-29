@@ -15,7 +15,7 @@ import java.util.Optional;
 public class PromoService {
     private final PromoRepository promoRepository;
     private final ProductService productService;
-    private final NotifyService notifyService;
+    private final NotificationService notificationService;
 
     public List<Promo> findAllByChatId(Long chatId) {
         return promoRepository.findAllByChatId(chatId);
@@ -23,7 +23,7 @@ public class PromoService {
 
     public void deleteById(long id) {
         productService.findByPromoId(id).forEach(product -> product.setPromo(null));
-        notifyService.deleteAllByPromoId(id);
+        notificationService.deleteAllByPromoId(id);
         promoRepository.deleteById(id);
     }
 

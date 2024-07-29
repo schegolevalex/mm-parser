@@ -18,7 +18,7 @@ import java.util.Optional;
 public class FilterService {
     private final FilterRepository filterRepository;
     private final ProductService productService;
-    private final NotifyService notifyService;
+    private final NotificationService notificationService;
 
     public Optional<Filter> findById(long promoId) {
         return filterRepository.findById(promoId);

@@ -37,7 +37,10 @@ public class JsonParser extends Parser {
     private final ModelMapper modelMapper;
     private final SellerService sellerService;
 
-    protected JsonParser(ProxyService proxyService, ObjectMapper objectMapper, ModelMapper modelMapper, SellerService sellerService) {
+    protected JsonParser(ProxyService proxyService,
+                         ObjectMapper objectMapper,
+                         ModelMapper modelMapper,
+                         SellerService sellerService) {
         super(proxyService);
         this.objectMapper = objectMapper;
         this.modelMapper = modelMapper;

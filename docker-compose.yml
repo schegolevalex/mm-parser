@@ -15,3 +15,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+
+  redis:
+    container_name: redis
+    image: redis
+    restart: on-failure
+    ports:
+      - "6379:6379"

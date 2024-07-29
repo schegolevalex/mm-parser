@@ -21,7 +21,7 @@ import java.util.Set;
 @Setter
 @ToString
 @EqualsAndHashCode
-public class Notify {
+public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Exclude
@@ -38,8 +38,8 @@ public class Notify {
     User user;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "notify_filter",
-            joinColumns = @JoinColumn(name = "notify_id"),
+    @JoinTable(name = "notification_filter",
+            joinColumns = @JoinColumn(name = "notification_id"),
             inverseJoinColumns = @JoinColumn(name = "filter_id"))
     @Builder.Default
     @EqualsAndHashCode.Exclude

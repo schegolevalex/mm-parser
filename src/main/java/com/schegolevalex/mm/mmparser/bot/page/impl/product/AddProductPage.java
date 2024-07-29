@@ -1,5 +1,6 @@
 package com.schegolevalex.mm.mmparser.bot.page.impl.product;
 
+import com.github.sonus21.rqueue.core.RqueueMessageEnqueuer;
 import com.schegolevalex.mm.mmparser.bot.Keyboard;
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
 import com.schegolevalex.mm.mmparser.bot.page.base.BasePage;
@@ -28,11 +29,16 @@ public class AddProductPage extends BasePage {
     private static final String VALID_MEGAMARKET_URL_REGEXP = "(http(s)?://)?(www\\.)?megamarket\\.ru/catalog/details/([-a-zA-Z0-9@:%_+.~#?&=]+)";
     private final ProductService productService;
     private final UserService userService;
+    private final RqueueMessageEnqueuer rqueueMessageEnqueuer;
 
-    public AddProductPage(@Lazy ParserBot bot, ProductService productService, UserService userService) {
+    public AddProductPage(@Lazy ParserBot bot,
+                          ProductService productService,
+                          UserService userService,
+                          RqueueMessageEnqueuer rqueueMessageEnqueuer) {
         super(bot);
         this.productService = productService;
         this.userService = userService;
+        this.rqueueMessageEnqueuer = rqueueMessageEnqueuer;
     }
 
     @Override
@@ -56,11 +62,13 @@ public class AddProductPage extends BasePage {
                     if (!productUrl.endsWith("/"))
                         productUrl += "/";
 
-                    productService.save(Product.builder()
+                    Product savedProduct = productService.save(Product.builder()
                             .url(productUrl)
                             .user(userService.findByChatId(chatId)
                                     .orElseThrow(() -> new RuntimeException("User not found")))
                             .build());
+
+                    rqueueMessageEnqueuer.enqueue("product-queue", savedProduct.getId());
 
                     bot.getSilent().execute(SendMessage.builder()
                             .chatId(chatId)
@@ -82,7 +90,6 @@ public class AddProductPage extends BasePage {
                 context.putPage(chatId, Page.UNEXPECTED);
             }
         }
-
     }
 
     @Override

@@ -2,10 +2,7 @@ package com.schegolevalex.mm.mmparser.service;
 
 import com.schegolevalex.mm.mmparser.bot.Constant;
 import com.schegolevalex.mm.mmparser.bot.util.PredicateConstructor;
-import com.schegolevalex.mm.mmparser.entity.Delivery;
-import com.schegolevalex.mm.mmparser.entity.Offer;
-import com.schegolevalex.mm.mmparser.entity.Product;
-import com.schegolevalex.mm.mmparser.entity.PromoStep;
+import com.schegolevalex.mm.mmparser.entity.*;
 import com.schegolevalex.mm.mmparser.repository.OfferRepository;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -16,6 +13,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.schegolevalex.mm.mmparser.bot.util.MessageUtil.prepareToMarkdownV2;
@@ -55,8 +53,13 @@ public class OfferService {
                 .toList();
     }
 
+    public Boolean isPassFilters(Offer offer) {
+        Set<Filter> filters = offer.getProduct().getFilters();
+        return filters.stream()
+                .allMatch(filter -> predicateConstructor.createFromFilter(filter).test(offer));
+    }
+
     public Optional<Offer> findExist(Offer offer) {
-        // todo стоит исключить отсюда даты доставки, чтобы не создавался новый элемент только из-за изменения даты доставки
         Delivery delivery = offer.getDelivery();
         String marketId = offer.getSeller().getMarketId();
         String clickCourierDate = delivery.getClickCourierDate();
@@ -122,5 +125,9 @@ public class OfferService {
                 offer.getPrice(),
                 offer.getBonusPercent(),
                 offer.getBonus());
+    }
+
+    public Optional<Offer> findById(Long offerId) {
+        return offerRepository.findById(offerId);
     }
 }

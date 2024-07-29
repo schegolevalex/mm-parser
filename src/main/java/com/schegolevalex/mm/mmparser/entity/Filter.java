@@ -54,7 +54,7 @@ public class Filter {
     @ManyToMany(mappedBy = "filters", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @Builder.Default
     @EqualsAndHashCode.Exclude
-    Set<Notify> notifies = new HashSet<>();
+    Set<Notification> notifies = new HashSet<>();
 
     @Override
     public String toString() {

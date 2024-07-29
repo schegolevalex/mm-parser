@@ -1,7 +1,7 @@
 package com.schegolevalex.mm.mmparser.bot;
 
 import com.schegolevalex.mm.mmparser.config.BotConfiguration;
-import com.schegolevalex.mm.mmparser.entity.Notify;
+import com.schegolevalex.mm.mmparser.entity.Notification;
 import com.schegolevalex.mm.mmparser.entity.User;
 import com.schegolevalex.mm.mmparser.service.OfferService;
 import com.schegolevalex.mm.mmparser.service.UserService;
@@ -140,14 +140,13 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
         return update -> update.getMessage().getText().contains(text);
     }
 
-    public void sendNotifies(Notify notify) {
+    public void sendNotifies(Notification notification) {
         silent.execute(SendMessage.builder()
-                .chatId(notify.getUser().getChatId())
-                .text(offerService.getOfferMessage(notify.getOffer()))
+                .chatId(notification.getUser().getChatId())
+                .text(offerService.getOfferMessage(notification.getOffer()))
                 .parseMode("MarkdownV2")
                 .build());
     }
-
 
     @Override
     public long creatorId() {

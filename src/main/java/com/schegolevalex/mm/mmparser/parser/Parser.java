@@ -12,12 +12,14 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.List;
 
 @Component
+@Scope("prototype")
 @Slf4j
 public abstract class Parser {
     protected final ChromeOptions options = new ChromeOptions();
