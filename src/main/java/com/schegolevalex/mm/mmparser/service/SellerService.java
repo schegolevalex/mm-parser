@@ -4,12 +4,13 @@ import com.schegolevalex.mm.mmparser.entity.Seller;
 import com.schegolevalex.mm.mmparser.repository.SellerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-//@Transactional
+@Transactional
 public class SellerService {
     private final SellerRepository sellerRepository;
 
@@ -21,8 +22,8 @@ public class SellerService {
         return sellerRepository.findByNameAndRatingAndOgrn(sellerName, rating, ogrn);
     }
 
-    public Optional<Seller> findByMarketId(String marketId) {
-        return sellerRepository.findByMarketId(marketId);
+    public Seller saveOrUpdate(Seller seller) {
+        return sellerRepository.saveOrUpdate(seller);
     }
 
     public Seller save(Seller seller) {

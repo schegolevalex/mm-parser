@@ -1,6 +1,7 @@
 package com.schegolevalex.mm.mmparser.bot.util;
 
 import com.schegolevalex.mm.mmparser.entity.*;
+import com.schegolevalex.mm.mmparser.service.OfferService;
 import com.schegolevalex.mm.mmparser.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,10 +12,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PredicateConstructorTest {
@@ -94,13 +96,20 @@ class PredicateConstructorTest {
         assertTrue(predicateConstructor.createFromFilter(filter).test(offer));
     }
 
-//    @Test
-//    void testCalculatePrice_WithPromo() {
-//        assertEquals(68_400, offerService.calculatePrice(offer, true));
-//    }
-//
-//    @Test
-//    void testCalculatePrice_WithoutPromo() {
-//        assertEquals(76_000, offerService.calculatePrice(offer, false));
-//    }
+    @Test
+    public void createFromFilter_PriceWithPromo_LessOrEqual() {
+        // Arrange
+        Filter filter = new Filter(/*"PRICE_WITH_PROMO", "<=", 100*/);
+        OfferService offerService = mock(OfferService.class);
+        Offer offer = mock(Offer.class);
+        when(offerService.calculatePrice(offer, false)).thenReturn(90);
+        PredicateConstructor predicateConstructor = new PredicateConstructor(offerService);
+
+        // Act
+        Predicate<Offer> predicate = predicateConstructor.createFromFilter(filter);
+
+        // Assert
+        assertTrue(predicate.test(offer));
+        verify(offerService).calculatePrice(offer, false);
+    }
 }

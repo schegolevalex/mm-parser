@@ -8,6 +8,7 @@ import com.schegolevalex.mm.mmparser.bot.page.base.Page;
 import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.service.ProductService;
 import com.schegolevalex.mm.mmparser.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.abilitybots.api.util.AbilityUtils;
@@ -30,6 +31,8 @@ public class AddProductPage extends BasePage {
     private final ProductService productService;
     private final UserService userService;
     private final RqueueMessageEnqueuer rqueueMessageEnqueuer;
+    @Value("${mm.rqueue.product-queue}")
+    private String productQueue;
 
     public AddProductPage(@Lazy ParserBot bot,
                           ProductService productService,
@@ -68,7 +71,7 @@ public class AddProductPage extends BasePage {
                                     .orElseThrow(() -> new RuntimeException("User not found")))
                             .build());
 
-                    rqueueMessageEnqueuer.enqueue("product-queue", savedProduct.getId());
+                    rqueueMessageEnqueuer.enqueue(productQueue, savedProduct.getId());
 
                     bot.getSilent().execute(SendMessage.builder()
                             .chatId(chatId)

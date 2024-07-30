@@ -24,7 +24,7 @@ public class ProxyService {
     private final List<Proxy> proxies = new ArrayList<>();
     private List<File> extensions = new ArrayList<>();
 
-    public void setProxy(ChromeOptions options) {
+    public void setRandomProxy(ChromeOptions options) {
         if (!extensions.isEmpty()) {
             int extNumber = new Random().nextInt(extensions.size());
             options.addExtensions(extensions.get(extNumber));

@@ -11,25 +11,25 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.List;
 
-@Component
-@Scope("prototype")
 @Slf4j
 public abstract class Parser {
-    protected final ChromeOptions options = new ChromeOptions();
-    protected final ProxyService proxyService;
-    protected WebDriver driver;
+    private final ChromeOptions options = new ChromeOptions();
+    private final ProxyService proxyService;
+    WebDriver driver;
     @Value("${mm.baseUrl}")
     private String baseUrl;
     private boolean baseUrlOpened = false;
+    @Value("${mm.parser.max-attempts-to-open-url}")
+    private int maxAttempts;
 
-    protected Parser(ProxyService proxyService) {
+    @Autowired
+    public Parser(ProxyService proxyService) {
         this.proxyService = proxyService;
     }
 
@@ -54,26 +54,26 @@ public abstract class Parser {
         }
     }
 
-    protected void openUrl(String url, int maxAttempts) {
+    void openUrl(String url) {
         int currentAttempt = 0;
         boolean openUrlSuccess = false;
 
         while (currentAttempt < maxAttempts && !openUrlSuccess) {
             try {
-                // Создаем новый драйвер и открываем baseUrl
                 if (!baseUrlOpened && driver == null) {
                     driver = new ChromeDriver(options);
                     log.info("Создан новый экземпляр WebDriver");
-                    proxyService.setProxy(options);
+                    proxyService.setRandomProxy(options);
                     log.info("Попытка открыть страницу {}", baseUrl);
                     driver.get(baseUrl);
                     WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
                     wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("html")));
+                    baseUrlOpened = true;
                     log.info("Успешно открыта страница {}", baseUrl);
                 }
 
                 log.info("{} попытка открыть страницу {}", currentAttempt + 1, url);
-                proxyService.setProxy(options);
+                proxyService.setRandomProxy(options);
                 driver.get(url);
                 WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("html")));

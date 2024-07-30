@@ -32,7 +32,7 @@ public class SeleniumParser extends Parser {
 
     @Override
     public List<Offer> parseProduct(Product product) {
-        openUrl(product.getUrl() + "#?details_block=prices", 3);
+        openUrl(product.getUrl() + "#?details_block=prices");
 
         WebDriverWait wait10sec = new WebDriverWait(driver, Duration.ofSeconds(10));
         if (product.getTitle() == null) {

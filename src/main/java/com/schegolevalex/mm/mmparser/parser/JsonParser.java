@@ -19,6 +19,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,9 +28,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@Scope("prototype")
 @Transactional
 @Slf4j
 public class JsonParser extends Parser {
@@ -49,7 +50,7 @@ public class JsonParser extends Parser {
 
     @Override
     public List<Offer> parseProduct(Product product) {
-        openUrl(product.getUrl() + "#?details_block=prices", 3);
+        openUrl(product.getUrl() + "#?details_block=prices");
 
         String page = driver.getPageSource();
         Document html = Jsoup.parse(page);
@@ -75,23 +76,13 @@ public class JsonParser extends Parser {
         if (offersNode.isArray()) {
             for (JsonNode offerNode : offersNode) {
                 Offer offer = modelMapper.map(objectMapper.convertValue(offerNode, OfferDto.class), Offer.class);
-                Seller seller = modelMapper.map(objectMapper.convertValue(offerNode, SellerDto.class), Seller.class);
-
-                Optional<Seller> maybeExistSeller = sellerService.findByMarketId(seller.getMarketId());
-                if (maybeExistSeller.isPresent()) {
-                    seller = maybeExistSeller.get();
-                    offer.setSeller(seller);
-                    log.trace("Найден существующий продавец: {}", seller);
-                } else {
-                    seller = sellerService.save(seller);
-                    log.trace("Создан новый продавец: {}", seller);
-                }
-                seller.addProduct(product);
-                offer.setProduct(product);
-
+                Seller parsedSeller = modelMapper.map(objectMapper.convertValue(offerNode, SellerDto.class), Seller.class);
+                Seller seller = sellerService.saveOrUpdate(parsedSeller);
                 Delivery delivery = modelMapper.map(objectMapper.convertValue(offerNode.path("delivery"), DeliveryDto.class), Delivery.class);
 
                 offer.setSeller(seller);
+                seller.addProduct(product);
+                offer.setProduct(product);
                 offer.setDelivery(delivery);
                 offers.add(offer);
             }
