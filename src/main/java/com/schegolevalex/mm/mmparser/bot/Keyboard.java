@@ -181,6 +181,8 @@ public class Keyboard {
 
         int pageSize = 5;
         int totalPages = (int) Math.ceil((double) promos.size() / pageSize);
+        if (totalPages == 0)
+            totalPages = 1;
         int startIndex = (page - 1) * pageSize;
         int endIndex = Math.min(startIndex + pageSize, promos.size());
 
@@ -320,6 +322,8 @@ public class Keyboard {
 
         int pageSize = 5;
         int totalPages = (int) Math.ceil((double) allUserFilters.size() / pageSize);
+        if (totalPages == 0)
+            totalPages = 1;
         int startIndex = (page - 1) * pageSize;
         int endIndex = Math.min(startIndex + pageSize, allUserFilters.size());
 
