@@ -9,9 +9,9 @@ import org.telegram.telegrambots.abilitybots.api.util.AbilityUtils;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
-public class NewPage extends BasePage {
+public class NewConversationPage extends BasePage {
 
-    public NewPage(@Lazy ParserBot bot) {
+    public NewConversationPage(@Lazy ParserBot bot) {
         super(bot);
     }
 

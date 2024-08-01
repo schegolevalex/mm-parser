@@ -14,13 +14,13 @@ import java.util.Stack;
 
 @Component
 public class Context {
-    private final List<BasePage> allPossiblePages;
+    private final List<BasePage> allPages;
     private final Map<Long, Stack<BasePage>> chatPages = new HashMap<>();
     private final Map<Long, Promo> tempPromo = new HashMap<>();
     private final Map<Long, Filter> tempFilter = new HashMap<>();
 
-    public Context(@Lazy List<BasePage> allPossiblePages) {
-        this.allPossiblePages = allPossiblePages;
+    public Context(@Lazy List<BasePage> allPages) {
+        this.allPages = allPages;
     }
 
     public void putPage(Long chatId, Page page) {
@@ -42,8 +42,7 @@ public class Context {
     }
 
     private BasePage findPage(Page page) {
-        return allPossiblePages
-                .stream()
+        return allPages.stream()
                 .filter(state -> state.getPage().equals(page))
                 .findFirst()
                 .orElse(null);
@@ -51,7 +50,7 @@ public class Context {
 
     private Stack<BasePage> getPageStack(Long chatId) {
         Stack<BasePage> stack;
-        if (!chatPages.containsKey(chatId)) {
+        if (!chatPages.containsKey(chatId) || chatPages.get(chatId).isEmpty()) {
             stack = new Stack<>();
             stack.push(findPage(Page.NEW_CONVERSATION));
             chatPages.put(chatId, stack);
