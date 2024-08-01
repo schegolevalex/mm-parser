@@ -112,7 +112,7 @@ public interface Constant {
         String DELETE_FILTER = "🗑";
         String PRICE = "цена";
         String PRICE_WITH_PROMO = "цена с промо";
-        String PRICE_TOTAL = "цена с промо и бонусами";
+        String PRICE_WITH_PROMO_AND_BONUSES = "цена с промо и бонусами";
         String BONUS = "количество бонусов";
         String BONUS_PERCENT = "процент бонусов";
         String LESS_OR_EQUALS = "≤";

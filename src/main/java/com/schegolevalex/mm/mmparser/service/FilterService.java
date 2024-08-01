@@ -17,8 +17,6 @@ import java.util.Optional;
 @Slf4j
 public class FilterService {
     private final FilterRepository filterRepository;
-    private final ProductService productService;
-    private final NotificationService notificationService;
 
     public Optional<Filter> findById(long promoId) {
         return filterRepository.findById(promoId);

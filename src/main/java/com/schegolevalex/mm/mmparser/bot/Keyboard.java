@@ -289,7 +289,7 @@ public class Keyboard {
         row1.add(Button.PRICE);
         KeyboardRow row2 = new KeyboardRow();
         row2.add(Button.PRICE_WITH_PROMO);
-        row2.add(Button.PRICE_TOTAL);
+        row2.add(Button.PRICE_WITH_PROMO_AND_BONUSES);
         KeyboardRow row3 = new KeyboardRow();
         row3.add(Button.BONUS);
         row3.add(Button.BONUS_PERCENT);

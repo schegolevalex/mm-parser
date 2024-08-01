@@ -49,14 +49,14 @@ public class OfferService {
     public List<Offer> filterOffers(List<Offer> offers) {
         return offers.stream()
                 .filter(offer -> offer.getProduct().getFilters().stream()
-                        .allMatch(filter -> predicateConstructor.createFromFilter(filter).test(offer)))
+                        .allMatch(filter -> predicateConstructor.fromFilter(filter).test(offer)))
                 .toList();
     }
 
     public Boolean isPassFilters(Offer offer) {
         Set<Filter> filters = offer.getProduct().getFilters();
         return filters.stream()
-                .allMatch(filter -> predicateConstructor.createFromFilter(filter).test(offer));
+                .allMatch(filter -> predicateConstructor.fromFilter(filter).test(offer));
     }
 
     public Optional<Offer> findExist(Offer offer) {
@@ -98,29 +98,39 @@ public class OfferService {
         return offerRepository.findAllByProductAndUpdatedAtGreaterThanEqual(product, minutesAgo);
     }
 
-    public int calculatePrice(Offer offer, boolean withPromo) {
-
+    public int calculatePriceWithPromoAndBonuses(Offer offer) {
         Integer priceBefore = offer.getPrice();
         double bonusPercent = offer.getBonusPercent() / 100.0;
+        int promoDiscount = calculatePromoDiscount(offer.getProduct().getPromo(), priceBefore);
+        Integer cashbackLevel = offer.getProduct().getUser().getCashbackLevel();
+        double sberprime = (priceBefore - promoDiscount) * cashbackLevel / 100.0 > 2_000 ? 2_000 : ((priceBefore - promoDiscount) * cashbackLevel / 100.0);
 
+        return (int) ((1 - bonusPercent) * (priceBefore - promoDiscount) - sberprime);
+    }
+
+    public int calculatePriceWithPromo(Offer offer) {
+        Integer priceBefore = offer.getPrice();
+        int promoDiscount = calculatePromoDiscount(offer.getProduct().getPromo(), priceBefore);
+
+        return priceBefore - promoDiscount;
+    }
+
+    private int calculatePromoDiscount(Promo promo, Integer priceBefore) {
         AtomicInteger promoDiscount = new AtomicInteger();
-        if (withPromo && offer.getProduct().getPromo() != null) {
-            offer.getProduct().getPromo().getPromoSteps().stream()
+        if (promo != null) {
+            promo.getPromoSteps().stream()
                     .filter(promoStep -> priceBefore >= promoStep.getPriceFrom())
                     .max(Comparator.comparing(PromoStep::getDiscount))
                     .ifPresent(promoStep -> promoDiscount.set(promoStep.getDiscount()));
         }
-
-        Integer cashbackLevel = offer.getProduct().getUser().getCashbackLevel();
-        double sberprime = (priceBefore - promoDiscount.get()) * cashbackLevel / 100.0 > 2_000 ? 2_000 : ((priceBefore - promoDiscount.get()) * cashbackLevel / 100.0);
-        return (int) ((1 - bonusPercent) * (priceBefore - promoDiscount.get()) - sberprime);
+        return promoDiscount.get();
     }
 
     public String getOfferMessage(Offer offer) {
         return String.format(Constant.Message.OFFER,
                 prepareToMarkdownV2(offer.getProduct().getTitle()),
                 prepareToMarkdownV2(offer.getProduct().getUrl()),
-                calculatePrice(offer, true),
+                calculatePriceWithPromoAndBonuses(offer),
                 prepareToMarkdownV2(offer.getSeller().getName()),
                 offer.getPrice(),
                 offer.getBonusPercent(),

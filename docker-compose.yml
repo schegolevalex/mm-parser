@@ -9,7 +9,9 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      TZ: Europe/Moscow
+#      POSTGRES_TIMEZONE: Europe/Moscow
+#      TZ: Europe/Moscow
+#      PGTZ: Europe/Moscow
     user: postgres
 
     volumes:

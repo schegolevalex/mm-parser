@@ -1,115 +1,326 @@
 package com.schegolevalex.mm.mmparser.bot.util;
 
-import com.schegolevalex.mm.mmparser.entity.*;
+import com.schegolevalex.mm.mmparser.entity.Filter;
+import com.schegolevalex.mm.mmparser.entity.FilterField;
+import com.schegolevalex.mm.mmparser.entity.Offer;
+import com.schegolevalex.mm.mmparser.entity.Operation;
 import com.schegolevalex.mm.mmparser.service.OfferService;
-import com.schegolevalex.mm.mmparser.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Predicate;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class PredicateConstructorTest {
 
     @Mock
-    private UserService userService;
+    private OfferService offerService;
 
     @InjectMocks
     private PredicateConstructor predicateConstructor;
 
+    @Mock
     private Offer offer;
-    private User user;
 
     @BeforeEach
     void setUp() {
-        user = User.builder()
-                .chatId(1123124L)
-                .nickname("nickname")
-                .firstName("firstName")
-                .lastName("lastName")
-                .isPremium(false)
-                .cashbackLevel(2)
+        when(offerService.calculatePriceWithPromoAndBonuses(any())).thenReturn(79_000);
+        when(offerService.calculatePriceWithPromo(any())).thenReturn(90_000);
+        when(offer.getPrice()).thenReturn(100_000);
+        when(offer.getBonus()).thenReturn(22_000);
+        when(offer.getBonusPercent()).thenReturn(22);
+    }
+
+    @Test
+    void testFromFilter_PriceWithPromoAndBonuses_LessOrEquals1() {
+        Filter filter = Filter.builder()
+                .field(FilterField.PRICE_WITH_PROMO_AND_BONUSES)
+                .operation(Operation.LESS_OR_EQUALS)
+                .value(80_000)
                 .build();
 
-        offer = Offer.builder()
-                .price(100_000)
-                .bonus(22_000)
-                .bonusPercent(22)
-                .product(Product.builder()
-                        .url("url")
-                        .title("title")
-                        .user(user)
-                        .promo(Promo.builder()
-                                .promoSteps(List.of(PromoStep.builder()
-                                                .priceFrom(110_000)
-                                                .discount(20_000)
-                                                .build(),
-                                        PromoStep.builder()
-                                                .priceFrom(80_000)
-                                                .discount(10_000)
-                                                .build()))
-                                .build())
-                        .build())
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+        verify(offerService).calculatePriceWithPromoAndBonuses(offer);
+    }
+
+    @Test
+    void testFromFilter_PriceWithPromoAndBonuses_LessOrEquals2() {
+        Filter filter = Filter.builder()
+                .field(FilterField.PRICE_WITH_PROMO_AND_BONUSES)
+                .operation(Operation.LESS_OR_EQUALS)
+                .value(79_000)
                 .build();
 
-        lenient().when(userService.findByChatId(anyLong())).thenReturn(Optional.of(user));
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+        verify(offerService).calculatePriceWithPromoAndBonuses(offer);
     }
 
     @Test
-    void testCreateFromFilter_PriceWithPromo_LessOrEquals() {
-        Filter filter = new Filter();
-        filter.setField(FilterField.PRICE_TOTAL);
-        filter.setOperation(Operation.LESS_OR_EQUALS);
-        filter.setValue(80_000);
+    void testFromFilter_PriceWithPromoAndBonuses_GreaterOrEquals1() {
+        Filter filter = Filter.builder()
+                .field(FilterField.PRICE_WITH_PROMO_AND_BONUSES)
+                .operation(Operation.GREATER_OR_EQUALS)
+                .value(78_000)
+                .build();
 
-
-        assertTrue(predicateConstructor.createFromFilter(filter).test(offer));
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+        verify(offerService).calculatePriceWithPromoAndBonuses(offer);
     }
 
     @Test
-    void testCreateFromFilter_PriceTotal_GreaterOrEquals() {
-        Filter filter = new Filter();
-        filter.setField(FilterField.PRICE_TOTAL);
-        filter.setOperation(Operation.GREATER_OR_EQUALS);
-        filter.setValue(10_000);
+    void testFromFilter_PriceWithPromoAndBonuses_GreaterOrEquals2() {
+        Filter filter = Filter.builder()
+                .field(FilterField.PRICE_WITH_PROMO_AND_BONUSES)
+                .operation(Operation.GREATER_OR_EQUALS)
+                .value(79_000)
+                .build();
 
-        assertTrue(predicateConstructor.createFromFilter(filter).test(offer));
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+        verify(offerService).calculatePriceWithPromoAndBonuses(offer);
     }
 
     @Test
-    void testCreateFromFilter_Price_Equals() {
-        Filter filter = new Filter();
-        filter.setField(FilterField.PRICE);
-        filter.setOperation(Operation.EQUALS);
-        filter.setValue(100_000);
+    void testFromFilter_PriceWithPromoAndBonuses_Equals() {
+        Filter filter = Filter.builder()
+                .field(FilterField.PRICE_WITH_PROMO_AND_BONUSES)
+                .operation(Operation.EQUALS)
+                .value(79_000)
+                .build();
 
-        assertTrue(predicateConstructor.createFromFilter(filter).test(offer));
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+        verify(offerService).calculatePriceWithPromoAndBonuses(offer);
     }
 
     @Test
-    public void createFromFilter_PriceWithPromo_LessOrEqual() {
-        // Arrange
-        Filter filter = new Filter(/*"PRICE_WITH_PROMO", "<=", 100*/);
-        OfferService offerService = mock(OfferService.class);
-        Offer offer = mock(Offer.class);
-        when(offerService.calculatePrice(offer, false)).thenReturn(90);
-        PredicateConstructor predicateConstructor = new PredicateConstructor(offerService);
+    void testFromFilter_PriceWithPromo_LessOrEquals1() {
+        Filter filter = Filter.builder()
+                .field(FilterField.PRICE_WITH_PROMO)
+                .operation(Operation.LESS_OR_EQUALS)
+                .value(91_000)
+                .build();
 
-        // Act
-        Predicate<Offer> predicate = predicateConstructor.createFromFilter(filter);
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+        verify(offerService).calculatePriceWithPromo(offer);
+    }
 
-        // Assert
-        assertTrue(predicate.test(offer));
-        verify(offerService).calculatePrice(offer, false);
+    @Test
+    void testFromFilter_PriceWithPromo_LessOrEquals2() {
+        Filter filter = Filter.builder()
+                .field(FilterField.PRICE_WITH_PROMO)
+                .operation(Operation.LESS_OR_EQUALS)
+                .value(90_000)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+        verify(offerService).calculatePriceWithPromo(offer);
+    }
+
+    @Test
+    void testFromFilter_PriceWithPromo_GreaterOrEquals1() {
+        Filter filter = Filter.builder()
+                .field(FilterField.PRICE_WITH_PROMO)
+                .operation(Operation.GREATER_OR_EQUALS)
+                .value(89_000)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+        verify(offerService).calculatePriceWithPromo(offer);
+    }
+
+    @Test
+    void testFromFilter_PriceWithPromo_GreaterOrEquals2() {
+        Filter filter = Filter.builder()
+                .field(FilterField.PRICE_WITH_PROMO)
+                .operation(Operation.GREATER_OR_EQUALS)
+                .value(90_000)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+        verify(offerService).calculatePriceWithPromo(offer);
+    }
+
+    @Test
+    void testFromFilter_PriceWithPromo_Equals() {
+        Filter filter = Filter.builder()
+                .field(FilterField.PRICE_WITH_PROMO)
+                .operation(Operation.EQUALS)
+                .value(90_000)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+        verify(offerService).calculatePriceWithPromo(offer);
+    }
+
+    @Test
+    void testFromFilter_Price_LessOrEquals1() {
+        Filter filter = Filter.builder()
+                .field(FilterField.PRICE)
+                .operation(Operation.LESS_OR_EQUALS)
+                .value(101_000)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+    }
+
+    @Test
+    void testFromFilter_Price_LessOrEquals2() {
+        Filter filter = Filter.builder()
+                .field(FilterField.PRICE)
+                .operation(Operation.LESS_OR_EQUALS)
+                .value(100_000)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+    }
+
+    @Test
+    void testFromFilter_Price_GreaterOrEquals1() {
+        Filter filter = Filter.builder()
+                .field(FilterField.PRICE)
+                .operation(Operation.GREATER_OR_EQUALS)
+                .value(99_000)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+    }
+
+    @Test
+    void testFromFilter_Price_GreaterOrEquals2() {
+        Filter filter = Filter.builder()
+                .field(FilterField.PRICE)
+                .operation(Operation.GREATER_OR_EQUALS)
+                .value(100_000)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+    }
+
+    @Test
+    void testFromFilter_Price_Equals() {
+        Filter filter = Filter.builder()
+                .field(FilterField.PRICE)
+                .operation(Operation.EQUALS)
+                .value(100_000)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+    }
+
+    @Test
+    void testFromFilter_Bonus_LessOrEquals1() {
+        Filter filter = Filter.builder()
+                .field(FilterField.BONUS)
+                .operation(Operation.LESS_OR_EQUALS)
+                .value(23_000)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+    }
+
+    @Test
+    void testFromFilter_Bonus_LessOrEquals2() {
+        Filter filter = Filter.builder()
+                .field(FilterField.BONUS)
+                .operation(Operation.LESS_OR_EQUALS)
+                .value(22_000)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+    }
+
+    @Test
+    void testFromFilter_Bonus_GreaterOrEquals1() {
+        Filter filter = Filter.builder()
+                .field(FilterField.BONUS)
+                .operation(Operation.GREATER_OR_EQUALS)
+                .value(21_000)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+    }
+
+    @Test
+    void testFromFilter_Bonus_GreaterOrEquals2() {
+        Filter filter = Filter.builder()
+                .field(FilterField.BONUS)
+                .operation(Operation.GREATER_OR_EQUALS)
+                .value(22_000)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+    }
+
+    @Test
+    void testFromFilter_Bonus_Equals() {
+        Filter filter = Filter.builder()
+                .field(FilterField.BONUS)
+                .operation(Operation.EQUALS)
+                .value(22_000)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+    }
+
+    @Test
+    void testFromFilter_BonusPercent_LessOrEquals1() {
+        Filter filter = Filter.builder()
+                .field(FilterField.BONUS_PERCENT)
+                .operation(Operation.LESS_OR_EQUALS)
+                .value(23)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+    }
+
+    @Test
+    void testFromFilter_BonusPercent_LessOrEquals2() {
+        Filter filter = Filter.builder()
+                .field(FilterField.BONUS_PERCENT)
+                .operation(Operation.LESS_OR_EQUALS)
+                .value(22)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+    }
+
+    @Test
+    void testFromFilter_BonusPercent_GreaterOrEquals1() {
+        Filter filter = Filter.builder()
+                .field(FilterField.BONUS_PERCENT)
+                .operation(Operation.GREATER_OR_EQUALS)
+                .value(21)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+    }
+
+    @Test
+    void testFromFilter_BonusPercent_GreaterOrEquals2() {
+        Filter filter = Filter.builder()
+                .field(FilterField.BONUS_PERCENT)
+                .operation(Operation.GREATER_OR_EQUALS)
+                .value(22)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
+    }
+
+    @Test
+    void testFromFilter_BonusPercent_Equals() {
+        Filter filter = Filter.builder()
+                .field(FilterField.BONUS_PERCENT)
+                .operation(Operation.EQUALS)
+                .value(22)
+                .build();
+
+        assertTrue(predicateConstructor.fromFilter(filter).test(offer));
     }
 }

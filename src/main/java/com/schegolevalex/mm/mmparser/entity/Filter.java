@@ -63,7 +63,7 @@ public class Filter {
         switch (field) {
             case FilterField.PRICE -> fieldName = Constant.Button.PRICE;
             case FilterField.PRICE_WITH_PROMO -> fieldName = Constant.Button.PRICE_WITH_PROMO;
-            case FilterField.PRICE_TOTAL -> fieldName = Constant.Button.PRICE_TOTAL;
+            case FilterField.PRICE_WITH_PROMO_AND_BONUSES -> fieldName = Constant.Button.PRICE_WITH_PROMO_AND_BONUSES;
             case FilterField.BONUS -> fieldName = Constant.Button.BONUS;
             case FilterField.BONUS_PERCENT -> fieldName = Constant.Button.BONUS_PERCENT;
             default -> fieldName = "error";

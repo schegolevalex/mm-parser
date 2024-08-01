@@ -47,8 +47,8 @@ public class AddFilterFieldPage extends MainKeyboardPage {
                 filter.setField(FilterField.PRICE_WITH_PROMO);
                 context.putPage(chatId, Page.ADD_FILTER_OPERATION);
             }
-            case Button.PRICE_TOTAL -> {
-                filter.setField(FilterField.PRICE_TOTAL);
+            case Button.PRICE_WITH_PROMO_AND_BONUSES -> {
+                filter.setField(FilterField.PRICE_WITH_PROMO_AND_BONUSES);
                 context.putPage(chatId, Page.ADD_FILTER_OPERATION);
             }
             case Button.BONUS -> {

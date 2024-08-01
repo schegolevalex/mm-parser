@@ -12,12 +12,12 @@ public interface SellerRepository extends JpaRepository<Seller, Long> {
     Optional<Seller> findByNameAndRatingAndOgrn(String sellerName, Double rating, String ogrn);
 
     @Query(value = "INSERT INTO seller (name, rating, created_at, updated_at, is_active, ogrn, email, market_id) " +
-                   "VALUES (:#{#seller.name}, :#{#seller.rating}, :#{#seller.createdAt}, :#{#seller.updatedAt}, :#{#seller.isActive}, :#{#seller.ogrn}, :#{#seller.email}, :#{#seller.marketId}) " +
+                   "VALUES (:#{#seller.name}, :#{#seller.rating}, NOW(), NOW(), :#{#seller.isActive}, :#{#seller.ogrn}, :#{#seller.email}, :#{#seller.marketId}) " +
                    "ON CONFLICT(market_id) DO UPDATE SET " +
                    "name = COALESCE(excluded.name, seller.name), " +
                    "rating = COALESCE(excluded.rating, seller.rating), " +
-                   "created_at = COALESCE(excluded.created_at, CURRENT_TIMESTAMP), " +
-                   "updated_at = CURRENT_TIMESTAMP, " +
+                   "created_at = COALESCE(excluded.created_at, NOW()), " +
+                   "updated_at = NOW(), " +
                    "is_active = COALESCE(excluded.is_active, seller.is_active), " +
                    "ogrn = COALESCE(excluded.ogrn, seller.ogrn), " +
                    "email = COALESCE(excluded.email, seller.email) " +

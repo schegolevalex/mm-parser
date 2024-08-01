@@ -18,7 +18,6 @@ import java.util.List;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final ProductService productService;
     private final OfferService offerService;
     private final ParserBot parserBot;
 
