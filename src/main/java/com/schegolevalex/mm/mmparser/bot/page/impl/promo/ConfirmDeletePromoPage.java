@@ -25,7 +25,7 @@ public class ConfirmDeletePromoPage extends PromoKeyboardPage {
         bot.getSilent().execute(EditMessageReplyMarkup.builder()
                 .chatId(getChatId(prevUpdate))
                 .messageId(prevUpdate.getCallbackQuery().getMessage().getMessageId())
-                .replyMarkup(Keyboard.withYesNoButtons(promoId))
+                .replyMarkup(Keyboard.withConfirmOrDeclineButtons(promoId))
                 .build());
     }
 

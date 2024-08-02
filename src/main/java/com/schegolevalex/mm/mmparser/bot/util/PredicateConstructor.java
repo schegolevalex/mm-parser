@@ -19,7 +19,8 @@ public class PredicateConstructor {
     public Predicate<Offer> fromFilter(Filter filter) {
         return switch (filter.getField()) {
             case PRICE_WITH_PROMO -> createPredicate(filter, offerService::calculatePriceWithPromo);
-            case PRICE_WITH_PROMO_AND_BONUSES -> createPredicate(filter, offerService::calculatePriceWithPromoAndBonuses);
+            case PRICE_WITH_PROMO_AND_BONUSES ->
+                    createPredicate(filter, offerService::calculatePriceWithPromoAndBonuses);
             case PRICE -> createPredicate(filter, Offer::getPrice);
             case BONUS -> createPredicate(filter, Offer::getBonus);
             case BONUS_PERCENT -> createPredicate(filter, Offer::getBonusPercent);

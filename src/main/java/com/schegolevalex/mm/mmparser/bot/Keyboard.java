@@ -260,7 +260,7 @@ public class Keyboard {
         return new InlineKeyboardMarkup(List.of(row));
     }
 
-    public static InlineKeyboardMarkup withYesNoButtons(long entityId) {
+    public static InlineKeyboardMarkup withConfirmOrDeclineButtons(long entityId) {
         InlineKeyboardRow row = new InlineKeyboardRow();
         row.add(InlineKeyboardButton.builder()
                 .text(Button.CONFIRM)
@@ -343,7 +343,7 @@ public class Keyboard {
             allUserFilters.subList(startIndex, endIndex).forEach(filter -> {
                 InlineKeyboardRow row = new InlineKeyboardRow();
                 row.add(InlineKeyboardButton.builder()
-                        .text((selectedFilters.contains(filter) ? "✅ " : "") + filter)
+                        .text((selectedFilters != null && selectedFilters.contains(filter) ? "✅ " : "") + filter)
                         .callbackData(Callback.APPLY_FILTER + DELIMITER + productId + DELIMITER
                                       + Callback.MY_FILTERS + DELIMITER + filter.getId() + DELIMITER +
                                       Callback.KEYBOARD_PAGES + DELIMITER + page)

@@ -31,7 +31,7 @@ public class ConfirmDeleteProductPage extends ProductKeyboardPage {
         bot.getSilent().execute(EditMessageReplyMarkup.builder()
                 .chatId(getChatId(prevUpdate))
                 .messageId(prevUpdate.getCallbackQuery().getMessage().getMessageId())
-                .replyMarkup(Keyboard.withYesNoButtons(productId))
+                .replyMarkup(Keyboard.withConfirmOrDeclineButtons(productId))
                 .build());
     }
 

@@ -25,7 +25,7 @@ public class ConfirmDeleteFilterPage extends FilterKeyboardPage {
         bot.getSilent().execute(EditMessageReplyMarkup.builder()
                 .chatId(getChatId(prevUpdate))
                 .messageId(prevUpdate.getCallbackQuery().getMessage().getMessageId())
-                .replyMarkup(Keyboard.withYesNoButtons(filterId))
+                .replyMarkup(Keyboard.withConfirmOrDeclineButtons(filterId))
                 .build());
     }
 
