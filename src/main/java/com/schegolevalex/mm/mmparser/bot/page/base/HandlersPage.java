@@ -32,8 +32,8 @@ public abstract class HandlersPage extends BasePage {
                 .ifPresentOrElse(button -> button.handle(nextUpdate), () -> context.putPage(getChatId(nextUpdate), Page.UNEXPECTED));
     }
 
-    protected static @NotNull Map<String, String> extractCallbacksMap(Update prevUpdate) {
-        String[] tokens = prevUpdate.getCallbackQuery().getData().split(DELIMITER);
+    protected static @NotNull Map<String, String> extractCallbacksMap(Update update) {
+        String[] tokens = update.getCallbackQuery().getData().split(DELIMITER);
         Map<String, String> callbacks = new HashMap<>();
         for (int i = 0; i < tokens.length; i += 2)
             callbacks.put(tokens[i], tokens[i + 1]);

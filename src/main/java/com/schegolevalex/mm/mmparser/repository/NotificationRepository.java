@@ -19,5 +19,16 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             "AND n.cashbackLevel = :cashbackLevel")
     Optional<Notification> findExist(Offer offer, User user, Set<Filter> filters, Promo promo, Integer cashbackLevel, int size);
 
+    @Query(
+            "SELECT n FROM Notification n " +
+            "WHERE n.offer = :#{#notification.offer} " +
+            "AND n.user = :#{#notification.user} " +
+            "AND (SIZE(n.filters) = :#{#notification.filters.size} " +
+            "AND NOT EXISTS (SELECT f FROM Filter f WHERE f IN :#{#notification.filters} AND n.id NOT IN " +
+            "(SELECT m.id FROM Notification m JOIN m.filters mf WHERE mf = f))) " +
+            "AND (n.promo = :#{#notification.promo} OR (:#{#notification.promo} IS NULL AND n.promo IS NULL)) " +
+            "AND n.cashbackLevel = :#{#notification.cashbackLevel}")
+    Optional<Notification> findExist(Notification notification);
+
     void deleteAllByPromoId(long id);
 }

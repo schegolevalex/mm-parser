@@ -2,14 +2,15 @@ package com.schegolevalex.mm.mmparser.service;
 
 import com.schegolevalex.mm.mmparser.bot.Constant;
 import com.schegolevalex.mm.mmparser.bot.util.PredicateConstructor;
-import com.schegolevalex.mm.mmparser.entity.*;
+import com.schegolevalex.mm.mmparser.entity.Filter;
+import com.schegolevalex.mm.mmparser.entity.Offer;
+import com.schegolevalex.mm.mmparser.entity.Promo;
+import com.schegolevalex.mm.mmparser.entity.PromoStep;
 import com.schegolevalex.mm.mmparser.repository.OfferRepository;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -37,29 +38,7 @@ public class OfferService {
     }
 
     public Optional<Offer> findExist(Offer offer) {
-        Delivery delivery = offer.getDelivery();
-        String marketId = offer.getSeller().getMarketId();
-        String clickCourierDate = delivery.getClickCourierDate();
-        Integer clickCourierPrice = delivery.getClickCourierPrice();
-        String pickupDate = delivery.getPickupDate();
-        Integer pickupPrice = delivery.getPickupPrice();
-        String storeDate = delivery.getStoreDate();
-        Integer storePrice = delivery.getStorePrice();
-        String courierDate = delivery.getCourierDate();
-        Integer courierPrice = delivery.getCourierPrice();
-        return offerRepository.findExist(offer.getPrice(),
-                offer.getBonusPercent(),
-                offer.getBonus(),
-                offer.getProduct().getUrl(),
-                marketId,
-                clickCourierDate,
-                clickCourierPrice,
-                pickupDate,
-                pickupPrice,
-                storeDate,
-                storePrice,
-                courierDate,
-                courierPrice);
+        return offerRepository.findExist(offer);
     }
 
     public Offer save(Offer newOffer) {

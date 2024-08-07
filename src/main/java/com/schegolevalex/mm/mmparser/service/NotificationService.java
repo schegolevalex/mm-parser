@@ -22,13 +22,7 @@ public class NotificationService {
     private final ParserBot parserBot;
 
     public boolean isAlreadyNotified(Notification notification) {
-        return notificationRepository.findExist(notification.getOffer(),
-                        notification.getUser(),
-                        notification.getFilters(),
-                        notification.getPromo(),
-                        notification.getCashbackLevel(),
-                        notification.getFilters().size())
-                .isPresent();
+        return notificationRepository.findExist(notification).isPresent();
     }
 
     public List<Notification> saveAll(List<Notification> notifies) {
