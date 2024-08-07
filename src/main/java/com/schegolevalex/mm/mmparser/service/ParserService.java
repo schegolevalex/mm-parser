@@ -4,8 +4,10 @@ import com.github.sonus21.rqueue.annotation.RqueueListener;
 import com.github.sonus21.rqueue.core.RqueueMessageEnqueuer;
 import com.github.sonus21.rqueue.core.RqueueMessageManager;
 import com.schegolevalex.mm.mmparser.entity.Offer;
+import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.parser.Parser;
 import jakarta.annotation.PreDestroy;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPool;
@@ -40,38 +42,37 @@ public class ParserService {
 
     @RqueueListener(value = "product-queue")
     public void parseJob(Long productId) {
-        productService.findById(productId).ifPresent(product -> {
-            try {
-                Parser parser = parserPool.borrowObject();
-                List<Offer> parsedOffers = parser.parseProduct(product)
-                        .stream()
-                        .map(offer -> {
-                            Optional<Offer> maybeExist = offerService.findExist(offer);
-                            if (maybeExist.isPresent()) {
-                                Offer exist = maybeExist.get();
-                                exist.setUpdatedAt(Instant.now());
-                                log.trace("Найдено существующее предложение: {}", exist);
-                                return exist;
-                            } else {
-                                log.trace("Найдено новое предложение: {}", offer);
-                                return offer;
-                            }
-                        })
-                        .toList();
+        Parser parser = null;
+        Product product = productService.findById(productId).orElseThrow(() -> new EntityNotFoundException("Product not found"));
+        try {
+            parser = parserPool.borrowObject();
+            List<Offer> parsedOffers = parser.parseProduct(product)
+                    .stream()
+                    .map(offer -> {
+                        Optional<Offer> maybeExist = offerService.findExist(offer);
+                        if (maybeExist.isPresent()) {
+                            Offer exist = maybeExist.get();
+                            exist.setUpdatedAt(Instant.now());
+                            log.trace("Найдено существующее предложение: {}", exist);
+                            return exist;
+                        } else {
+                            log.trace("Найдено новое предложение: {}", offer);
+                            return offer;
+                        }
+                    }).toList();
 
-                rqueueMessageEnqueuer.enqueueIn(productQueue, productId, Duration.ofMinutes(delay));
-                offerService.saveAll(parsedOffers);
+            rqueueMessageEnqueuer.enqueueIn(productQueue, productId, Duration.ofMinutes(delay));
+            offerService.saveAll(parsedOffers);
 
-                if (!parsedOffers.isEmpty())
-                    parsedOffers.forEach(offer -> rqueueMessageEnqueuer.enqueue(notificationQueue, offer.getId()));
-
-                parserPool.returnObject(parser);
-            } catch (Exception e) {
-                log.error("При обработке продукта произошла ошибка: {}", e.getMessage());
-                parserPool.clear();
-                throw new RuntimeException(e);
-            }
-        });
+            if (!parsedOffers.isEmpty())
+                parsedOffers.forEach(offer -> rqueueMessageEnqueuer.enqueue(notificationQueue, offer.getId()));
+        } catch (Exception e) {
+            log.error("При обработке продукта произошла ошибка: {}", e.getMessage());
+            parserPool.clear();
+            throw new RuntimeException(e);
+        } finally {
+            parserPool.returnObject(parser);
+        }
     }
 
     @EventListener

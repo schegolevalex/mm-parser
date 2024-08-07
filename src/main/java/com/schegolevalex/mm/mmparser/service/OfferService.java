@@ -30,29 +30,6 @@ public class OfferService {
         this.predicateConstructor = predicateConstructor;
     }
 
-    public List<Offer> filterOffersWithDefaultParameters(List<Offer> offers) {
-        return offers.stream()
-                .filter(offer -> {
-                    Integer priceBefore = offer.getPrice();
-                    double bonusPercent = offer.getBonusPercent() / 100.0;
-                    int promo = priceBefore > 110_000 ? 20_000 : 10_000;
-
-                    double sberprime = priceBefore * bonusPercent > 2_000 ? 2_000 : (priceBefore * bonusPercent);
-
-                    boolean totalPrice = (priceBefore - promo - (priceBefore - promo) * bonusPercent - sberprime) < 79_000;
-                    boolean scam = priceBefore > 100_000;
-                    return totalPrice && scam;
-                })
-                .toList();
-    }
-
-    public List<Offer> filterOffers(List<Offer> offers) {
-        return offers.stream()
-                .filter(offer -> offer.getProduct().getFilters().stream()
-                        .allMatch(filter -> predicateConstructor.fromFilter(filter).test(offer)))
-                .toList();
-    }
-
     public Boolean isPassFilters(Offer offer) {
         Set<Filter> filters = offer.getProduct().getFilters();
         return filters.stream()
@@ -91,11 +68,6 @@ public class OfferService {
 
     public List<Offer> saveAll(List<Offer> offers) {
         return offerRepository.saveAllAndFlush(offers);
-    }
-
-    public List<Offer> findAllForSpecifiedTime(Product product, Integer timeAgo, ChronoUnit unit) {
-        Instant minutesAgo = Instant.now().minus(timeAgo, unit);
-        return offerRepository.findAllByProductAndUpdatedAtGreaterThanEqual(product, minutesAgo);
     }
 
     public int calculatePriceWithPromoAndBonuses(Offer offer) {
