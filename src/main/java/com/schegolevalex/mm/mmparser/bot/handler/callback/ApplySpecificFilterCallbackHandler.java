@@ -9,6 +9,7 @@ import com.schegolevalex.mm.mmparser.entity.Product;
 import com.schegolevalex.mm.mmparser.service.FilterService;
 import com.schegolevalex.mm.mmparser.service.ProductService;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static com.schegolevalex.mm.mmparser.bot.Constant.DELIMITER;
@@ -29,6 +30,7 @@ public class ApplySpecificFilterCallbackHandler extends BaseHandler {
     }
 
     @Override
+    @Transactional
     public void handle(Update update) {
         String callback = update.getCallbackQuery().getData();
         long productId = Long.parseLong(callback.split(DELIMITER)[1]);
@@ -39,6 +41,7 @@ public class ApplySpecificFilterCallbackHandler extends BaseHandler {
             product.removeFilter(filter);
         else
             product.addFilter(filter);
+        productService.save(product);
         context.putPage(getChatId(update), Page.APPLY_FILTER);
     }
 

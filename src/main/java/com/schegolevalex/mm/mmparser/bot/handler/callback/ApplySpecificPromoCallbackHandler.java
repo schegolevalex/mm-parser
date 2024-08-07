@@ -9,6 +9,7 @@ import com.schegolevalex.mm.mmparser.entity.Promo;
 import com.schegolevalex.mm.mmparser.service.ProductService;
 import com.schegolevalex.mm.mmparser.service.PromoService;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static com.schegolevalex.mm.mmparser.bot.Constant.DELIMITER;
@@ -29,6 +30,7 @@ public class ApplySpecificPromoCallbackHandler extends BaseHandler {
     }
 
     @Override
+    @Transactional
     public void handle(Update update) {
         String callback = update.getCallbackQuery().getData();
         long productId = Long.parseLong(callback.split(DELIMITER)[1]);
@@ -39,6 +41,7 @@ public class ApplySpecificPromoCallbackHandler extends BaseHandler {
             product.setPromo(null);
         else
             product.setPromo(promo);
+        productService.save(product);
         context.putPage(getChatId(update), Page.APPLY_PROMO);
     }
 
