@@ -10,6 +10,7 @@ import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.abilitybots.api.bot.AbilityBot;
@@ -49,7 +50,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
 
     @Autowired
     public ParserBot(BotConfiguration botConfiguration,
-                     Context context,
+                     @Lazy Context context,
                      OfferService offerService,
                      UserService userService) {
         super(new OkHttpTelegramClient(botConfiguration.getBotToken()), botConfiguration.getBotUsername());
@@ -83,8 +84,8 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
                         log.info("Присоединился новый пользователь: {}", user);
                     } else
                         maybeUser.get().setActive(true);
-                    this.context.peekPage(chatId).afterUpdateReceive(ctx.update());
-                    this.context.peekPage(chatId).beforeUpdateReceive(ctx.update());
+                    this.context.peekPage(chatId).afterUpdateReceived(ctx.update());
+                    this.context.peekPage(chatId).show(ctx.update());
                 })
                 .build();
     }
@@ -126,8 +127,8 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
 
     public Reply replyToButtons() {
         return Reply.of((_, upd) -> {
-                    context.peekPage(getChatId(upd)).afterUpdateReceive(upd);
-                    context.peekPage(getChatId(upd)).beforeUpdateReceive(upd);
+                    context.peekPage(getChatId(upd)).afterUpdateReceived(upd);
+                    context.peekPage(getChatId(upd)).show(upd);
                 },
                 Flag.TEXT
                         .and(Predicate.not(hasMessageWith("/stop")))
@@ -184,6 +185,6 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
 
     @PreDestroy
     private void clearDb() {
-        db.clear();
+//        db.clear();
     }
 }

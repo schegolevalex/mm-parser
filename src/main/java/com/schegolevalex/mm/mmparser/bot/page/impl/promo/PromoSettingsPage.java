@@ -2,11 +2,11 @@ package com.schegolevalex.mm.mmparser.bot.page.impl.promo;
 
 import com.schegolevalex.mm.mmparser.bot.Keyboard;
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
+import com.schegolevalex.mm.mmparser.bot.handler.Handler;
+import com.schegolevalex.mm.mmparser.bot.page.base.HandlersPage;
 import com.schegolevalex.mm.mmparser.bot.page.base.Page;
-import com.schegolevalex.mm.mmparser.bot.page.base.PromoKeyboardPage;
 import com.schegolevalex.mm.mmparser.entity.Promo;
 import com.schegolevalex.mm.mmparser.service.PromoService;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -24,16 +24,19 @@ import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getCha
 
 @Component
 @Transactional
-public class PromoSettingsPage extends PromoKeyboardPage {
+public class PromoSettingsPage extends HandlersPage {
+
     private final PromoService promoService;
 
-    public PromoSettingsPage(@Lazy ParserBot bot, PromoService promoService) {
-        super(bot);
+    public PromoSettingsPage(ParserBot bot,
+                             List<Handler> handlers,
+                             PromoService promoService) {
+        super(bot, handlers);
         this.promoService = promoService;
     }
 
     @Override
-    public void beforeUpdateReceive(Update prevUpdate) {
+    public void show(Update prevUpdate) {
         Long chatId = getChatId(prevUpdate);
 
         if (prevUpdate.hasCallbackQuery()) {
@@ -70,11 +73,6 @@ public class PromoSettingsPage extends PromoKeyboardPage {
                     .replyMarkup(Keyboard.withPromoSettingsActions())
                     .build());
         }
-    }
-
-    @Override
-    public void afterUpdateReceive(Update nextUpdate) {
-        resolvePromoKeyboard(nextUpdate);
     }
 
     @Override

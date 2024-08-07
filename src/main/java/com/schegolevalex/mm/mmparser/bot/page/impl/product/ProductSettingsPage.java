@@ -2,41 +2,32 @@ package com.schegolevalex.mm.mmparser.bot.page.impl.product;
 
 import com.schegolevalex.mm.mmparser.bot.Keyboard;
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
+import com.schegolevalex.mm.mmparser.bot.handler.Handler;
+import com.schegolevalex.mm.mmparser.bot.page.base.HandlersPage;
 import com.schegolevalex.mm.mmparser.bot.page.base.Page;
-import com.schegolevalex.mm.mmparser.bot.page.base.ProductKeyboardPage;
-import com.schegolevalex.mm.mmparser.service.FilterService;
-import com.schegolevalex.mm.mmparser.service.ProductService;
-import com.schegolevalex.mm.mmparser.service.PromoService;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
+import java.util.List;
 
 import static com.schegolevalex.mm.mmparser.bot.Constant.DELIMITER;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
-public class ProductSettingsPage extends ProductKeyboardPage {
+public class ProductSettingsPage extends HandlersPage {
 
-    public ProductSettingsPage(@Lazy ParserBot bot,
-                               ProductService productService,
-                               PromoService promoService,
-                               FilterService filterService) {
-        super(bot, productService, promoService, filterService);
+    public ProductSettingsPage(ParserBot bot, List<Handler> handlers) {
+        super(bot, handlers);
     }
 
     @Override
-    public void beforeUpdateReceive(Update prevUpdate) {
+    public void show(Update prevUpdate) {
         bot.getSilent().execute(EditMessageReplyMarkup.builder()
                 .chatId(getChatId(prevUpdate))
                 .messageId(prevUpdate.getCallbackQuery().getMessage().getMessageId())
                 .replyMarkup(Keyboard.withProductSettings(Long.parseLong(prevUpdate.getCallbackQuery().getData().split(DELIMITER)[1])))
                 .build());
-    }
-
-    @Override
-    public void afterUpdateReceive(Update nextUpdate) {
-        resolveProductKeyboardAction(nextUpdate);
     }
 
     @Override

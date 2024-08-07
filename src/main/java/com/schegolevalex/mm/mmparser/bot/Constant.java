@@ -23,7 +23,7 @@ public interface Constant {
                 Такой тип ссылок не поддерживается😦
                 Можете ввести другую ссылку или вернуться на главную🏠
                                 
-                ||ссылка должна начинаться с https://megamarket.ru/catalog/details/...||""";
+                ||ссылка должна начинаться с https://megamarket\\.ru/catalog/details/\\.\\.\\.||""";
         String BYE = "👋";
         String OFFER = """
                 ❗️❗️❗️Новое предложение товара ["%s"](%s)\\.
@@ -58,9 +58,9 @@ public interface Constant {
                 __*"500 от 2000 рублей, 800 от 3000 рублей, 1500 от 10000 рублей"*__\\. Всё это один промокод\\!||""";
         String PROMO = "%d/%d";
         String FILTERS_IS_EMPTY = "нет фильтров 😦";
-        String ADD_FILTER_FIELD = "По чему будем фильтровать?";
-        String ADD_FILTER_OPERATION = "Выберите условие фильтрации:";
-        String ADD_FILTER_VALUE = "Введите значение фильтра:";
+        String ADD_FILTER_FIELD = "По какому полю будем фильтровать предложения товара?";
+        String ADD_FILTER_OPERATION = "Выберите условие фильтрации поля:";
+        String ADD_FILTER_VALUE = "Введите значение поля:";
         String FILTER_ADDED = "Фильтр успешно добавлен";
         String NO_TITLE = "Название товара появится позже";
         String HELP = """
@@ -85,7 +85,7 @@ public interface Constant {
     }
 
     interface Button {
-        String MY_PRODUCTS = "🛒 мои товары";
+        String WATCH_PRODUCTS = "🛒 мои товары";
         String ADD_PRODUCT = "➕ добавить товар";
         String BACK = "⬅ назад";
         String MAIN_PAGE = "🏠 на главную";
@@ -103,7 +103,7 @@ public interface Constant {
         String PREVIOUS_PAGE = "<<";
         String NEXT_PAGE = ">>";
         String EMPTY = " ";
-        String PRODUCT_NOTIFICATIONS = "⭐️";
+        //        String PRODUCT_NOTIFICATIONS = "⭐️";
         String PRODUCT_SETTINGS = "⚙️";
         String DELETE_PRODUCT = "🗑";
         String BACK_TO_PRODUCT_SETTINGS = "⬅ ⚙️";
@@ -118,24 +118,42 @@ public interface Constant {
         String LESS_OR_EQUALS = "≤";
         String EQUALS = "=";
         String GREATER_OR_EQUALS = "≥";
+        String BACK_TO_SETTINGS = "⬅ 📚";
+        String BACK_TO_PROMOS_SETTINGS = "⬅ 🔵";
+        String BACK_TO_FILTERS_SETTINGS = "⬅ 🔴";
+        String BACK_TO_PROMO_STEP_DISCOUNT = "⬅ к вводу скидки";
+        String BACK_TO_PROMO_STEP_PRICE = "⬅ к вводу суммы";
+        String BACK_TO_FILTERS_FIELDS = "⬅ к вводу поля";
+        String BACK_TO_FILTERS_OPERATIONS = "⬅ к вводу условия";
     }
 
     interface Callback {
-        String MY_PRODUCTS = "products";
+        //        String MY_PRODUCTS = "products";
         String MY_PROMOS = "promos";
         String APPLY_PROMO = "apply-promo";
         String DELETE_PROMO = "delete-promo";
         String KEYBOARD_PAGES = "pages";
         String APPLY_FILTER = "apply-filter";
-        String BACK = "back";
+        //        String BACK = "back";
         String EMPTY = "empty";
         String BACK_TO_PRODUCT_SETTINGS = "to-product-settings";
-        String PRODUCT_NOTIFICATIONS = "product-notifications";
+        //        String PRODUCT_NOTIFICATIONS = "product-notifications";
         String PRODUCT_SETTINGS = "product-settings";
         String DELETE_PRODUCT = "delete-product";
         String DELETE_FILTER = "delete-filter";
-        String CONFIRM_DELETE = "confirm";
-        String DECLINE_DELETE = "decline";
+        String CONFIRM_DELETE_PRODUCT = "confirm-del-product";
+        String DECLINE_DELETE_PRODUCT = "decline-del-product";
+        String CONFIRM_DELETE_PROMO = "confirm-del-promo";
+        String DECLINE_DELETE_PROMO = "decline-del-promo";
+        String CONFIRM_DELETE_FILTER = "confirm-del-filter";
+        String DECLINE_DELETE_FILTER = "decline-del-filter";
         String MY_FILTERS = "filters";
+        String ZERO_CASHBACK = "0";
+        String TWO_CASHBACK = "2";
+        String FIVE_CASHBACK = "5";
+        String SEVEN_CASHBACK = "7";
+        String NINE_CASHBACK = "9";
+        String TWELVE_CASHBACK = "12";
+        String BACK_TO_PRODUCT_KEYBOARD = "back-to-product-keyboard";
     }
 }

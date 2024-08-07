@@ -23,7 +23,7 @@ public class Keyboard {
     public static ReplyKeyboard withMainPageActions() {
         KeyboardRow row1 = new KeyboardRow();
         row1.add(Button.ADD_PRODUCT);
-        row1.add(Button.MY_PRODUCTS);
+        row1.add(Button.WATCH_PRODUCTS);
         KeyboardRow row2 = new KeyboardRow();
         row2.add(Button.SETTINGS);
         return ReplyKeyboardMarkup.builder()
@@ -32,9 +32,27 @@ public class Keyboard {
                 .build();
     }
 
-    public static ReplyKeyboard withBackButton() {
+    public static ReplyKeyboard withBackToPromoSettingsButton() {
         KeyboardRow row = new KeyboardRow();
-        row.add(Button.BACK);
+        row.add(Button.BACK_TO_PROMOS_SETTINGS);
+        return ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row))
+                .resizeKeyboard(true)
+                .build();
+    }
+
+    public static ReplyKeyboard withBackToPromoStepDiscountButton() {
+        KeyboardRow row = new KeyboardRow();
+        row.add(Button.BACK_TO_PROMO_STEP_DISCOUNT);
+        return ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row))
+                .resizeKeyboard(true)
+                .build();
+    }
+
+    public static ReplyKeyboard withBackToFiltersOperationsButton() {
+        KeyboardRow row = new KeyboardRow();
+        row.add(Button.BACK_TO_FILTERS_OPERATIONS);
         return ReplyKeyboardMarkup.builder()
                 .keyboard(List.of(row))
                 .resizeKeyboard(true)
@@ -54,11 +72,11 @@ public class Keyboard {
         KeyboardRow row1 = new KeyboardRow();
         row1.add(Button.CASHBACK_SETTINGS);
         KeyboardRow row2 = new KeyboardRow();
-        row2.add(Button.PROMOS_SETTINGS);
+        row2.add(Button.FILTERS_SETTINGS);
         KeyboardRow row3 = new KeyboardRow();
-        row3.add(Button.FILTERS_SETTINGS);
+        row3.add(Button.PROMOS_SETTINGS);
         KeyboardRow row4 = new KeyboardRow();
-        row4.add(Button.BACK);
+        row4.add(Button.MAIN_PAGE);
         return ReplyKeyboardMarkup.builder()
                 .keyboard(List.of(row1, row2, row3, row4))
                 .resizeKeyboard(true)
@@ -69,7 +87,7 @@ public class Keyboard {
         KeyboardRow row1 = new KeyboardRow();
         row1.add(Button.ADD_PROMO);
         KeyboardRow row2 = new KeyboardRow();
-        row2.add(Button.BACK);
+        row2.add(Button.BACK_TO_SETTINGS);
         return ReplyKeyboardMarkup.builder()
                 .keyboard(List.of(row1, row2))
                 .resizeKeyboard(true)
@@ -96,28 +114,28 @@ public class Keyboard {
         InlineKeyboardRow row1 = new InlineKeyboardRow();
         row1.add(InlineKeyboardButton.builder()
                 .text(zero)
-                .callbackData("0")
+                .callbackData(Callback.ZERO_CASHBACK)
                 .build());
         row1.add(InlineKeyboardButton.builder()
                 .text(two)
-                .callbackData("2")
+                .callbackData(Callback.TWO_CASHBACK)
                 .build());
         row1.add(InlineKeyboardButton.builder()
                 .text(five)
-                .callbackData("5")
+                .callbackData(Callback.FIVE_CASHBACK)
                 .build());
         InlineKeyboardRow row2 = new InlineKeyboardRow();
         row2.add(InlineKeyboardButton.builder()
                 .text(seven)
-                .callbackData("7")
+                .callbackData(Callback.SEVEN_CASHBACK)
                 .build());
         row2.add(InlineKeyboardButton.builder()
                 .text(nine)
-                .callbackData("9")
+                .callbackData(Callback.NINE_CASHBACK)
                 .build());
         row2.add(InlineKeyboardButton.builder()
                 .text(twelve)
-                .callbackData("12")
+                .callbackData(Callback.TWELVE_CASHBACK)
                 .build());
         return new InlineKeyboardMarkup(List.of(row1, row2));
     }
@@ -128,7 +146,7 @@ public class Keyboard {
         KeyboardRow row2 = new KeyboardRow();
         row2.add(Button.NO_SAVE_PROMO);
         KeyboardRow row3 = new KeyboardRow();
-        row3.add(Button.BACK);
+        row3.add(Button.BACK_TO_PROMO_STEP_PRICE);
         return ReplyKeyboardMarkup.builder()
                 .keyboard(List.of(row1, row2, row3))
                 .resizeKeyboard(true)
@@ -168,7 +186,7 @@ public class Keyboard {
         InlineKeyboardRow row3 = new InlineKeyboardRow();
         row3.add(InlineKeyboardButton.builder()
                 .text(Button.BACK)
-                .callbackData(Callback.BACK + DELIMITER + productId)
+                .callbackData(Callback.BACK_TO_PRODUCT_KEYBOARD + DELIMITER + productId)
                 .build());
         return new InlineKeyboardMarkup(List.of(row1, row2, row3));
     }
@@ -260,15 +278,41 @@ public class Keyboard {
         return new InlineKeyboardMarkup(List.of(row));
     }
 
-    public static InlineKeyboardMarkup withConfirmOrDeclineButtons(long entityId) {
+    public static InlineKeyboardMarkup withConfirmOrDeclineDeleteProductButtons(long entityId) {
         InlineKeyboardRow row = new InlineKeyboardRow();
         row.add(InlineKeyboardButton.builder()
                 .text(Button.CONFIRM)
-                .callbackData(Callback.CONFIRM_DELETE + DELIMITER + entityId)
+                .callbackData(Callback.CONFIRM_DELETE_PRODUCT + DELIMITER + entityId)
                 .build());
         row.add(InlineKeyboardButton.builder()
                 .text(Button.DECLINE)
-                .callbackData(Callback.DECLINE_DELETE + DELIMITER + entityId)
+                .callbackData(Callback.DECLINE_DELETE_PRODUCT + DELIMITER + entityId)
+                .build());
+        return new InlineKeyboardMarkup(List.of(row));
+    }
+
+    public static InlineKeyboardMarkup withConfirmOrDeclineDeletePromoButtons(long entityId) {
+        InlineKeyboardRow row = new InlineKeyboardRow();
+        row.add(InlineKeyboardButton.builder()
+                .text(Button.CONFIRM)
+                .callbackData(Callback.CONFIRM_DELETE_PROMO + DELIMITER + entityId)
+                .build());
+        row.add(InlineKeyboardButton.builder()
+                .text(Button.DECLINE)
+                .callbackData(Callback.DECLINE_DELETE_PROMO + DELIMITER + entityId)
+                .build());
+        return new InlineKeyboardMarkup(List.of(row));
+    }
+
+    public static InlineKeyboardMarkup withConfirmOrDeclineDeleteFilterButtons(long entityId) {
+        InlineKeyboardRow row = new InlineKeyboardRow();
+        row.add(InlineKeyboardButton.builder()
+                .text(Button.CONFIRM)
+                .callbackData(Callback.CONFIRM_DELETE_FILTER + DELIMITER + entityId)
+                .build());
+        row.add(InlineKeyboardButton.builder()
+                .text(Button.DECLINE)
+                .callbackData(Callback.DECLINE_DELETE_FILTER + DELIMITER + entityId)
                 .build());
         return new InlineKeyboardMarkup(List.of(row));
     }
@@ -277,7 +321,7 @@ public class Keyboard {
         KeyboardRow row1 = new KeyboardRow();
         row1.add(Button.ADD_FILTER);
         KeyboardRow row2 = new KeyboardRow();
-        row2.add(Button.BACK);
+        row2.add(Button.BACK_TO_SETTINGS);
         return ReplyKeyboardMarkup.builder()
                 .keyboard(List.of(row1, row2))
                 .resizeKeyboard(true)
@@ -294,7 +338,7 @@ public class Keyboard {
         row3.add(Button.BONUS);
         row3.add(Button.BONUS_PERCENT);
         KeyboardRow row4 = new KeyboardRow();
-        row4.add(Button.BACK);
+        row4.add(Button.BACK_TO_FILTERS_SETTINGS);
         return ReplyKeyboardMarkup.builder()
                 .keyboard(List.of(row1, row2, row3, row4))
 //                .resizeKeyboard(true)
@@ -307,7 +351,7 @@ public class Keyboard {
         row1.add(Button.EQUALS);
         row1.add(Button.GREATER_OR_EQUALS);
         KeyboardRow row2 = new KeyboardRow();
-        row2.add(Button.BACK);
+        row2.add(Button.BACK_TO_FILTERS_FIELDS);
         return ReplyKeyboardMarkup.builder()
                 .keyboard(List.of(row1, row2))
                 .resizeKeyboard(true)

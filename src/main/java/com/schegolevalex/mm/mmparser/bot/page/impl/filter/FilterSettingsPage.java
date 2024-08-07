@@ -3,11 +3,11 @@ package com.schegolevalex.mm.mmparser.bot.page.impl.filter;
 import com.schegolevalex.mm.mmparser.bot.Constant;
 import com.schegolevalex.mm.mmparser.bot.Keyboard;
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
-import com.schegolevalex.mm.mmparser.bot.page.base.FilterKeyboardPage;
+import com.schegolevalex.mm.mmparser.bot.handler.Handler;
+import com.schegolevalex.mm.mmparser.bot.page.base.HandlersPage;
 import com.schegolevalex.mm.mmparser.bot.page.base.Page;
 import com.schegolevalex.mm.mmparser.entity.Filter;
 import com.schegolevalex.mm.mmparser.service.FilterService;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
@@ -21,17 +21,19 @@ import static com.schegolevalex.mm.mmparser.bot.Constant.DELIMITER;
 import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getChatId;
 
 @Component
-public class FilterSettingsPage extends FilterKeyboardPage {
+public class FilterSettingsPage extends HandlersPage {
 
     private final FilterService filterService;
 
-    public FilterSettingsPage(@Lazy ParserBot bot, FilterService filterService) {
-        super(bot);
+    public FilterSettingsPage(ParserBot bot,
+                              List<Handler> handlers,
+                              FilterService filterService) {
+        super(bot, handlers);
         this.filterService = filterService;
     }
 
     @Override
-    public void beforeUpdateReceive(Update prevUpdate) {
+    public void show(Update prevUpdate) {
         Long chatId = getChatId(prevUpdate);
 
         if (prevUpdate.hasCallbackQuery()) {
@@ -65,11 +67,6 @@ public class FilterSettingsPage extends FilterKeyboardPage {
                 .text(Constant.Message.CHOOSE_ACTION)
                 .replyMarkup(Keyboard.withFiltersSettingsActions())
                 .build());
-    }
-
-    @Override
-    public void afterUpdateReceive(Update nextUpdate) {
-        resolveFiltersKeyboard(nextUpdate);
     }
 
     @Override

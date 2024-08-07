@@ -2,13 +2,12 @@ package com.schegolevalex.mm.mmparser.bot.page.impl.filter;
 
 import com.schegolevalex.mm.mmparser.bot.Keyboard;
 import com.schegolevalex.mm.mmparser.bot.ParserBot;
+import com.schegolevalex.mm.mmparser.bot.handler.Handler;
+import com.schegolevalex.mm.mmparser.bot.page.base.HandlersPage;
 import com.schegolevalex.mm.mmparser.bot.page.base.Page;
-import com.schegolevalex.mm.mmparser.bot.page.base.ProductKeyboardPage;
 import com.schegolevalex.mm.mmparser.entity.Filter;
 import com.schegolevalex.mm.mmparser.service.FilterService;
 import com.schegolevalex.mm.mmparser.service.ProductService;
-import com.schegolevalex.mm.mmparser.service.PromoService;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
@@ -23,17 +22,22 @@ import static org.telegram.telegrambots.abilitybots.api.util.AbilityUtils.getCha
 
 @Component
 @Transactional
-public class ApplyFilterPage extends ProductKeyboardPage {
+public class ApplyFilterPage extends HandlersPage {
 
-    public ApplyFilterPage(@Lazy ParserBot bot,
+    private final ProductService productService;
+    private final FilterService filterService;
+
+    public ApplyFilterPage(ParserBot bot,
+                           List<Handler> handlers,
                            ProductService productService,
-                           PromoService promoService,
                            FilterService filterService) {
-        super(bot, productService, promoService, filterService);
+        super(bot, handlers);
+        this.productService = productService;
+        this.filterService = filterService;
     }
 
     @Override
-    public void beforeUpdateReceive(Update prevUpdate) {
+    public void show(Update prevUpdate) {
         Long chatId = getChatId(prevUpdate);
         Map<String, String> callbacks = extractCallbacksMap(prevUpdate);
         long productId = Long.parseLong(callbacks.get(Callback.APPLY_FILTER));
@@ -52,11 +56,6 @@ public class ApplyFilterPage extends ProductKeyboardPage {
                 .messageId(prevUpdate.getCallbackQuery().getMessage().getMessageId())
                 .replyMarkup(Keyboard.withFiltersForProduct(allUserFilters, selectedFilters, productId, page))
                 .build());
-    }
-
-    @Override
-    public void afterUpdateReceive(Update nextUpdate) {
-        resolveProductKeyboardAction(nextUpdate);
     }
 
     @Override

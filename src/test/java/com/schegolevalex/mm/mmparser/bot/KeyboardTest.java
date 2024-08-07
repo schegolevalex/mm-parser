@@ -255,19 +255,19 @@ class KeyboardTest {
     }
 
     @Test
-    void testWithConfirmOrDeclineButtons_shouldReturnCorrectKeyboardWithId() {
-        List<InlineKeyboardRow> keyboard = Keyboard.withConfirmOrDeclineButtons(productId).getKeyboard();
+    void testWithConfirmOrDeclineDeleteProductButtons_shouldReturnCorrectKeyboardWithId() {
+        List<InlineKeyboardRow> keyboard = Keyboard.withConfirmOrDeclineDeleteProductButtons(productId).getKeyboard();
         assertEquals(1, keyboard.size());
         InlineKeyboardRow firstRow = keyboard.getFirst();
         assertEquals(2, firstRow.size());
 
         InlineKeyboardButton button = firstRow.getFirst();
         assertEquals(Constant.Button.CONFIRM, button.getText());
-        assertEquals(Constant.Callback.CONFIRM_DELETE + DELIMITER + productId, button.getCallbackData());
+        assertEquals(Constant.Callback.CONFIRM_DELETE_PRODUCT + DELIMITER + productId, button.getCallbackData());
 
         button = firstRow.get(1);
         assertEquals(Constant.Button.DECLINE, button.getText());
-        assertEquals(Constant.Callback.DECLINE_DELETE + DELIMITER + productId, button.getCallbackData());
+        assertEquals(Constant.Callback.DECLINE_DELETE_PRODUCT + DELIMITER + productId, button.getCallbackData());
     }
 
 
