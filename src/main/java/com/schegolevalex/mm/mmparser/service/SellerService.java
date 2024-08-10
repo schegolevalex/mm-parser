@@ -3,7 +3,9 @@ package com.schegolevalex.mm.mmparser.service;
 import com.schegolevalex.mm.mmparser.entity.Seller;
 import com.schegolevalex.mm.mmparser.repository.SellerRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -22,8 +24,11 @@ public class SellerService {
         return sellerRepository.findByNameAndRatingAndOgrn(sellerName, rating, ogrn);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Seller saveOrUpdate(Seller seller) {
-        return sellerRepository.saveOrUpdate(seller);
+        Seller savedOrUpdatedSeller = sellerRepository.saveOrUpdate(seller);
+        Hibernate.initialize(savedOrUpdatedSeller.getProducts());
+        return savedOrUpdatedSeller;
     }
 
     public Seller save(Seller seller) {
