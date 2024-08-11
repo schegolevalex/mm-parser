@@ -41,6 +41,7 @@ public abstract class Parser {
         options.addArguments("accept-language=ru-Ru");
         options.addArguments("--disable-blink-features");
         options.addArguments("--disable-blink-features=AutomationControlled");
+        options.addArguments("--disable-gpu");
 
         options.setPageLoadStrategy(PageLoadStrategy.EAGER);
         options.addArguments("--headless=new");
