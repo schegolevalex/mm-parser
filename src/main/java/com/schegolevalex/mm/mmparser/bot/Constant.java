@@ -155,5 +155,6 @@ public interface Constant {
         String NINE_CASHBACK = "9";
         String TWELVE_CASHBACK = "12";
         String BACK_TO_PRODUCT_KEYBOARD = "back-to-product-keyboard";
+        String PARSE_ID = "parse-id";
     }
 }

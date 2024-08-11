@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -21,8 +22,8 @@ public class NotificationService {
     private final OfferService offerService;
     private final ParserBot parserBot;
 
-    public boolean isAlreadyNotified(Notification notification) {
-        return notificationRepository.findExist(notification).isPresent();
+    public boolean shouldNotified(Notification notification) {
+        return notificationRepository.findExist(notification).isEmpty();
     }
 
     public List<Notification> saveAll(List<Notification> notifies) {
@@ -39,22 +40,30 @@ public class NotificationService {
     }
 
     @RqueueListener(value = "notification-queue")
-    protected void notifyJob(Long offerId) {
-        offerService.findById(offerId).ifPresent(offer -> {
-            if (offerService.isPassFilters(offer)) {
-                Notification notification = Notification.builder()
-                        .offer(offer)
-                        .user(offer.getProduct().getUser())
-                        .promo(offer.getProduct().getPromo())
-                        .cashbackLevel(offer.getProduct().getUser().getCashbackLevel())
-                        .build();
-                notification.addFilters(offer.getProduct().getFilters());
+    protected void notifyJob(UUID parseId) {
+        List<Notification> notifications = offerService.findByParseId(parseId)
+                .stream()
+                .filter(offerService::isPassFilters)
+                .map(offer -> {
+                    Notification notification = Notification.builder()
+                            .offer(offer)
+                            .user(offer.getProduct().getUser())
+                            .promo(offer.getProduct().getPromo())
+                            .cashbackLevel(offer.getProduct().getUser().getCashbackLevel())
+                            .build();
+                    notification.addFilters(offer.getProduct().getFilters());
+                    return notification;
+                })
+                .filter(this::shouldNotified)
+                .toList();
 
-                if (!isAlreadyNotified(notification)) {
-                    parserBot.sendNotifies(notification);
-                    notificationRepository.save(notification);
-                }
-            }
-        });
+        if (!notifications.isEmpty()) {
+            notificationRepository.saveAll(notifications);
+            parserBot.sendNotifies(notifications);
+        }
+    }
+
+    public List<Notification> findByParseId(UUID parseId) {
+        return notificationRepository.findByParseId(parseId);
     }
 }

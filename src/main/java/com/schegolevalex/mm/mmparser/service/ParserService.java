@@ -64,8 +64,9 @@ public class ParserService {
             rqueueMessageEnqueuer.enqueueIn(productQueue, productId, Duration.ofMinutes(delay));
             offerService.saveAll(parsedOffers);
 
-            if (!parsedOffers.isEmpty())
-                parsedOffers.forEach(offer -> rqueueMessageEnqueuer.enqueue(notificationQueue, offer.getId()));
+            parsedOffers.stream()
+                    .findAny()
+                    .ifPresent(offer -> rqueueMessageEnqueuer.enqueue(notificationQueue, offer.getParseId()));
         } catch (Exception e) {
             log.error("При обработке продукта произошла ошибка: {}", e.getMessage());
             parserPool.clear();

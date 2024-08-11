@@ -4,8 +4,10 @@ import com.schegolevalex.mm.mmparser.entity.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     @Query(
@@ -31,4 +33,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     Optional<Notification> findExist(Notification notification);
 
     void deleteAllByPromoId(long id);
+
+    @Query("SELECT n FROM Notification n WHERE n.offer.parseId = :parseId")
+    List<Notification> findByParseId(UUID parseId);
 }

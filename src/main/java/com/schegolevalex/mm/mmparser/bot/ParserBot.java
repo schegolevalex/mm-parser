@@ -31,6 +31,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 import static org.telegram.telegrambots.abilitybots.api.objects.Locality.ALL;
@@ -141,10 +142,20 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
         return update -> update.getMessage().getText().contains(text);
     }
 
-    public void sendNotifies(Notification notification) {
+    public void sendNotify(Notification notification) {
         silent.execute(SendMessage.builder()
                 .chatId(notification.getUser().getChatId())
                 .text(offerService.getOfferMessage(notification.getOffer()))
+                .parseMode("MarkdownV2")
+                .build());
+    }
+
+    public void sendNotifies(List<Notification> notifications) {
+        UUID parseId = notifications.stream().findAny().get().getOffer().getParseId();
+        silent.execute(SendMessage.builder()
+                .chatId(notifications.stream().findAny().get().getUser().getChatId())
+                .text(offerService.getOfferMessage(notifications.stream().findFirst().get().getOffer()))
+                .replyMarkup(Keyboard.withNotifications(parseId, notifications.size(), 1))
                 .parseMode("MarkdownV2")
                 .build());
     }

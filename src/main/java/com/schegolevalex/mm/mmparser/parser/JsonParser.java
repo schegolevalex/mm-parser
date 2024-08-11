@@ -28,6 +28,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Scope("prototype")
@@ -73,6 +74,8 @@ public class JsonParser extends Parser {
         JsonPointer offersPointer = JsonPointer.compile("/hydratorState/PrefetchStore/componentsInitialState/catalog.details/offersData/offers");
         JsonNode offersNode = jsonRoot.at(offersPointer);
 
+        UUID parseId = UUID.randomUUID();
+
         if (offersNode.isArray()) {
             for (JsonNode offerNode : offersNode) {
                 Offer offer = modelMapper.map(objectMapper.convertValue(offerNode, OfferDto.class), Offer.class);
@@ -80,6 +83,7 @@ public class JsonParser extends Parser {
                 Seller seller = sellerService.saveOrUpdate(parsedSeller);
                 Delivery delivery = modelMapper.map(objectMapper.convertValue(offerNode.path("delivery"), DeliveryDto.class), Delivery.class);
 
+                offer.setParseId(parseId);
                 offer.setSeller(seller);
                 seller.addProduct(product);
                 offer.setProduct(product);

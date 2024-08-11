@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.schegolevalex.mm.mmparser.bot.Constant.*;
@@ -428,5 +429,44 @@ public class Keyboard {
         keyboard.add(bottomRow);
 
         return new InlineKeyboardMarkup(keyboard);
+    }
+
+    public static InlineKeyboardMarkup withNotifications(UUID parseId, int notificationSize, int notificationNumber) {
+        if (notificationNumber <= 0 || notificationNumber > notificationSize) {
+            log.error("Неверный номер уведомления для клавиатуры: {}", notificationNumber);
+            throw new RuntimeException("Неверный номер уведомления для клавиатуры: " + notificationNumber);
+        }
+
+        InlineKeyboardRow row = new InlineKeyboardRow();
+        if (notificationNumber == 1) {
+            row.add(InlineKeyboardButton.builder()
+                    .text(Button.EMPTY)
+                    .callbackData(Callback.EMPTY)
+                    .build());
+        } else {
+            row.add(InlineKeyboardButton.builder()
+                    .text(Button.PREVIOUS_PAGE)
+                    .callbackData(Callback.PARSE_ID + DELIMITER + parseId + DELIMITER
+                                  + Callback.KEYBOARD_PAGES + DELIMITER + (notificationNumber - 1))
+                    .build());
+        }
+        row.add(InlineKeyboardButton.builder()
+                .text(notificationNumber + "/" + notificationSize)
+                .callbackData(Callback.EMPTY)
+                .build());
+        if (notificationNumber == notificationSize) {
+            row.add(InlineKeyboardButton.builder()
+                    .text(Button.EMPTY)
+                    .callbackData(Callback.EMPTY)
+                    .build());
+        } else {
+            row.add(InlineKeyboardButton.builder()
+                    .text(Button.NEXT_PAGE)
+                    .callbackData(Callback.PARSE_ID + DELIMITER + parseId + DELIMITER
+                                  + Callback.KEYBOARD_PAGES + DELIMITER + (notificationNumber + 1))
+                    .build());
+        }
+
+        return new InlineKeyboardMarkup(List.of(row));
     }
 }

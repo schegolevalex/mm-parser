@@ -11,10 +11,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.schegolevalex.mm.mmparser.bot.util.MessageUtil.prepareToMarkdownV2;
@@ -90,5 +87,9 @@ public class OfferService {
 
     public Optional<Offer> findById(Long offerId) {
         return offerRepository.findById(offerId);
+    }
+
+    public List<Offer> findByParseId(UUID parseId) {
+        return offerRepository.findByParseId(parseId);
     }
 }
