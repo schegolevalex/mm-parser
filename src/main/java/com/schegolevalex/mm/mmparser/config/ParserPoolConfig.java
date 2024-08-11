@@ -15,10 +15,10 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class ParserPoolConfig {
 
-    @Value("${mm.min-idle}")
+    @Value("${mm.parser-pool.min-idle}")
     private int minIdle;
 
-    @Value("${mm.max-idle}")
+    @Value("${mm.parser-pool.max-idle}")
     private int maxIdle;
 
     private final ParserFactory parserFactory;

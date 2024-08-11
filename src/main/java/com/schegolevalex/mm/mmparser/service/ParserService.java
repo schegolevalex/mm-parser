@@ -43,9 +43,9 @@ public class ParserService {
     @RqueueListener(value = "product-queue")
     public void parseJob(Long productId) {
         Parser parser = null;
-        Product product = productService.findById(productId).orElseThrow(() -> new EntityNotFoundException("Product not found"));
         try {
             parser = parserPool.borrowObject();
+            Product product = productService.findById(productId).orElseThrow(() -> new EntityNotFoundException("Product not found"));
             List<Offer> parsedOffers = parser.parseProduct(product)
                     .stream()
                     .map(offer -> {
