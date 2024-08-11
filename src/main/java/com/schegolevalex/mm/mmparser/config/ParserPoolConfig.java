@@ -21,6 +21,9 @@ public class ParserPoolConfig {
     @Value("${mm.parser-pool.max-idle}")
     private int maxIdle;
 
+    @Value("${mm.parser-pool.wait-idle-in-seconds}")
+    private int waitIdle;
+
     private final ParserFactory parserFactory;
 
     @Bean
@@ -28,7 +31,7 @@ public class ParserPoolConfig {
         GenericObjectPoolConfig<Parser> config = new GenericObjectPoolConfig<>();
         config.setMinIdle(minIdle);
         config.setMaxTotal(maxIdle);
-        config.setMaxWait(Duration.ofSeconds(30));
+        config.setMaxWait(Duration.ofSeconds(waitIdle));
         config.setJmxEnabled(false);
 
         return new GenericObjectPool<>(parserFactory, config);
