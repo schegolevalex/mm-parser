@@ -127,7 +127,7 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
     }
 
     public Reply replyToButtons() {
-        return Reply.of((_, upd) -> {
+        return Reply.of((bot, upd) -> {
                     context.peekPage(getChatId(upd)).afterUpdateReceived(upd);
                     context.peekPage(getChatId(upd)).show(upd);
                 },
