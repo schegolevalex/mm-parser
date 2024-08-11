@@ -5,6 +5,7 @@ import com.schegolevalex.mm.mmparser.parser.ParserFactory;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,13 +15,19 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class ParserPoolConfig {
 
+    @Value("${mm.min-idle}")
+    private int minIdle;
+
+    @Value("${mm.max-idle}")
+    private int maxIdle;
+
     private final ParserFactory parserFactory;
 
     @Bean
     public GenericObjectPool<Parser> parserPool() {
         GenericObjectPoolConfig<Parser> config = new GenericObjectPoolConfig<>();
-        config.setMinIdle(1);
-        config.setMaxTotal(4);
+        config.setMinIdle(minIdle);
+        config.setMaxTotal(maxIdle);
         config.setMaxWait(Duration.ofSeconds(30));
         config.setJmxEnabled(false);
 
