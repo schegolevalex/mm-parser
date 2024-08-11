@@ -196,6 +196,6 @@ public class ParserBot extends AbilityBot implements SpringLongPollingBot, LongP
 
     @PreDestroy
     private void clearDb() {
-//        db.clear();
+        db.clear();
     }
 }
