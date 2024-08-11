@@ -43,6 +43,10 @@ public abstract class Parser {
         options.addArguments("--disable-blink-features=AutomationControlled");
         options.addArguments("--disable-gpu");
 
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-setuid-sandbox");
+
         options.setPageLoadStrategy(PageLoadStrategy.EAGER);
         options.addArguments("--headless=new");
     }
