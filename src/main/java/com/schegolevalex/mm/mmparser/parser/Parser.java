@@ -65,17 +65,8 @@ public abstract class Parser {
 
         while (currentAttempt < maxAttempts && !openUrlSuccess) {
             try {
-                if (!baseUrlOpened && driver == null) {
-                    driver = new ChromeDriver(options);
-                    log.info("Создан новый экземпляр WebDriver");
-                    proxyService.setRandomProxy(options);
-                    log.info("Попытка открыть страницу {}", baseUrl);
-                    driver.get(baseUrl);
-                    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-                    wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("html")));
-                    baseUrlOpened = true;
-                    log.info("Успешно открыта страница {}", baseUrl);
-                }
+                if (driver == null && !baseUrlOpened)
+                    createNewWebDriverAndOpenBaseUrl();
 
                 log.info("{} попытка открыть страницу {}", currentAttempt + 1, url);
                 proxyService.setRandomProxy(options);
@@ -99,5 +90,17 @@ public abstract class Parser {
                 baseUrlOpened = false;
             }
         }
+    }
+
+    private void createNewWebDriverAndOpenBaseUrl() {
+        driver = new ChromeDriver(options);
+        log.info("Создан новый экземпляр WebDriver");
+        proxyService.setRandomProxy(options);
+        log.info("Попытка открыть страницу {}", baseUrl);
+        driver.get(baseUrl);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("html")));
+        baseUrlOpened = true;
+        log.info("Успешно открыта страница {}", baseUrl);
     }
 }
