@@ -40,7 +40,7 @@ public class ParserService {
     @Value("${mm.parser.free-parser-delay-in-minutes}")
     private int delay;
 
-    @RqueueListener(value = "product-queue")
+    @RqueueListener(value = "product-queue", concurrency = "1")
     public void parseJob(Long productId) {
         Parser parser = null;
         try {
