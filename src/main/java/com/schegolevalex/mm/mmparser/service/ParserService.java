@@ -42,37 +42,38 @@ public class ParserService {
 
     @RqueueListener(value = "product-queue"/*, concurrency = "1"*/)
     public void parseJob(Long productId) {
-        Parser parser = null;
         try {
-            parser = parserPool.borrowObject();
-            Product product = productService.findById(productId).orElseThrow(() -> new EntityNotFoundException("Product not found"));
-            List<Offer> parsedOffers = parser.parseProduct(product)
-                    .stream()
-                    .map(offer -> {
-                        Optional<Offer> maybeExist = offerService.findExist(offer);
-                        if (maybeExist.isPresent()) {
-                            Offer exist = maybeExist.get();
-                            exist.setUpdatedAt(Instant.now());
-                            log.trace("Найдено существующее предложение: {}", exist);
-                            return exist;
-                        } else {
-                            log.trace("Найдено новое предложение: {}", offer);
-                            return offer;
-                        }
-                    }).toList();
+            Parser parser = parserPool.borrowObject();
+            try {
+                Product product = productService.findById(productId).orElseThrow(() -> new EntityNotFoundException("Product not found"));
+                List<Offer> parsedOffers = parser.parseProduct(product)
+                        .stream()
+                        .map(offer -> {
+                            Optional<Offer> maybeExist = offerService.findExist(offer);
+                            if (maybeExist.isPresent()) {
+                                Offer exist = maybeExist.get();
+                                exist.setUpdatedAt(Instant.now());
+                                log.trace("Найдено существующее предложение: {}", exist);
+                                return exist;
+                            } else {
+                                log.trace("Найдено новое предложение: {}", offer);
+                                return offer;
+                            }
+                        }).toList();
 
-            rqueueMessageEnqueuer.enqueueIn(productQueue, productId, Duration.ofMinutes(delay));
-            offerService.saveAll(parsedOffers);
+                rqueueMessageEnqueuer.enqueueIn(productQueue, productId, Duration.ofMinutes(delay));
+                offerService.saveAll(parsedOffers);
 
-            parsedOffers.stream()
-                    .findAny()
-                    .ifPresent(offer -> rqueueMessageEnqueuer.enqueue(notificationQueue, offer.getParseId()));
+                parsedOffers.stream()
+                        .findAny()
+                        .ifPresent(offer -> rqueueMessageEnqueuer.enqueue(notificationQueue, offer.getParseId()));
+            } finally {
+                parserPool.returnObject(parser);
+            }
         } catch (Exception e) {
             log.error("При обработке продукта произошла ошибка: {}", e.getMessage());
             parserPool.clear();
             throw new RuntimeException(e);
-        } finally {
-            parserPool.returnObject(parser);
         }
     }
 
