@@ -34,7 +34,7 @@ mm:
     free-parser-delay-in-minutes: 10
   parser-pool:
     min-idle: 1
-    max-idle: 1
+    max-idle: 2
     wait-idle-in-seconds: 30
 
 rqueue:
