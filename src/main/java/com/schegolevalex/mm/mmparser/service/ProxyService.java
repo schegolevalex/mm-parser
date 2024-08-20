@@ -78,9 +78,9 @@ public class ProxyService {
                                         bypassList: ["localhost"]
                                       }
                                     };
-
+                                    
                                     chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
-
+                                    
                                     function callbackFn(details) {
                                       return {
                                         authCredentials: {
@@ -89,7 +89,7 @@ public class ProxyService {
                                         }
                                       };
                                     }
-
+                                    
                                     chrome.webRequest.onAuthRequired.addListener(
                                     callbackFn,
                                     {urls: ["<all_urls>"]},
