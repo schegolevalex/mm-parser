@@ -20,9 +20,9 @@ spring:
 #        jakarta.persistence.validation.mode: none
 
 telegram-bot:
-  botUsername: schegolev_test_bot
-  creatorId: 50928456
-  botToken: 6962805254:AAGP1UolXDpSR7cdMAik9LDQl72a1tnKghI
+  botUsername: ${BOT_USERNAME}
+  creatorId: ${CREATOR_ID}
+  botToken: ${BOT_TOKEN}
 
 mm:
   baseUrl: https://megamarket.ru/
@@ -31,10 +31,10 @@ mm:
     notification-queue: notification-queue
   parser:
     max-attempts-to-open-url: 3
-    free-parser-delay-in-minutes: 10
+    free-parser-delay-in-minutes: 5
   parser-pool:
     min-idle: 1
-    max-idle: 2
+    max-idle: 4
     wait-idle-in-seconds: 30
 
 rqueue:

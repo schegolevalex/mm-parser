@@ -42,3 +42,4 @@ build/
 /.fuse*
 /src/main/resources/proxy/proxy_list
 /product_data_*
+/set_env.sh
